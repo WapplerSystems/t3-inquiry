@@ -1,0 +1,4 @@
+name: wapplersystems/inquiry
+label: inquiry
+dependencies:
+  - typo3/fluid-styled-content

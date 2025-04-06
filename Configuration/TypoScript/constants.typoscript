@@ -1,0 +1,22 @@
+
+
+
+plugin.tx_inquiry {
+
+
+  view {
+    # cat=plugin.tx_inquiry/file; type=string; label=Path to template root (FE)
+    templateRootPath = EXT:inquiry/Resources/Private/Templates/
+    # cat=plugin.tx_inquiry/file; type=string; label=Path to template partials (FE)
+    partialRootPath = EXT:inquiry/Resources/Private/Partials/
+    # cat=plugin.tx_inquiry/file; type=string; label=Path to template layouts (FE)
+    layoutRootPath = EXT:inquiry/Resources/Private/Layouts/
+  }
+
+  settings {
+
+
+  }
+
+
+}

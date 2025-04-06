@@ -1,0 +1,32 @@
+# number musst be lower than the template
+
+plugin.tx_inquiry {
+
+  view {
+    templateRootPaths {
+      0 = EXT:inquiry/Resources/Private/Templates/
+      1 = {$plugin.tx_inquiry.view.templateRootPath}
+    }
+
+    partialRootPaths {
+      0 = EXT:inquiry/Resources/Private/Partials/
+      1 = {$plugin.tx_inquiry.view.partialRootPath}
+    }
+
+    layoutRootPaths {
+      0 = EXT:inquiry/Resources/Private/Layouts/
+      1 = {$plugin.tx_inquiry.view.layoutRootPath}
+    }
+
+  }
+
+  settings {
+
+
+  }
+}
+
+page.includeJSFooter.inquiyry = EXT:inquiry/Resources/Public/JavaScript/inquiry.js
+
+
+
