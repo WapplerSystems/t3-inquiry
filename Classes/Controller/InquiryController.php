@@ -24,15 +24,13 @@ class InquiryController extends ActionController
 {
 
 
-    public function __construct(EventDispatcherInterface               $eventDispatcher)
+    public function __construct(EventDispatcherInterface $eventDispatcher)
     {
     }
 
 
-
     public function formAction(): ResponseInterface
     {
-
 
 
         return $this->htmlResponse();
