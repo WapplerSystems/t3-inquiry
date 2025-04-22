@@ -4,6 +4,28 @@
 		<header/>
 		<body>
 
+			<trans-unit id="element.name.properties.label">
+				<source>Name</source>
+			</trans-unit>
+			<trans-unit id="element.email.properties.label">
+				<source>Email</source>
+			</trans-unit>
+			<trans-unit id="element.phonenumber.properties.label">
+				<source>Phone number</source>
+			</trans-unit>
+			<trans-unit id="element.company.properties.label">
+				<source>Company</source>
+			</trans-unit>
+			<trans-unit id="element.country.properties.label">
+				<source>Country</source>
+			</trans-unit>
+			<trans-unit id="element.requestType.properties.label">
+				<source>Request type</source>
+			</trans-unit>
+			<trans-unit id="element.requestType.properties.label">
+				<source>Request type</source>
+			</trans-unit>
+
 		</body>
 	</file>
 </xliff>

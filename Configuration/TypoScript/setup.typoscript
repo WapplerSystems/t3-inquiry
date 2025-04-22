@@ -30,3 +30,10 @@ page.includeJSFooter.inquiyry = EXT:inquiry/Resources/Public/JavaScript/inquiry.
 
 
 
+plugin.tx_form {
+
+  settings.yamlConfigurations {
+    1745351874 = EXT:inquiry/Configuration/Yaml/FormSetup.yaml
+  }
+
+}

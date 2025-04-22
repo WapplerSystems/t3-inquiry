@@ -8,13 +8,13 @@ prototypes:
     formEditor:
 
       translationFiles:
-        45543: 'EXT:inquiry/Resources/Private/Language/form.xlf'
+        1745351874: 'EXT:inquiry/Resources/Private/Language/form.xlf'
 
       formEditorFluidConfiguration:
         partialRootPaths:
-          30: 'EXT:form/Resources/Private/Backend/Partials/FormEditor/'
+          1745351874: 'EXT:form/Resources/Private/Backend/Partials/FormEditor/'
         layoutRootPaths:
-          30: 'EXT:form/Resources/Private/Backend/Layouts/FormEditor/'
+          1745351874: 'EXT:form/Resources/Private/Backend/Layouts/FormEditor/'
 
 
     formElementsDefinition:
@@ -23,18 +23,18 @@ prototypes:
       Form:
         renderingOptions:
           templateRootPaths:
-            60: 'EXT:inquiry/Resources/Private/Extensions/form/Frontend/Templates/'
+            1745351874: 'EXT:inquiry/Resources/Private/Extensions/form/Frontend/Templates/'
           partialRootPaths:
-            60: 'EXT:inquiry/Resources/Private/Extensions/form/Frontend/Partials/'
+            1745351874: 'EXT:inquiry/Resources/Private/Extensions/form/Frontend/Partials/'
           translation:
             translationFiles:
-              30: 'EXT:inquiry/Resources/Private/Language/form.xlf'
+              1745351874: 'EXT:inquiry/Resources/Private/Language/form.xlf'
 
     formEngine:
       translationFiles:
-        20: 'EXT:inquiry/Resources/Private/Language/form.xlf'
+        1745351874: 'EXT:inquiry/Resources/Private/Language/form.xlf'
 
 
 formManager:
   translationFiles:
-    20: 'EXT:inquiry/Resources/Private/Language/form.xlf'
+    1745351874: 'EXT:inquiry/Resources/Private/Language/form.xlf'

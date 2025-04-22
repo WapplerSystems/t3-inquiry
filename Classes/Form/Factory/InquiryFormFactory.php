@@ -2,24 +2,40 @@
 
 namespace WapplerSystems\Inquiry\Form\Factory;
 
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Validation\Validator\EmailAddressValidator;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
 use TYPO3\CMS\Extbase\Validation\Validator\StringLengthValidator;
+use TYPO3\CMS\Extbase\Validation\ValidatorResolver;
 use TYPO3\CMS\Form\Domain\Configuration\ConfigurationService;
+use TYPO3\CMS\Form\Domain\Configuration\Exception\PrototypeNotFoundException;
+use TYPO3\CMS\Form\Domain\Exception\TypeDefinitionNotFoundException;
 use TYPO3\CMS\Form\Domain\Factory\AbstractFormFactory;
+use TYPO3\CMS\Form\Domain\Model\Exception\FinisherPresetNotFoundException;
 use TYPO3\CMS\Form\Domain\Model\FormDefinition;
 use TYPO3\CMS\Form\Domain\Model\FormElements\AbstractFormElement;
 use TYPO3\CMS\Form\Domain\Model\FormElements\AbstractSection;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Section;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
 use TYPO3\CMS\Form\Domain\Model\FormElements\GridRow;
-use TYPO3\CMS\Form\Domain\Model\FormElements\GridColumn;
 use TYPO3\CMS\Form\Domain\Model\FormElements\GenericFormElement;
+use TYPO3\CMS\Form\Domain\Model\Renderable\AbstractRenderable;
 use TYPO3\CMS\Form\Domain\Renderer\FluidFormRenderer;
 
 class InquiryFormFactory extends AbstractFormFactory
 {
-    public function create(): Page
+
+    /**
+     * @param array $configuration
+     * @param string|null $prototypeName
+     * @param ServerRequestInterface|null $request
+     * @return FormDefinition
+     * @throws PrototypeNotFoundException
+     * @throws TypeDefinitionNotFoundException
+     * @throws FinisherPresetNotFoundException
+     */
+    public function build(array $configuration, ?string $prototypeName = null, ?ServerRequestInterface $request = null): FormDefinition
     {
 
         /** @var ConfigurationService $configurationService */
@@ -35,17 +51,154 @@ class InquiryFormFactory extends AbstractFormFactory
                 'job' => 'deed',
             ]
         ]);
+        $resolver = GeneralUtility::makeInstance(ValidatorResolver::class);
 
+        /** @var Page $page */
         $page = $formDefinition->createPage('page1');
 
-        $gridRow = $this->createGridRow('gridRow');
-
-
-        $this->addFormElement(
+        /** @var GridRow $gridRow */
+        $gridRow = $this->addFormElement(
             $page,
             type: 'GridRow',
             id: 'gridRow',
         );
+
+
+        /** @var Section $leftColumn */
+        $leftColumn = $this->addFormElement(
+            $gridRow,
+            type: 'Fieldset',
+            id: 'leftColumn',
+        );
+
+
+        /** @var Section $fieldsetProduct1 */
+        $fieldsetProduct1 = $this->addFormElement(
+            $leftColumn,
+            type: 'Fieldset',
+            id: 'fieldsetProduct1',
+        );
+
+        $this->addFormElement(
+            $fieldsetProduct1,
+            type: 'SingleSelect',
+            id: 'requestType1',
+            label: 'requestType',
+            properties: [
+                'options' => [
+                    'value1' => 'Option 1',
+                    'value2' => 'Option 2',
+                ],
+            ],
+            validators: [
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+            ]
+        );
+
+        $this->addFormElement(
+            $fieldsetProduct1,
+            type: 'Textarea',
+            id: 'message1',
+            label: 'message',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 1000
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 1000])
+            ]
+        );
+
+        /** @var Section $rightColumn */
+        $rightColumn = $this->addFormElement(
+            $gridRow,
+            type: 'Fieldset',
+            id: 'rightColumn',
+        );
+
+
+        $this->addFormElement(
+            $rightColumn,
+            type: 'Text',
+            id: 'name',
+            label: 'name',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 300
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(NotEmptyValidator::class),
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+            ]
+        );
+
+        $this->addFormElement(
+            $rightColumn,
+            type: 'Email',
+            id: 'email',
+            label: 'email',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 300
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(NotEmptyValidator::class),
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300]),
+                $resolver->createValidator(EmailAddressValidator::class)
+            ]
+        );
+        $this->addFormElement(
+            $rightColumn,
+            type: 'Text',
+            id: 'phonenumber',
+            label: 'phonenumber',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 20
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 20])
+            ]
+        );
+        $this->addFormElement(
+            $rightColumn,
+            type: 'Text',
+            id: 'company',
+            label: 'company',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 300
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(NotEmptyValidator::class),
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+            ]
+        );
+        $this->addFormElement(
+            $rightColumn,
+            type: 'Text',
+            id: 'country',
+            label: 'country',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 300
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(NotEmptyValidator::class),
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+            ]
+        );
+
+
+        $this->triggerFormBuildingFinished($formDefinition);
+
+        return $formDefinition;
 
 
         $leftColumn = $this->createGridColumn('leftColumn', 6);
@@ -66,9 +219,7 @@ class InquiryFormFactory extends AbstractFormFactory
         // Füge die Zeile zur Seite hinzu
         $page->addChild($gridRow);
 
-        $this->triggerFormBuildingFinished($page);
 
-        return $page;
     }
 
     private function createDropdown(string $identifier, string $label, bool $required = false): GenericFormElement
@@ -112,8 +263,7 @@ class InquiryFormFactory extends AbstractFormFactory
 
     private function createGridRow(string $identifier): GridRow
     {
-        $gridRow = new GridRow($identifier, 'GridRow');
-        return $gridRow;
+        return new GridRow($identifier, 'GridRow');
     }
 
     private function createFormElement(string $identifier, string $type, string $label): GenericFormElement
@@ -125,8 +275,7 @@ class InquiryFormFactory extends AbstractFormFactory
 
     private function createGridColumn(string $identifier, int $width): GridColumn
     {
-        $gridColumn = new GridColumn($identifier, $width);
-        return $gridColumn;
+        return new GridColumn($identifier, $width);
 
     }
 
@@ -139,9 +288,9 @@ class InquiryFormFactory extends AbstractFormFactory
         ?array          $properties = null,
         ?array          $renderingOptions = null,
         ?array          $validators = null
-    ): AbstractFormElement
+    ): AbstractRenderable
     {
-        /** @var AbstractFormElement $element */
+        /** @var AbstractRenderable $element */
         $element = $section->createElement($id, $type);
 
         if (isset($label)) $element->setLabel($label);
