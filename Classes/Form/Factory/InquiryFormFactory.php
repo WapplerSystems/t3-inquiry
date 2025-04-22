@@ -3,6 +3,7 @@
 namespace WapplerSystems\Inquiry\Form\Factory;
 
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\EmailAddressValidator;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
@@ -22,6 +23,7 @@ use TYPO3\CMS\Form\Domain\Model\FormElements\GridRow;
 use TYPO3\CMS\Form\Domain\Model\FormElements\GenericFormElement;
 use TYPO3\CMS\Form\Domain\Model\Renderable\AbstractRenderable;
 use TYPO3\CMS\Form\Domain\Renderer\FluidFormRenderer;
+use WapplerSystems\Inquiry\Event\BuildInquiryFormEvent;
 
 class InquiryFormFactory extends AbstractFormFactory
 {
@@ -78,6 +80,13 @@ class InquiryFormFactory extends AbstractFormFactory
             type: 'Fieldset',
             id: 'fieldsetProduct1',
         );
+
+
+        /** @var EventDispatcher $eventDispatcher */
+        $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
+        $eventDispatcher->dispatch(new BuildInquiryFormEvent($formDefinition));
+
+
 
         $this->addFormElement(
             $fieldsetProduct1,
