@@ -22,12 +22,30 @@ plugin.tx_inquiry {
 
   settings {
 
+    ajaxAddToListTypeNum = {$plugin.tx_inquiry.settings.ajaxAddToListTypeNum}
+    ajaxCountItemsTypeNum = {$plugin.tx_inquiry.settings.ajaxCountItemsTypeNum}
+
 
   }
 }
 
 page.includeJSFooter.inquiyry = EXT:inquiry/Resources/Public/JavaScript/inquiry.js
 
+page.headerData {
+  #76890 = TEXT
+  #76890.typolink.parameter.data = TSFE:id
+  #76890.typolink.forceAbsoluteUrl = 1
+  #76890.typolink.returnLast = url
+  #76890.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.ajaxAddToListTypeNum}
+  #76890.wrap = <meta name="inquiry-add-to-list" content="|">
+
+  76891 = TEXT
+  76891.typolink.parameter.data = TSFE:id
+  76891.typolink.forceAbsoluteUrl = 1
+  76891.typolink.returnLast = url
+  76891.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.ajaxCountItemsTypeNum}
+  76891.wrap = <meta name="inquiry-count-items" content="|">
+}
 
 
 plugin.tx_form {
@@ -36,4 +54,52 @@ plugin.tx_form {
     1745351874 = EXT:inquiry/Configuration/Yaml/FormSetup.yaml
   }
 
+}
+
+
+addToInquiryPage = PAGE
+addToInquiryPage {
+  typeNum = {$plugin.tx_inquiry.settings.ajaxAddToListTypeNum}
+
+  config {
+    disableAllHeaderCode = 1
+    xhtml_cleaning = none
+    admPanel = 0
+    debug = 0
+    disablePrefixComment = 1
+    metaCharset = utf-8
+    #additionalHeaders.10.header = Content-Type:application/json;charset=UTF-8
+    additionalHeaders.10.header = Content-Type:text/html;charset=UTF-8
+    disableBodyTag = 1
+    no_cache = 1
+  }
+
+  10 = USER
+  10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+  10.extensionName = Inquiry
+  10.pluginName = AddItem
+  10.vendorName = wapplersystems
+}
+
+countItemsInquiryPage = PAGE
+countItemsInquiryPage {
+  typeNum = {$plugin.tx_inquiry.settings.ajaxCountItemsTypeNum}
+
+  config {
+    disableAllHeaderCode = 1
+    xhtml_cleaning = none
+    admPanel = 0
+    debug = 0
+    disablePrefixComment = 1
+    metaCharset = utf-8
+    additionalHeaders.10.header = Content-Type:application/json;charset=UTF-8
+    disableBodyTag = 1
+    no_cache = 1
+  }
+
+  10 = USER
+  10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+  10.extensionName = Inquiry
+  10.pluginName = CountItems
+  10.vendorName = wapplersystems
 }

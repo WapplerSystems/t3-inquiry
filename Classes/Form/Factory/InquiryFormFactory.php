@@ -2,8 +2,10 @@
 
 namespace WapplerSystems\Inquiry\Form\Factory;
 
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\EmailAddressValidator;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
@@ -23,10 +25,24 @@ use TYPO3\CMS\Form\Domain\Model\FormElements\GridRow;
 use TYPO3\CMS\Form\Domain\Model\FormElements\GenericFormElement;
 use TYPO3\CMS\Form\Domain\Model\Renderable\AbstractRenderable;
 use TYPO3\CMS\Form\Domain\Renderer\FluidFormRenderer;
+use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
+use WapplerSystems\Inquiry\Domain\Model\RequestTextTemplate;
+use WapplerSystems\Inquiry\Domain\Repository\RequestTextTemplateRepository;
 use WapplerSystems\Inquiry\Event\BuildInquiryFormEvent;
+use WapplerSystems\Inquiry\Event\BuildInquiryFormProductEvent;
+use WapplerSystems\Inquiry\Event\ResolveItemsEvent;
 
 class InquiryFormFactory extends AbstractFormFactory
 {
+
+
+    public function __construct(
+        readonly private RequestTextTemplateRepository $requestTextTemplateRepository,
+        private EventDispatcherInterface $eventDispatcher,
+    )
+    {
+
+    }
 
     /**
      * @param array $configuration
@@ -39,6 +55,11 @@ class InquiryFormFactory extends AbstractFormFactory
      */
     public function build(array $configuration, ?string $prototypeName = null, ?ServerRequestInterface $request = null): FormDefinition
     {
+
+        /** @var FrontendUserAuthentication $frontendUserAuthentication */
+        $frontendUserAuthentication = $request->getAttribute('frontend.user');
+        $userSession = $frontendUserAuthentication->getSession();
+
 
         /** @var ConfigurationService $configurationService */
         $configurationService = GeneralUtility::makeInstance(ConfigurationService::class);
@@ -74,50 +95,74 @@ class InquiryFormFactory extends AbstractFormFactory
         );
 
 
-        /** @var Section $fieldsetProduct1 */
-        $fieldsetProduct1 = $this->addFormElement(
-            $leftColumn,
-            type: 'Fieldset',
-            id: 'fieldsetProduct1',
-        );
 
 
-        /** @var EventDispatcher $eventDispatcher */
-        $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
-        $eventDispatcher->dispatch(new BuildInquiryFormEvent($formDefinition));
+        $requestTextTemplates = $this->requestTextTemplateRepository->findAll();
+        $requestTextTemplatesOptions = [];
+        DebugUtility::debug($requestTextTemplates);
+        /** @var RequestTextTemplate $requestTextTemplate */
+        foreach ($requestTextTemplates as $requestTextTemplate) {
+            $requestTextTemplatesOptions[$requestTextTemplate->getUid()] = $requestTextTemplate->getTitle();
+        }
+        DebugUtility::debug($requestTextTemplatesOptions);
+
+        $items = [];
+        if ($userSession->get('items')) {
+            $items = $userSession->get('items');
+        }
+
+        $event = new ResolveItemsEvent($items);
+        $this->eventDispatcher->dispatch($event);
+
+        $resolvedItems = $event->getResolvedItems();
+        DebugUtility::debug($resolvedItems, 'resolvedItems');
 
 
+        $i = 0;
+        foreach ($items as $key => $value) {
 
-        $this->addFormElement(
-            $fieldsetProduct1,
-            type: 'SingleSelect',
-            id: 'requestType1',
-            label: 'requestType',
-            properties: [
-                'options' => [
-                    'value1' => 'Option 1',
-                    'value2' => 'Option 2',
+            /** @var Section $fieldsetProduct */
+            $fieldsetProduct = $this->addFormElement(
+                $leftColumn,
+                type: 'Fieldset',
+                id: 'fieldsetProduct'.$i,
+            );
+
+
+            $this->addFormElement(
+                $fieldsetProduct,
+                type: 'SingleSelect',
+                id: 'requestType'.$i,
+                label: 'requestType',
+                properties: [
+                    'options' => $requestTextTemplatesOptions,
                 ],
-            ],
-            validators: [
-                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
-            ]
-        );
-
-        $this->addFormElement(
-            $fieldsetProduct1,
-            type: 'Textarea',
-            id: 'message1',
-            label: 'message',
-            properties: [
-                'fluidAdditionalAttributes' => [
-                    'maxlength' => 1000
+                validators: [
+                    $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
                 ]
-            ],
-            validators: [
-                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 1000])
-            ]
-        );
+            );
+
+            $this->addFormElement(
+                $fieldsetProduct,
+                type: 'Textarea',
+                id: 'message'.$i,
+                label: 'message',
+                properties: [
+                    'fluidAdditionalAttributes' => [
+                        'maxlength' => 1000
+                    ]
+                ],
+                validators: [
+                    $resolver->createValidator(StringLengthValidator::class, ['maximum' => 1000])
+                ]
+            );
+
+            $this->eventDispatcher->dispatch(new BuildInquiryFormProductEvent($formDefinition, $fieldsetProduct));
+
+
+            $i++;
+        }
+
 
         /** @var Section $rightColumn */
         $rightColumn = $this->addFormElement(

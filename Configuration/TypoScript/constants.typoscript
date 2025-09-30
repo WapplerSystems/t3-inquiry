@@ -15,6 +15,9 @@ plugin.tx_inquiry {
 
   settings {
 
+    ajaxAddToListTypeNum = 678934
+    ajaxCountItemsTypeNum = 678935
+
 
   }
 

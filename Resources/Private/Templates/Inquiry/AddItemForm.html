@@ -1,0 +1,25 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+      xmlns:formvh="http://typo3.org/ns/TYPO3/CMS/Form/ViewHelpers"
+      data-namespace-typo3-fluid="true" lang="en">
+
+<f:layout name="Default"/>
+
+
+<f:section name="Main">
+
+    <f:flashMessages />
+
+    <f:form action="addItem">
+
+        <label>Uid</label>
+        <f:form.textfield name="uid" />
+
+        <label>type</label>
+        <f:form.textfield name="type" />
+
+        <f:form.button type="submit">Submit</f:form.button>
+
+    </f:form>
+
+</f:section>
+</html>

@@ -18,6 +18,50 @@ $boot = static function (): void {
         ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
     );
 
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
+        'AddItem',
+        [
+            InquiryController::class => 'addItem',
+        ],
+        [
+            InquiryController::class => 'addItem',
+        ],
+    );
+
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
+        'CountItems',
+        [
+            InquiryController::class => 'countItems',
+        ],
+        [
+            InquiryController::class => 'countItems',
+        ],
+    );
+
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
+        'RemoveItem',
+        [
+            InquiryController::class => 'removeItem',
+        ],
+        [
+            InquiryController::class => 'removeItem',
+        ],
+    );
+
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
+        'AddItemForm',
+        [
+            InquiryController::class => 'addItemForm',
+        ],
+        [
+            InquiryController::class => 'addItemForm',
+        ],
+        ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
+    );
 };
 
 $boot();

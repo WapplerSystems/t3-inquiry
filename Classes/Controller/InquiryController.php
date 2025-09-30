@@ -2,23 +2,12 @@
 
 namespace WapplerSystems\Inquiry\Controller;
 
-use Doctrine\DBAL\ParameterType;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Http\JsonResponse;
-use TYPO3\CMS\Core\Service\FlexFormService;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
-use TYPO3\CMS\Extbase\Exception;
+use TYPO3\CMS\Core\Session\UserSessionManager;
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
-use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
-use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
-use TYPO3\CMS\Form\Domain\Finishers\Exception\FinisherException;
+use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 
 class InquiryController extends ActionController
 {
@@ -30,6 +19,100 @@ class InquiryController extends ActionController
 
 
     public function formAction(): ResponseInterface
+    {
+
+
+        return $this->htmlResponse();
+    }
+
+
+    public function addItemAction() : ResponseInterface
+    {
+
+        $params = $this->request->getParsedBody();
+        $uid = $params['tx_inquiry_additemform']['uid'] ?? $this->request->getArguments()['uid'] ?? null;
+        $type = $params['tx_inquiry_additemform']['type'] ?? $this->request->getArguments()['type'] ?? null;
+        if (!$uid || !$type) {
+            $accept = $this->request->getHeader('accept')[0] ?? '';
+            if (str_contains($accept, 'application/json')) {
+                return $this->jsonResponse(json_encode(['success' => false, 'message' => 'No uid or type given']));
+            }
+            return $this->htmlResponse('No uid or type given');
+        }
+
+        $items = [
+            ['uid' => $uid, 'type' => $type]
+        ];
+
+        // check if item is allowed to be added
+
+        /** @var FrontendUserAuthentication $frontendUserAuthentication */
+        $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
+        $userSession = $frontendUserAuthentication->getSession();
+
+        if ($userSession->get('items')) {
+            $items = array_merge($userSession->get('items'), $items);
+        }
+        //DebugUtility::debug($items, 'items');
+
+        $userSession->set('items', $items);
+
+        $frontendUserAuthentication->storeSessionData();
+
+        $data = [
+            'success' => true,
+            'count' => count($items)
+        ];
+
+        $accept = $this->request->getHeader('accept')[0] ?? '';
+        if (str_contains($accept, 'application/json')) {
+            return $this->jsonResponse(json_encode($data));
+        }
+        $this->view->assignMultiple([
+            'items' => $items,
+            'count' => count($items)
+        ]);
+        return $this->htmlResponse();
+    }
+
+    public function removeItemAction() : ResponseInterface
+    {
+
+        /** @var FrontendUserAuthentication $frontendUserAuthentication */
+        $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
+        $userSession = $frontendUserAuthentication->getSession();
+
+
+        $data = [
+            'success' => true,
+            'count' => count($items)
+        ];
+
+        return $this->jsonResponse(json_encode($data));
+    }
+
+
+    public function countItemsAction() : ResponseInterface
+    {
+        /** @var FrontendUserAuthentication $frontendUserAuthentication */
+        $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
+        $userSession = $frontendUserAuthentication->getSession();
+
+        if ($userSession->get('items')) {
+            $items = $userSession->get('items');
+        } else {
+            $items = [];
+        }
+
+        $data = [
+            'success' => true,
+            'count' => count($items)
+        ];
+
+        return $this->jsonResponse(json_encode($data));
+    }
+
+    public function addItemFormAction() : ResponseInterface
     {
 
 

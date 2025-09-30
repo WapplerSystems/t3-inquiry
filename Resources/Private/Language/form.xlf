@@ -20,10 +20,10 @@
 				<source>Country</source>
 			</trans-unit>
 			<trans-unit id="element.requestType.properties.label">
-				<source>Request type</source>
+				<source>Type of request</source>
 			</trans-unit>
-			<trans-unit id="element.requestType.properties.label">
-				<source>Request type</source>
+			<trans-unit id="element.message.properties.label">
+				<source>Type of request</source>
 			</trans-unit>
 
 		</body>
