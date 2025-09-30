@@ -7,6 +7,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\EmailAddressValidator;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
 use TYPO3\CMS\Extbase\Validation\Validator\StringLengthValidator;
@@ -25,11 +26,13 @@ use TYPO3\CMS\Form\Domain\Model\FormElements\GridRow;
 use TYPO3\CMS\Form\Domain\Model\FormElements\GenericFormElement;
 use TYPO3\CMS\Form\Domain\Model\Renderable\AbstractRenderable;
 use TYPO3\CMS\Form\Domain\Renderer\FluidFormRenderer;
+use TYPO3\CMS\Form\Mvc\Validation\EmptyValidator;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Domain\Model\RequestTextTemplate;
 use WapplerSystems\Inquiry\Domain\Repository\RequestTextTemplateRepository;
 use WapplerSystems\Inquiry\Event\BuildInquiryFormEvent;
 use WapplerSystems\Inquiry\Event\BuildInquiryFormProductEvent;
+use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemsEvent;
 
 class InquiryFormFactory extends AbstractFormFactory
@@ -67,17 +70,20 @@ class InquiryFormFactory extends AbstractFormFactory
 
         $formDefinition = GeneralUtility::makeInstance(FormDefinition::class, 'inquiryFormPage', $prototypeConfiguration);
         $formDefinition->setRendererClassName(FluidFormRenderer::class);
-        $formDefinition->setRenderingOption('controllerAction', 'show');
-        $formDefinition->setRenderingOption('submitButtonLabel', 'send');
-        $formDefinition->setRenderingOption('additionalParams', [
-            'tx_inquiry_form' => [
-                'job' => 'deed',
-            ]
-        ]);
+        $formDefinition->setRenderingOption('controllerAction', 'form');
         $resolver = GeneralUtility::makeInstance(ValidatorResolver::class);
 
         /** @var Page $page */
         $page = $formDefinition->createPage('page1');
+
+        $this->addFormElement(
+            $page,
+            type: 'Hidden',
+            id: 'completed',
+            validators: [
+                $resolver->createValidator(EmptyValidator::class)
+            ]
+        );
 
         /** @var GridRow $gridRow */
         $gridRow = $this->addFormElement(
@@ -95,45 +101,50 @@ class InquiryFormFactory extends AbstractFormFactory
         );
 
 
-
-
         $requestTextTemplates = $this->requestTextTemplateRepository->findAll();
         $requestTextTemplatesOptions = [];
-        DebugUtility::debug($requestTextTemplates);
+        //DebugUtility::debug($requestTextTemplates);
         /** @var RequestTextTemplate $requestTextTemplate */
         foreach ($requestTextTemplates as $requestTextTemplate) {
             $requestTextTemplatesOptions[$requestTextTemplate->getUid()] = $requestTextTemplate->getTitle();
         }
-        DebugUtility::debug($requestTextTemplatesOptions);
+        //DebugUtility::debug($requestTextTemplatesOptions);
 
         $items = [];
         if ($userSession->get('items')) {
             $items = $userSession->get('items');
         }
 
+        /*
         $event = new ResolveItemsEvent($items);
         $this->eventDispatcher->dispatch($event);
 
-        $resolvedItems = $event->getResolvedItems();
-        DebugUtility::debug($resolvedItems, 'resolvedItems');
+        $resolvedItems = $event->getResolvedItems();*/
+        //DebugUtility::debug($resolvedItems, 'resolvedItems');
 
 
         $i = 0;
-        foreach ($items as $key => $value) {
+        foreach ($items as $key => $item) {
+
+            $hash = $item['hash'];
+            $event = new ResolveItemEvent($item['uid'], $item['type']);
+            $this->eventDispatcher->dispatch($event);
 
             /** @var Section $fieldsetProduct */
             $fieldsetProduct = $this->addFormElement(
                 $leftColumn,
-                type: 'Fieldset',
-                id: 'fieldsetProduct'.$i,
+                type: 'InquiryItemFieldset',
+                id: 'fieldsetProduct_'.$hash,
+                properties: ['hash' => $hash],
+                label: $event->getResolvedName(),
             );
 
 
             $this->addFormElement(
                 $fieldsetProduct,
                 type: 'SingleSelect',
-                id: 'requestType'.$i,
-                label: 'requestType',
+                id: 'requestType_'.$hash,
+                label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryFormPage.element.requestType.properties.label'),
                 properties: [
                     'options' => $requestTextTemplatesOptions,
                 ],
@@ -145,8 +156,8 @@ class InquiryFormFactory extends AbstractFormFactory
             $this->addFormElement(
                 $fieldsetProduct,
                 type: 'Textarea',
-                id: 'message'.$i,
-                label: 'message',
+                id: 'message_'.$hash,
+                label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryFormPage.element.message.properties.label'),
                 properties: [
                     'fluidAdditionalAttributes' => [
                         'maxlength' => 1000
@@ -157,7 +168,33 @@ class InquiryFormFactory extends AbstractFormFactory
                 ]
             );
 
-            $this->eventDispatcher->dispatch(new BuildInquiryFormProductEvent($formDefinition, $fieldsetProduct));
+            $this->addFormElement(
+                $fieldsetProduct,
+                type: 'Hidden',
+                id: 'itemUid_'.$hash,
+                defaultValue: $item['uid'],
+                validators: [
+                    $resolver->createValidator(EmptyValidator::class)
+                ]
+            );
+
+            $this->addFormElement(
+                $fieldsetProduct,
+                type: 'Hidden',
+                id: 'itemType_'.$hash,
+                defaultValue: $item['type']
+            );
+
+            $this->addFormElement(
+                $fieldsetProduct,
+                type: 'Hidden',
+                id: 'itemDelete_'.$hash,
+                renderingOptions: [
+
+                ]
+            );
+
+            //$this->eventDispatcher->dispatch(new BuildInquiryFormProductEvent($formDefinition, $fieldsetProduct));
 
 
             $i++;
@@ -248,6 +285,9 @@ class InquiryFormFactory extends AbstractFormFactory
                 $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
             ]
         );
+
+
+
 
 
         $this->triggerFormBuildingFinished($formDefinition);

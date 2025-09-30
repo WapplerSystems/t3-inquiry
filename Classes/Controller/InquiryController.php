@@ -4,8 +4,7 @@ namespace WapplerSystems\Inquiry\Controller;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
-use TYPO3\CMS\Core\Session\UserSessionManager;
-use TYPO3\CMS\Core\Utility\DebugUtility;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 
@@ -21,6 +20,40 @@ class InquiryController extends ActionController
     public function formAction(): ResponseInterface
     {
 
+        /** @var FrontendUserAuthentication $frontendUserAuthentication */
+        $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
+        $userSession = $frontendUserAuthentication->getSession();
+
+
+        $items = $userSession->get('items') ?? [];
+
+        $arguments = $this->request->getArguments()['inquiryFormPage'] ?? [];
+        foreach ($items as $key => $item) {
+            if (($arguments['itemDelete_'.$item['hash']] ?? 0) === '1') {
+                unset($items[$key]);
+            }
+        }
+
+        $userSession->set('items', $items);
+        $frontendUserAuthentication->storeSessionData();
+
+
+        if (count($items) === 0) {
+
+            $this->addFlashMessage(
+                'No items were added',
+                '',
+                ContextualFeedbackSeverity::INFO,
+                false);
+
+            $this->view->assignMultiple([
+                'showForm' => 0
+            ]);
+        } else {
+            $this->view->assignMultiple([
+                'showForm' => 1
+            ]);
+        }
 
         return $this->htmlResponse();
     }
@@ -41,7 +74,7 @@ class InquiryController extends ActionController
         }
 
         $items = [
-            ['uid' => $uid, 'type' => $type]
+            ['uid' => $uid, 'type' => $type, 'hash' => md5($uid . '_' . $type) ]
         ];
 
         // check if item is allowed to be added

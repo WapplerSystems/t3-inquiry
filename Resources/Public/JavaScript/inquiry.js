@@ -72,3 +72,18 @@ if (countItemsMeta) {
       console.error('Fehler beim Abrufen:', error);
     });
 }
+
+document.querySelectorAll('button.inquiry-item-delete').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    const targetId = btn.getAttribute('data-target');
+    const input = document.getElementById(targetId);
+    if (input) {
+      input.value = '1';
+      const form = input.form;
+      if (form) {
+        form.submit();
+      }
+    }
+  });
+})

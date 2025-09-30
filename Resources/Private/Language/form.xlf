@@ -26,6 +26,16 @@
 				<source>Type of request</source>
 			</trans-unit>
 
+			<trans-unit id="inquiryFormPage.element.requestType.properties.label">
+				<source>Your type of request</source>
+			</trans-unit>
+			<trans-unit id="inquiryFormPage.element.message.properties.label">
+				<source>Your message</source>
+			</trans-unit>
+			<trans-unit id="element.inquiryFormPage.renderingOptions.submitButtonLabel">
+				<source>Send inquiry</source>
+			</trans-unit>
+
 		</body>
 	</file>
 </xliff>

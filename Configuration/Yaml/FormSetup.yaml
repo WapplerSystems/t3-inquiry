@@ -1,6 +1,6 @@
 
 imports:
-  - { resource: "./FormElements/DSGVOCheckbox.yaml" }
+  - { resource: "./FormElements/InquiryItemFieldset.yaml" }
 
 
 prototypes:
@@ -23,9 +23,9 @@ prototypes:
       Form:
         renderingOptions:
           templateRootPaths:
-            1745351874: 'EXT:inquiry/Resources/Private/Extensions/form/Frontend/Templates/'
+            1745351874: 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/'
           partialRootPaths:
-            1745351874: 'EXT:inquiry/Resources/Private/Extensions/form/Frontend/Partials/'
+            1745351874: 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Partials/'
           translation:
             translationFiles:
               1745351874: 'EXT:inquiry/Resources/Private/Language/form.xlf'

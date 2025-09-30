@@ -9,10 +9,14 @@
 
     <f:flashMessages />
 
-    <formvh:render
-        overrideConfiguration="{settings}"
-        factoryClass="WapplerSystems\Inquiry\Form\Factory\InquiryFormFactory"
-    />
+    <f:if condition="{showForm}">
+        <formvh:render
+            overrideConfiguration="{settings}"
+            factoryClass="WapplerSystems\Inquiry\Form\Factory\InquiryFormFactory"
+        />
+    </f:if>
+
+
 
 </f:section>
 </html>

@@ -29,7 +29,8 @@ plugin.tx_inquiry {
   }
 }
 
-page.includeJSFooter.inquiyry = EXT:inquiry/Resources/Public/JavaScript/inquiry.js
+page.includeJSFooter.inquiry = EXT:inquiry/Resources/Public/JavaScript/inquiry.js
+page.includeCSS.inquiry = EXT:inquiry/Resources/Public/CSS/inquiry.css
 
 page.headerData {
   #76890 = TEXT
