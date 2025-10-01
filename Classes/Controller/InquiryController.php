@@ -73,6 +73,8 @@ class InquiryController extends ActionController
             return $this->htmlResponse('No uid or type given');
         }
 
+        $hash = md5($uid . '_' . $type);
+
         $items = [
             ['uid' => $uid, 'type' => $type, 'hash' => md5($uid . '_' . $type) ]
         ];
@@ -82,12 +84,16 @@ class InquiryController extends ActionController
         /** @var FrontendUserAuthentication $frontendUserAuthentication */
         $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
         $userSession = $frontendUserAuthentication->getSession();
+        $storedItems = $userSession->get('items') ?? [];
 
-        if ($userSession->get('items')) {
-            $items = array_merge($userSession->get('items'), $items);
+        if (in_array($hash, array_column($storedItems, 'hash'))) {
+            $accept = $this->request->getHeader('accept')[0] ?? '';
+            if (str_contains($accept, 'application/json')) {
+                return $this->jsonResponse(json_encode(['success' => false, 'code' => 1000, 'count' => count($items), 'message' => 'Item already in inquiry']));
+            }
+            return $this->htmlResponse('Item already in inquiry');
         }
-        //DebugUtility::debug($items, 'items');
-
+        $items = array_merge($storedItems, $items);
         $userSession->set('items', $items);
 
         $frontendUserAuthentication->storeSessionData();

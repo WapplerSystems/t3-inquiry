@@ -52,8 +52,6 @@ if (countItemsMeta) {
     })
     .then(data => {
 
-      console.debug(data);
-
       if (data.count == 0) {
         return;
       }
@@ -87,3 +85,22 @@ document.querySelectorAll('button.inquiry-item-delete').forEach(btn => {
     }
   });
 })
+
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('inquiryFormPage');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      const completedField = document.getElementById('inquiryFormPage-completed');
+      if (completedField) {
+        completedField.value = '1';
+      }
+    });
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  const completedField = document.getElementById('inquiryFormPage-completed');
+  if (completedField) {
+    completedField.value = '';
+  }
+});

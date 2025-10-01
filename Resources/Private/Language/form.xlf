@@ -36,6 +36,13 @@
 				<source>Send inquiry</source>
 			</trans-unit>
 
+			<trans-unit id="confirmation.title">
+				<source>Thank you</source>
+			</trans-unit>
+			<trans-unit id="confirmation.message">
+				<source>Thank you for your inquiry. We will get back to you as soon as possible.</source>
+			</trans-unit>
+
 		</body>
 	</file>
 </xliff>

@@ -41,7 +41,7 @@ class InquiryFormFactory extends AbstractFormFactory
 
     public function __construct(
         readonly private RequestTextTemplateRepository $requestTextTemplateRepository,
-        private EventDispatcherInterface $eventDispatcher,
+        private EventDispatcherInterface               $eventDispatcher,
     )
     {
 
@@ -81,7 +81,7 @@ class InquiryFormFactory extends AbstractFormFactory
             type: 'Hidden',
             id: 'completed',
             validators: [
-                $resolver->createValidator(EmptyValidator::class)
+                $resolver->createValidator(NotEmptyValidator::class)
             ]
         );
 
@@ -134,7 +134,7 @@ class InquiryFormFactory extends AbstractFormFactory
             $fieldsetProduct = $this->addFormElement(
                 $leftColumn,
                 type: 'InquiryItemFieldset',
-                id: 'fieldsetProduct_'.$hash,
+                id: 'fieldsetProduct_' . $hash,
                 properties: ['hash' => $hash],
                 label: $event->getResolvedName(),
             );
@@ -143,7 +143,7 @@ class InquiryFormFactory extends AbstractFormFactory
             $this->addFormElement(
                 $fieldsetProduct,
                 type: 'SingleSelect',
-                id: 'requestType_'.$hash,
+                id: 'requestType_' . $hash,
                 label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryFormPage.element.requestType.properties.label'),
                 properties: [
                     'options' => $requestTextTemplatesOptions,
@@ -156,7 +156,7 @@ class InquiryFormFactory extends AbstractFormFactory
             $this->addFormElement(
                 $fieldsetProduct,
                 type: 'Textarea',
-                id: 'message_'.$hash,
+                id: 'message_' . $hash,
                 label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryFormPage.element.message.properties.label'),
                 properties: [
                     'fluidAdditionalAttributes' => [
@@ -171,24 +171,24 @@ class InquiryFormFactory extends AbstractFormFactory
             $this->addFormElement(
                 $fieldsetProduct,
                 type: 'Hidden',
-                id: 'itemUid_'.$hash,
+                id: 'itemUid_' . $hash,
                 defaultValue: $item['uid'],
                 validators: [
-                    $resolver->createValidator(EmptyValidator::class)
+                    $resolver->createValidator(NotEmptyValidator::class)
                 ]
             );
 
             $this->addFormElement(
                 $fieldsetProduct,
                 type: 'Hidden',
-                id: 'itemType_'.$hash,
+                id: 'itemType_' . $hash,
                 defaultValue: $item['type']
             );
 
             $this->addFormElement(
                 $fieldsetProduct,
                 type: 'Hidden',
-                id: 'itemDelete_'.$hash,
+                id: 'itemDelete_' . $hash,
                 renderingOptions: [
 
                 ]
@@ -286,34 +286,36 @@ class InquiryFormFactory extends AbstractFormFactory
             ]
         );
 
+        $emailToReceiver = $formDefinition->createFinisher('EmailToReceiver');
+        $emailToReceiver->setOptions([
+            'subject' => 'New inquiry',
+            'recipients' => [
+                'wappler@wappler.systems' => 'WDWDWDWDDD'
+            ],
+            'senderName' => 'Mail from inquiry form',
+            'senderAddress' => 'dwddwdw@ededed.de',
+            'replyToAddress' => '{email}',
+            'replyToName' => '{name}',
+            'templateName' => 'MailToReceiver',
+            'templateRootPaths' => [
+                34240 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/EmailToReceiver/',
+            ]
+        ]);
 
 
+        $confirmationFinisher = $formDefinition->createFinisher('Confirmation');
+        $confirmationFinisher->setOptions([
+            'message' => LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:confirmation.message'),
+            'templateName' => 'Confirmation',
+            'templateRootPaths' => [
+                10 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/Confirmation/',
+            ]
+        ]);
 
 
         $this->triggerFormBuildingFinished($formDefinition);
 
         return $formDefinition;
-
-
-        $leftColumn = $this->createGridColumn('leftColumn', 6);
-        $leftColumn->addChild($this->createDropdown('requestType', 'Request Type', true));
-        $leftColumn->addChild($this->createTextField('additionalInfo', 'Additional Information'));
-
-        $rightColumn = $this->createGridColumn('rightColumn', 6);
-        $rightColumn->addChild($this->createTextField('name', 'Name', true));
-        $rightColumn->addChild($this->createEmailField('email', 'Email', true));
-        $rightColumn->addChild($this->createTextField('phone', 'Phone'));
-        $rightColumn->addChild($this->createTextField('company', 'Company'));
-        $rightColumn->addChild($this->createTextField('country', 'Country'));
-
-        // Füge die Spalten zur Zeile hinzu
-        $gridRow->addChild($leftColumn);
-        $gridRow->addChild($rightColumn);
-
-        // Füge die Zeile zur Seite hinzu
-        $page->addChild($gridRow);
-
-
     }
 
     private function createDropdown(string $identifier, string $label, bool $required = false): GenericFormElement
