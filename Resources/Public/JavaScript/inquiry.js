@@ -104,3 +104,4 @@ document.addEventListener('DOMContentLoaded', function() {
     completedField.value = '';
   }
 });
+

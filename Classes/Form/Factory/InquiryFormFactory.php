@@ -106,6 +106,11 @@ class InquiryFormFactory extends AbstractFormFactory
         //DebugUtility::debug($requestTextTemplates);
         /** @var RequestTextTemplate $requestTextTemplate */
         foreach ($requestTextTemplates as $requestTextTemplate) {
+            /*
+            $requestTextTemplatesOptions[$requestTextTemplate->getUid()] = [
+                'template' => $requestTextTemplate->getBody(),
+                'label' => $requestTextTemplate->getTitle()
+            ];*/
             $requestTextTemplatesOptions[$requestTextTemplate->getUid()] = $requestTextTemplate->getTitle();
         }
         //DebugUtility::debug($requestTextTemplatesOptions);
@@ -142,11 +147,13 @@ class InquiryFormFactory extends AbstractFormFactory
 
             $this->addFormElement(
                 $fieldsetProduct,
+                //type: 'RequestTypeSelect',
                 type: 'SingleSelect',
                 id: 'requestType_' . $hash,
                 label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryFormPage.element.requestType.properties.label'),
                 properties: [
                     'options' => $requestTextTemplatesOptions,
+                    'prependOptionLabel' => LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryFormPage.element.requestType.properties.prependOptionLabel')
                 ],
                 validators: [
                     $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])

@@ -89,7 +89,7 @@ class InquiryController extends ActionController
         if (in_array($hash, array_column($storedItems, 'hash'))) {
             $accept = $this->request->getHeader('accept')[0] ?? '';
             if (str_contains($accept, 'application/json')) {
-                return $this->jsonResponse(json_encode(['success' => false, 'code' => 1000, 'count' => count($items), 'message' => 'Item already in inquiry']));
+                return $this->jsonResponse(json_encode(['success' => false, 'code' => 1000, 'count' => count($storedItems), 'message' => 'Item already in inquiry']));
             }
             return $this->htmlResponse('Item already in inquiry');
         }
