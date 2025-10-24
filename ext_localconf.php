@@ -20,6 +20,18 @@ $boot = static function (): void {
 
     ExtensionUtility::configurePlugin(
         'Inquiry',
+        'QuickForm',
+        [
+            InquiryController::class => 'quickForm',
+        ],
+        [
+            InquiryController::class => 'quickForm',
+        ],
+        ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
+    );
+
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
         'CountItems',
         [
             InquiryController::class => 'countItems',

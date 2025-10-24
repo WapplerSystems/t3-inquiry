@@ -1,0 +1,19 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+      xmlns:formvh="http://typo3.org/ns/TYPO3/CMS/Form/ViewHelpers"
+      data-namespace-typo3-fluid="true" lang="en">
+
+<f:layout name="Default"/>
+
+
+<f:section name="Main">
+
+    <f:flashMessages />
+
+    <formvh:render
+        overrideConfiguration="{settings}"
+        factoryClass="WapplerSystems\Inquiry\Form\Factory\QuickInquiryFormFactory"
+    />
+
+
+</f:section>
+</html>

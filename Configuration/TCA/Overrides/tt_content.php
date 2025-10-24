@@ -14,6 +14,14 @@ ExtensionUtility::registerPlugin(
 
 ExtensionUtility::registerPlugin(
     extensionName: 'inquiry',
+    pluginName: 'QuickForm',
+    pluginTitle: 'Quick Inquiry form for single item',
+    group: 'inquiry',
+    pluginDescription: '',
+);
+
+ExtensionUtility::registerPlugin(
+    extensionName: 'inquiry',
     pluginName: 'AddItemForm',
     pluginTitle: 'Add Item Form',
     group: 'inquiry',

@@ -29,7 +29,7 @@ class InquiryController extends ActionController
 
         $arguments = $this->request->getArguments()['inquiryFormPage'] ?? [];
         foreach ($items as $key => $item) {
-            if (($arguments['itemDelete_'.$item['hash']] ?? 0) === '1') {
+            if (($arguments['itemDelete_' . $item['hash']] ?? 0) === '1') {
                 unset($items[$key]);
             }
         }
@@ -59,7 +59,19 @@ class InquiryController extends ActionController
     }
 
 
-    public function addItemAction() : ResponseInterface
+    public function quickFormAction(): ResponseInterface
+    {
+
+        // TODO: implement quick form
+        $this->view->assignMultiple([
+            'item' => null
+        ]);
+
+        return $this->htmlResponse();
+    }
+
+
+    public function addItemAction(): ResponseInterface
     {
 
         $params = $this->request->getParsedBody();
@@ -76,7 +88,7 @@ class InquiryController extends ActionController
         $hash = md5($uid . '_' . $type);
 
         $items = [
-            ['uid' => $uid, 'type' => $type, 'hash' => md5($uid . '_' . $type) ]
+            ['uid' => $uid, 'type' => $type, 'hash' => md5($uid . '_' . $type)]
         ];
 
         // check if item is allowed to be added
@@ -114,7 +126,7 @@ class InquiryController extends ActionController
         return $this->htmlResponse();
     }
 
-    public function removeItemAction() : ResponseInterface
+    public function removeItemAction(): ResponseInterface
     {
 
         /** @var FrontendUserAuthentication $frontendUserAuthentication */
@@ -131,7 +143,7 @@ class InquiryController extends ActionController
     }
 
 
-    public function countItemsAction() : ResponseInterface
+    public function countItemsAction(): ResponseInterface
     {
         /** @var FrontendUserAuthentication $frontendUserAuthentication */
         $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
@@ -151,7 +163,7 @@ class InquiryController extends ActionController
         return $this->jsonResponse(json_encode($data));
     }
 
-    public function getItemsAction() : ResponseInterface
+    public function getItemsAction(): ResponseInterface
     {
         /** @var FrontendUserAuthentication $frontendUserAuthentication */
         $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
@@ -171,7 +183,7 @@ class InquiryController extends ActionController
         return $this->jsonResponse(json_encode($data));
     }
 
-    public function addItemFormAction() : ResponseInterface
+    public function addItemFormAction(): ResponseInterface
     {
 
 
