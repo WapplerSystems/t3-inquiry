@@ -20,17 +20,6 @@ $boot = static function (): void {
 
     ExtensionUtility::configurePlugin(
         'Inquiry',
-        'AddItem',
-        [
-            InquiryController::class => 'addItem',
-        ],
-        [
-            InquiryController::class => 'addItem',
-        ],
-    );
-
-    ExtensionUtility::configurePlugin(
-        'Inquiry',
         'CountItems',
         [
             InquiryController::class => 'countItems',
@@ -42,12 +31,45 @@ $boot = static function (): void {
 
     ExtensionUtility::configurePlugin(
         'Inquiry',
+        'ItemsList',
+        [
+            InquiryController::class => 'getItems',
+        ],
+        [
+            InquiryController::class => 'getItems',
+        ],
+    );
+
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
+        'AddItem',
+        [
+            InquiryController::class => 'addItem',
+        ],
+        [
+            InquiryController::class => 'addItem',
+        ],
+    );
+
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
         'RemoveItem',
         [
             InquiryController::class => 'removeItem',
         ],
         [
             InquiryController::class => 'removeItem',
+        ],
+    );
+
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
+        'ToggleItem',
+        [
+            InquiryController::class => 'toggleItem',
+        ],
+        [
+            InquiryController::class => 'toggleItem',
         ],
     );
 

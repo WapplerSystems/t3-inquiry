@@ -17,6 +17,11 @@ plugin.tx_inquiry {
 
     ajaxAddToListTypeNum = 678934
     ajaxCountItemsTypeNum = 678935
+    ajaxItemsListTypeNum = 678936
+
+
+    # cat=plugin.tx_inquiry/list/b; type=int; label=UID of the page containing the inquiry list
+    listPageUid =
 
 
   }

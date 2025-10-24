@@ -24,6 +24,7 @@ plugin.tx_inquiry {
 
     ajaxAddToListTypeNum = {$plugin.tx_inquiry.settings.ajaxAddToListTypeNum}
     ajaxCountItemsTypeNum = {$plugin.tx_inquiry.settings.ajaxCountItemsTypeNum}
+    ajaxItemsListTypeNum = {$plugin.tx_inquiry.settings.ajaxItemsListTypeNum}
 
 
   }
@@ -46,6 +47,13 @@ page.headerData {
   76891.typolink.returnLast = url
   76891.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.ajaxCountItemsTypeNum}
   76891.wrap = <meta name="inquiry-count-items" content="|">
+
+  76892 = TEXT
+  76892.typolink.parameter.data = TSFE:id
+  76892.typolink.forceAbsoluteUrl = 1
+  76892.typolink.returnLast = url
+  76892.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.ajaxItemsListTypeNum}
+  76892.wrap = <meta name="inquiry-items-list" content="|">
 }
 
 
@@ -102,5 +110,28 @@ countItemsInquiryPage {
   10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
   10.extensionName = Inquiry
   10.pluginName = CountItems
+  10.vendorName = wapplersystems
+}
+
+itemsListInquiryPage = PAGE
+itemsListInquiryPage {
+  typeNum = {$plugin.tx_inquiry.settings.ajaxItemsListTypeNum}
+
+  config {
+    disableAllHeaderCode = 1
+    xhtml_cleaning = none
+    admPanel = 0
+    debug = 0
+    disablePrefixComment = 1
+    metaCharset = utf-8
+    additionalHeaders.10.header = Content-Type:application/json;charset=UTF-8
+    disableBodyTag = 1
+    no_cache = 1
+  }
+
+  10 = USER
+  10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+  10.extensionName = Inquiry
+  10.pluginName = ItemsList
   10.vendorName = wapplersystems
 }

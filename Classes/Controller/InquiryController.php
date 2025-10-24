@@ -151,6 +151,26 @@ class InquiryController extends ActionController
         return $this->jsonResponse(json_encode($data));
     }
 
+    public function getItemsAction() : ResponseInterface
+    {
+        /** @var FrontendUserAuthentication $frontendUserAuthentication */
+        $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
+        $userSession = $frontendUserAuthentication->getSession();
+
+        if ($userSession->get('items')) {
+            $items = $userSession->get('items');
+        } else {
+            $items = [];
+        }
+
+        $data = [
+            'success' => true,
+            'items' => $items
+        ];
+
+        return $this->jsonResponse(json_encode($data));
+    }
+
     public function addItemFormAction() : ResponseInterface
     {
 

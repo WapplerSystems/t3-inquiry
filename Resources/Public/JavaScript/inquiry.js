@@ -17,16 +17,18 @@ document.querySelectorAll('a.add-to-inquiry-list').forEach(link => {
       return response.json();
     })
     .then(data => {
-      console.log(data);
 
-      let countSpan = link.querySelector('.inquiry-count');
-      if (!countSpan) {
-        countSpan = document.createElement('span');
-        countSpan.className = 'inquiry-count calltoaction-item-counter';
-        link.appendChild(countSpan);
-      }
-      countSpan.textContent = data.count;
+      link.classList.add('added-to-inquiry-list');
 
+      document.querySelectorAll('a.to-inquiry-list').forEach(link => {
+        let countSpan = link.querySelector('.inquiry-count');
+        if (!countSpan) {
+          countSpan = document.createElement('span');
+          countSpan.className = 'inquiry-count calltoaction-item-counter';
+          link.appendChild(countSpan);
+        }
+        countSpan.textContent = data.count;
+      });
 
     })
     .catch(error => {
@@ -36,10 +38,10 @@ document.querySelectorAll('a.add-to-inquiry-list').forEach(link => {
 });
 
 
-const countItemsMeta = document.querySelector('meta[name="inquiry-count-items"]');
-if (countItemsMeta) {
-  const countItemsUrl = countItemsMeta.getAttribute('content');
-  fetch(countItemsUrl, {
+const itemsListMeta = document.querySelector('meta[name="inquiry-items-list"]');
+if (itemsListMeta) {
+  const itemsListUrl = itemsListMeta.getAttribute('content');
+  fetch(itemsListUrl, {
     headers: {
       'Accept': 'application/json'
     }
@@ -51,19 +53,41 @@ if (countItemsMeta) {
       return response.json();
     })
     .then(data => {
+      let items = Object.values(data.items);
 
-      if (data.count == 0) {
+      let count = items.length;
+      if (count == 0) {
         return;
       }
 
-      document.querySelectorAll('a.add-to-inquiry-list').forEach(link => {
+      document.querySelectorAll('a.to-inquiry-list').forEach(link => {
         let countSpan = link.querySelector('.inquiry-count');
         if (!countSpan) {
           countSpan = document.createElement('span');
           countSpan.className = 'inquiry-count calltoaction-item-counter';
           link.appendChild(countSpan);
         }
-        countSpan.textContent = data.count;
+        countSpan.textContent = count;
+      });
+
+
+      items.forEach(item => {
+        const inquiryLinks = document.querySelectorAll('a[data-inquiry-item-uid][data-inquiry-item-type]');
+        inquiryLinks.forEach(link => {
+          const uid = link.getAttribute('data-inquiry-item-uid');
+          const type = link.getAttribute('data-inquiry-item-type');
+          const addToListLabel = link.getAttribute('data-add-label');
+          const removeFromListLabel = link.getAttribute('data-remove-label');
+          if (uid === item.uid && type === item.type) {
+            link.classList.add('added-to-inquiry-list');
+            const labelSpan = link.querySelector('.inquiry-button-label');
+            console.debug(link);
+            if (labelSpan && removeFromListLabel) {
+              labelSpan.textContent = removeFromListLabel;
+            }
+          }
+
+        });
       });
     })
     .catch(error => {
@@ -104,4 +128,3 @@ document.addEventListener('DOMContentLoaded', function() {
     completedField.value = '';
   }
 });
-
