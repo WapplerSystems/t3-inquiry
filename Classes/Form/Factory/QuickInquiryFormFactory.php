@@ -87,6 +87,18 @@ class QuickInquiryFormFactory extends AbstractFormFactory
 
         $this->addFormElement(
             $page,
+            type: 'ItemName',
+            id: 'itemName',
+            label: 'Item Name',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 1500
+                ]
+            ]
+        );
+
+        $this->addFormElement(
+            $page,
             type: 'Textarea',
             id: 'Custom',
             label: 'Do you have any special requests?',

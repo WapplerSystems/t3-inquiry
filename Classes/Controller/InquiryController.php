@@ -5,6 +5,7 @@ namespace WapplerSystems\Inquiry\Controller;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
+use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 
@@ -61,6 +62,8 @@ class InquiryController extends ActionController
 
     public function quickFormAction(): ResponseInterface
     {
+
+//        DebugUtility::debug($this->request);
 
         // TODO: implement quick form
         $this->view->assignMultiple([

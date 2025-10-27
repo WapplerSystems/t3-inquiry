@@ -5,7 +5,7 @@ TYPO3:
         standard:
           formElementsDefinition:
             ItemName:
-              implementationClassName: WapplerSystems\Iquiry\Domain\Model\FormElements\ItemName
+              implementationClassName: WapplerSystems\Inquiry\Domain\Model\FormElements\ItemName
               properties:
                 containerClassAttribute: input
                 elementClassAttribute: ''
