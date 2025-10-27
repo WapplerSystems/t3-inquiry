@@ -1,6 +1,6 @@
 <?php
 
-namespace WapplerSystems\Iquiry\ViewHelpers\Form;
+namespace WapplerSystems\Inquiry\ViewHelpers\Form;
 
 use Doctrine\DBAL\ParameterType;
 use TYPO3\CMS\Core\Database\ConnectionPool;
