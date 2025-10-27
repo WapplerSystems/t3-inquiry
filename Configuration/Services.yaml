@@ -9,3 +9,6 @@ services:
 
   WapplerSystems\Inquiry\Form\Factory\InquiryFormFactory:
     public: true
+
+  WapplerSystems\Inquiry\Form\Factory\QuickInquiryFormFactory:
+    public: true

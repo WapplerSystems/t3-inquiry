@@ -85,6 +85,22 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             ]
         );
 
+        $this->addFormElement(
+            $page,
+            type: 'Textarea',
+            id: 'Custom',
+            label: 'Do you have any special requests?',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 1500
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(NotEmptyValidator::class),
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+            ]
+        );
+
         /** @var GridRow $gridRow */
         $gridRow = $this->addFormElement(
             $page,
@@ -98,6 +114,30 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             $gridRow,
             type: 'Fieldset',
             id: 'leftColumn',
+            properties: [
+                'gridColumnClassAutoConfiguration' => [
+                    'viewPorts' => [
+                        'xxl' => [
+                            'numbersOfColumnsToUse' => 6
+                        ],
+                        'xl' => [
+                            'numbersOfColumnsToUse' => 6
+                        ],
+                        'lg' => [
+                            'numbersOfColumnsToUse' => 6
+                        ],
+                        'md' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'sm' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'xs' => [
+                            'numbersOfColumnsToUse' => 12
+                        ]
+                    ]
+                ]
+            ]
         );
 
 
@@ -138,7 +178,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
 
 
         $this->addFormElement(
-            $rightColumn,
+            $leftColumn,
             type: 'Text',
             id: 'name',
             label: 'name',
@@ -154,7 +194,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
         );
 
         $this->addFormElement(
-            $rightColumn,
+            $leftColumn,
             type: 'Email',
             id: 'email',
             label: 'email',
@@ -170,7 +210,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             ]
         );
         $this->addFormElement(
-            $rightColumn,
+            $leftColumn,
             type: 'Text',
             id: 'phonenumber',
             label: 'phonenumber',
@@ -184,10 +224,122 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             ]
         );
         $this->addFormElement(
-            $rightColumn,
+            $leftColumn,
             type: 'Text',
             id: 'company',
             label: 'company',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 300
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(NotEmptyValidator::class),
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+            ]
+        );
+
+        $this->addFormElement(
+            $rightColumn,
+            type: 'Text',
+            id: 'street',
+            label: 'Street',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 300
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(NotEmptyValidator::class),
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+            ]
+        );
+        /** @var GridRow $gridRow */
+        $gridRow2 = $this->addFormElement(
+            $rightColumn,
+            type: 'GridRow',
+            id: 'gridRow2',
+        );
+        /** @var Section $rightColumn */
+        $leftColumn2 = $this->addFormElement(
+            $gridRow2,
+            type: 'Fieldset',
+            id: 'leftColumn2',
+            properties: [
+                'gridColumnClassAutoConfiguration' => [
+                    'viewPorts' => [
+                        'xxl' => [
+                            'numbersOfColumnsToUse' => 6
+                        ],
+                        'xl' => [
+                            'numbersOfColumnsToUse' => 6
+                        ],
+                        'lg' => [
+                            'numbersOfColumnsToUse' => 6
+                        ],
+                        'md' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'sm' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'xs' => [
+                            'numbersOfColumnsToUse' => 12
+                        ]
+                    ]
+                ]
+            ]
+        );
+        /** @var Section $rightColumn */
+        $rightColumn2 = $this->addFormElement(
+            $gridRow2,
+            type: 'Fieldset',
+            id: 'rightColumn2',
+            properties: [
+                'gridColumnClassAutoConfiguration' => [
+                    'viewPorts' => [
+                        'xxl' => [
+                            'numbersOfColumnsToUse' => 6
+                        ],
+                        'xl' => [
+                            'numbersOfColumnsToUse' => 6
+                        ],
+                        'lg' => [
+                            'numbersOfColumnsToUse' => 6
+                        ],
+                        'md' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'sm' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'xs' => [
+                            'numbersOfColumnsToUse' => 12
+                        ]
+                    ]
+                ]
+            ]
+        );
+        $this->addFormElement(
+            $leftColumn2,
+            type: 'Text',
+            id: 'zipcode',
+            label: 'Zipcode',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 300
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(NotEmptyValidator::class),
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+            ]
+        );
+        $this->addFormElement(
+            $rightColumn2,
+            type: 'Text',
+            id: 'city',
+            label: 'City',
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 300
