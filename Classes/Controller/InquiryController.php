@@ -24,6 +24,12 @@ class InquiryController extends ActionController
         $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
         $userSession = $frontendUserAuthentication->getSession();
 
+        if (($this->settings['subject'] ?? '') === '') {
+            return $this->htmlResponse('<div class="alert alert-warning">The inquiry form subject setting is required.</div>');
+        }
+        if (count($this->settings['recipients'] ?? []) === 0) {
+            return $this->htmlResponse('<div class="alert alert-warning">Please set recipients.</div>');
+        }
 
         $items = $userSession->get('items') ?? [];
 

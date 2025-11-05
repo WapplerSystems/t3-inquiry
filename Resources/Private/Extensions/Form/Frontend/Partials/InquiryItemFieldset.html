@@ -19,9 +19,22 @@
             <button type="button" data-target="inquiryFormPage-itemDelete_{element.properties.hash}" class="inquiry-item-delete">Remove</button>
         </div>
 
-        <f:for each="{element.elements}" as="element">
-            <f:render partial="{element.templateName}" arguments="{element: element}" />
-        </f:for>
+        <div class="inquiry-item-content row">
+            <f:if condition="{element.properties.event.htmlPreview}">
+                <div class=" col-12 col-lg-4">
+                    <div class="inquiry-item-preview">
+                        <f:format.raw>{element.properties.event.htmlPreview}</f:format.raw>
+                    </div>
+                </div>
+            </f:if>
+
+            <div class="inquiry-item-fields col-12 col-lg-8">
+                <f:for each="{element.elements}" as="element">
+                    <f:render partial="{element.templateName}" arguments="{element: element}" />
+                </f:for>
+            </div>
+        </div>
+
     </fieldset>
 </formvh:renderRenderable>
 </html>
