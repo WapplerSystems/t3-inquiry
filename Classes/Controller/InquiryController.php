@@ -7,6 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
+use WapplerSystems\Inquiry\Event\CanResolveItemEvent;
 
 class InquiryController extends ActionController
 {
@@ -77,25 +78,31 @@ class InquiryController extends ActionController
     }
 
 
-    public function addItemAction(): ResponseInterface
+    public function toggleItemStatusAction(): ResponseInterface
     {
 
-        $params = $this->request->getParsedBody();
-        $uid = $params['tx_inquiry_additemform']['uid'] ?? $this->request->getArguments()['uid'] ?? null;
-        $type = $params['tx_inquiry_additemform']['type'] ?? $this->request->getArguments()['type'] ?? null;
+        $uid = (int)($this->request->getQueryParams()['uid'] ?? null);
+        $type = $this->request->getQueryParams()['type'] ?? null;
         if (!$uid || !$type) {
             $accept = $this->request->getHeader('accept')[0] ?? '';
             if (str_contains($accept, 'application/json')) {
-                return $this->jsonResponse(json_encode(['success' => false, 'message' => 'No uid or type given']));
+                return $this->jsonResponse(json_encode(['message' => 'No uid or type given']));
             }
             return $this->htmlResponse('No uid or type given');
         }
 
-        $hash = md5($uid . '_' . $type);
+        $event = new CanResolveItemEvent($uid, $type);
+        $this->eventDispatcher->dispatch($event);
+        if (!$event->isResult()) {
+            $accept = $this->request->getHeader('accept')[0] ?? '';
+            if (str_contains($accept, 'application/json')) {
+                return $this->jsonResponse(json_encode(['message' => 'Item cannot be resolved']));
+            }
+            return $this->htmlResponse('Item cannot be resolved');
+        }
 
-        $items = [
-            ['uid' => $uid, 'type' => $type, 'hash' => md5($uid . '_' . $type)]
-        ];
+
+        $hash = md5($uid . '_' . $type);
 
         // check if item is allowed to be added
 
@@ -104,33 +111,34 @@ class InquiryController extends ActionController
         $userSession = $frontendUserAuthentication->getSession();
         $storedItems = $userSession->get('items') ?? [];
 
-        if (in_array($hash, array_column($storedItems, 'hash'))) {
-            $accept = $this->request->getHeader('accept')[0] ?? '';
-            if (str_contains($accept, 'application/json')) {
-                return $this->jsonResponse(json_encode(['success' => false, 'code' => 1000, 'count' => count($storedItems), 'message' => 'Item already in inquiry']));
-            }
-            return $this->htmlResponse('Item already in inquiry');
-        }
-        $items = array_merge($storedItems, $items);
-        $userSession->set('items', $items);
+        if (!in_array($hash, array_column($storedItems, 'hash'), true)) {
+            $items = array_merge($storedItems, [['uid' => $uid, 'type' => $type, 'hash' => md5($uid . '_' . $type)]]);
+            $userSession->set('items', $items);
+            $frontendUserAuthentication->storeSessionData();
 
+            $data = [
+                'items' => $items,
+                'added' => true,
+            ];
+            return $this->jsonResponse(json_encode($data));
+        }
+
+        // remove item
+        foreach ($storedItems as $item) {
+            if ($item['hash'] === $hash) {
+                unset($storedItems[array_search($item, $storedItems, true)]);
+            }
+        }
+        $userSession->set('items', $storedItems);
         $frontendUserAuthentication->storeSessionData();
 
         $data = [
-            'success' => true,
-            'count' => count($items)
+            'items' => $storedItems,
+            'removed' => true,
         ];
-
-        $accept = $this->request->getHeader('accept')[0] ?? '';
-        if (str_contains($accept, 'application/json')) {
-            return $this->jsonResponse(json_encode($data));
-        }
-        $this->view->assignMultiple([
-            'items' => $items,
-            'count' => count($items)
-        ]);
-        return $this->htmlResponse();
+        return $this->jsonResponse(json_encode($data));
     }
+
 
     public function removeItemAction(): ResponseInterface
     {
@@ -141,7 +149,6 @@ class InquiryController extends ActionController
 
 
         $data = [
-            'success' => true,
             'count' => count($items)
         ];
 
@@ -161,8 +168,15 @@ class InquiryController extends ActionController
             $items = [];
         }
 
+        foreach ($items as &$item) {
+            $event = new CanResolveItemEvent($item['uid'], $item['type']);
+            $this->eventDispatcher->dispatch($event);
+            if (!$event->isResult()) {
+                unset($item);
+            }
+        }
+
         $data = [
-            'success' => true,
             'count' => count($items)
         ];
 
@@ -181,8 +195,15 @@ class InquiryController extends ActionController
             $items = [];
         }
 
+        foreach ($items as &$item) {
+            $event = new CanResolveItemEvent($item['uid'], $item['type']);
+            $this->eventDispatcher->dispatch($event);
+            if (!$event->isResult()) {
+                unset($item);
+            }
+        }
+
         $data = [
-            'success' => true,
             'items' => $items
         ];
 

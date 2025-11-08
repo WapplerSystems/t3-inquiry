@@ -22,10 +22,9 @@ plugin.tx_inquiry {
 
   settings {
 
-    ajaxAddToListTypeNum = {$plugin.tx_inquiry.settings.ajaxAddToListTypeNum}
-    ajaxCountItemsTypeNum = {$plugin.tx_inquiry.settings.ajaxCountItemsTypeNum}
+    ajaxToggleItemTypeNum = {$plugin.tx_inquiry.settings.ajaxToggleItemTypeNum}
     ajaxItemsListTypeNum = {$plugin.tx_inquiry.settings.ajaxItemsListTypeNum}
-
+    ajaxRemoveItemTypeNum = {$plugin.tx_inquiry.settings.ajaxRemoveItemTypeNum}
 
   }
 }
@@ -34,26 +33,26 @@ page.includeJSFooter.inquiry = EXT:inquiry/Resources/Public/JavaScript/inquiry.j
 page.includeCSS.inquiry = EXT:inquiry/Resources/Public/CSS/inquiry.css
 
 page.headerData {
-  #76890 = TEXT
-  #76890.typolink.parameter.data = TSFE:id
-  #76890.typolink.forceAbsoluteUrl = 1
-  #76890.typolink.returnLast = url
-  #76890.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.ajaxAddToListTypeNum}
-  #76890.wrap = <meta name="inquiry-add-to-list" content="|">
+  76890 = TEXT
+  76890.typolink.parameter.data = TSFE:id
+  76890.typolink.forceAbsoluteUrl = 1
+  76890.typolink.returnLast = url
+  76890.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.ajaxToggleItemTypeNum}
+  76890.wrap = <meta name="inquiry-toggle-item" content="|">
 
   76891 = TEXT
   76891.typolink.parameter.data = TSFE:id
   76891.typolink.forceAbsoluteUrl = 1
   76891.typolink.returnLast = url
-  76891.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.ajaxCountItemsTypeNum}
-  76891.wrap = <meta name="inquiry-count-items" content="|">
+  76891.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.ajaxItemsListTypeNum}
+  76891.wrap = <meta name="inquiry-items-list" content="|">
 
   76892 = TEXT
   76892.typolink.parameter.data = TSFE:id
   76892.typolink.forceAbsoluteUrl = 1
   76892.typolink.returnLast = url
-  76892.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.ajaxItemsListTypeNum}
-  76892.wrap = <meta name="inquiry-items-list" content="|">
+  76892.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.ajaxRemoveItemTypeNum}
+  76892.wrap = <meta name="inquiry-remove-item" content="|">
 }
 
 
@@ -66,33 +65,9 @@ plugin.tx_form {
 }
 
 
-addToInquiryPage = PAGE
-addToInquiryPage {
-  typeNum = {$plugin.tx_inquiry.settings.ajaxAddToListTypeNum}
-
-  config {
-    disableAllHeaderCode = 1
-    xhtml_cleaning = none
-    admPanel = 0
-    debug = 0
-    disablePrefixComment = 1
-    metaCharset = utf-8
-    #additionalHeaders.10.header = Content-Type:application/json;charset=UTF-8
-    additionalHeaders.10.header = Content-Type:text/html;charset=UTF-8
-    disableBodyTag = 1
-    no_cache = 1
-  }
-
-  10 = USER
-  10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
-  10.extensionName = Inquiry
-  10.pluginName = AddItem
-  10.vendorName = wapplersystems
-}
-
-countItemsInquiryPage = PAGE
-countItemsInquiryPage {
-  typeNum = {$plugin.tx_inquiry.settings.ajaxCountItemsTypeNum}
+toggleItemInquiryPage = PAGE
+toggleItemInquiryPage {
+  typeNum = {$plugin.tx_inquiry.settings.ajaxToggleItemTypeNum}
 
   config {
     disableAllHeaderCode = 1
@@ -109,7 +84,7 @@ countItemsInquiryPage {
   10 = USER
   10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
   10.extensionName = Inquiry
-  10.pluginName = CountItems
+  10.pluginName = ToggleItem
   10.vendorName = wapplersystems
 }
 
@@ -133,5 +108,28 @@ itemsListInquiryPage {
   10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
   10.extensionName = Inquiry
   10.pluginName = ItemsList
+  10.vendorName = wapplersystems
+}
+
+removeItemInquiryPage = PAGE
+removeItemInquiryPage {
+  typeNum = {$plugin.tx_inquiry.settings.ajaxRemoveItemTypeNum}
+
+  config {
+    disableAllHeaderCode = 1
+    xhtml_cleaning = none
+    admPanel = 0
+    debug = 0
+    disablePrefixComment = 1
+    metaCharset = utf-8
+    additionalHeaders.10.header = Content-Type:application/json;charset=UTF-8
+    disableBodyTag = 1
+    no_cache = 1
+  }
+
+  10 = USER
+  10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+  10.extensionName = Inquiry
+  10.pluginName = RemoveItem
   10.vendorName = wapplersystems
 }

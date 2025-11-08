@@ -223,7 +223,7 @@ class InquiryFormFactory extends AbstractFormFactory
                 ]
             );
 
-            //$this->eventDispatcher->dispatch(new BuildInquiryFormProductEvent($formDefinition, $fieldsetProduct));
+            $this->eventDispatcher->dispatch(new BuildInquiryFormProductEvent($formDefinition, $fieldsetProduct));
 
 
             $i++;
