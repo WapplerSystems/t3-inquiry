@@ -6,12 +6,8 @@ if (toggleItemMeta) {
     link.addEventListener('click', function (e) {
       e.preventDefault();
 
-
       const uid = this.getAttribute('data-inquiry-item-uid');
       const type = this.getAttribute('data-inquiry-item-type');
-
-
-
       let url = new URL(toggleItemUrl);
       url.searchParams.append('uid', uid);
       url.searchParams.append('type', type);
@@ -51,10 +47,10 @@ if (toggleItemMeta) {
         let count = data.items.length;
 
         document.querySelectorAll('a.to-inquiry-list').forEach(link => {
-          let countSpan = link.querySelector('.inquiry-count');
+          let countSpan = link.querySelector('.inquiry-item-counter');
           if (!countSpan) {
             countSpan = document.createElement('span');
-            countSpan.className = 'inquiry-count calltoaction-item-counter';
+            countSpan.className = 'inquiry-item-counter';
             link.appendChild(countSpan);
           }
           countSpan.textContent = count;
