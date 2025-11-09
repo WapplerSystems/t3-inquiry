@@ -10,7 +10,7 @@ function addClickListenerToInquiryLinks() {
   }
 
   document.querySelectorAll('.toggle-inquiry-item-status-button').forEach(link => {
-    if (link._inquiryListenerAdded) return; // Verhindert mehrfaches Hinzufügen
+    if (link._inquiryListenerAdded) return;
     link.addEventListener('click', function (e) {
       e.preventDefault();
 
@@ -69,7 +69,7 @@ function addClickListenerToInquiryLinks() {
           console.error('Fehler beim Abrufen:', error);
         });
     });
-    link._inquiryListenerAdded = true; // Markiere, dass Listener hinzugefügt wurde
+    link._inquiryListenerAdded = true;
   });
 
 }
@@ -139,8 +139,10 @@ function updateInquiryLinks() {
 }
 
 const observer = new MutationObserver(() => {
+  observer.disconnect();
   updateInquiryLinks();
-  addClickListenerToInquiryLinks(); // Nach DOM-Änderungen erneut Listener setzen
+  addClickListenerToInquiryLinks();
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 observer.observe(document.body, { childList: true, subtree: true });
 
@@ -160,7 +162,7 @@ document.querySelectorAll('button.inquiry-item-delete').forEach(btn => {
 })
 
 document.addEventListener('DOMContentLoaded', function() {
-  addClickListenerToInquiryLinks(); // Nach DOM-Load Listener setzen
+  addClickListenerToInquiryLinks();
   const form = document.getElementById('inquiryFormPage');
   if (form) {
     form.addEventListener('submit', function(e) {
