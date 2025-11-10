@@ -11,6 +11,23 @@
 			<trans-unit id="tx_inquiry_domain_model_requesttexttemplate.body">
 				<source>Text</source>
 			</trans-unit>
+
+
+			<trans-unit id="flexform.subject">
+				<source>Subject</source>
+			</trans-unit>
+			<trans-unit id="flexform.recipients">
+				<source>Recipients</source>
+			</trans-unit>
+			<trans-unit id="flexform.recipient">
+				<source>Recipient</source>
+			</trans-unit>
+			<trans-unit id="flexform.recipient.emailaddress">
+				<source>Email address</source>
+			</trans-unit>
+			<trans-unit id="flexform.recipient.name">
+				<source>Name</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

@@ -93,7 +93,8 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 1500
-                ]
+                ],
+                'item' => $configuration['resolvedItem']
             ]
         );
 

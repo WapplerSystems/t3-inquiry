@@ -98,6 +98,21 @@ class InquiryFormFactory extends AbstractFormFactory
             $gridRow,
             type: 'Fieldset',
             id: 'leftColumn',
+            properties: [
+                'gridColumnClassAutoConfiguration' => [
+                    'viewPorts' => [
+                        'xxl' => [
+                            'numbersOfColumnsToUse' => 8
+                        ],
+                        'xl' => [
+                            'numbersOfColumnsToUse' => 8
+                        ],
+                        'lg' => [
+                            'numbersOfColumnsToUse' => 8
+                        ],
+                    ]
+                ]
+            ],
         );
 
 
@@ -132,15 +147,22 @@ class InquiryFormFactory extends AbstractFormFactory
         foreach ($items as $key => $item) {
 
             $hash = $item['hash'];
-            $event = new ResolveItemEvent($item['uid'], $item['type']);
+            $event = new ResolveItemEvent($item['uid'], $item['type'], $request);
             $this->eventDispatcher->dispatch($event);
+
+            if ($event->getResolvedObject() === null) {
+                continue;
+            }
 
             /** @var Section $fieldsetProduct */
             $fieldsetProduct = $this->addFormElement(
                 $leftColumn,
                 type: 'InquiryItemFieldset',
                 id: 'fieldsetProduct_' . $hash,
-                properties: ['hash' => $hash],
+                properties: [
+                    'hash' => $hash,
+                    'event' => $event
+                ],
                 label: $event->getResolvedName(),
             );
 
@@ -201,7 +223,7 @@ class InquiryFormFactory extends AbstractFormFactory
                 ]
             );
 
-            //$this->eventDispatcher->dispatch(new BuildInquiryFormProductEvent($formDefinition, $fieldsetProduct));
+            $this->eventDispatcher->dispatch(new BuildInquiryFormProductEvent($formDefinition, $fieldsetProduct));
 
 
             $i++;
@@ -293,14 +315,19 @@ class InquiryFormFactory extends AbstractFormFactory
             ]
         );
 
+        $recipients = [];
+        foreach ($configuration['recipients'] ?? [] as $recipient) {
+            $recipients[$recipient['container']['address']] = $recipient['container']['name'];
+        }
+
+        $mailSettings = $GLOBALS['TYPO3_CONF_VARS']['MAIL'];
+
         $emailToReceiver = $formDefinition->createFinisher('EmailToReceiver');
         $emailToReceiver->setOptions([
-            'subject' => 'New inquiry',
-            'recipients' => [
-                'wappler@wappler.systems' => 'WDWDWDWDDD'
-            ],
-            'senderName' => 'Mail from inquiry form',
-            'senderAddress' => 'dwddwdw@ededed.de',
+            'subject' => $configuration['subject'] ?? 'Mail from inquiry form',
+            'recipients' => $recipients,
+            'senderName' => $mailSettings['defaultMailFromName'],
+            'senderAddress' => $mailSettings['defaultMailFromAddress'],
             'replyToAddress' => '{email}',
             'replyToName' => '{name}',
             'templateName' => 'MailToReceiver',

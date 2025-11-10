@@ -1,42 +1,81 @@
-const meta = document.querySelector('meta[name="inquiry-add-to-list"]');
+let toggleItemMeta = document.querySelector('meta[name="inquiry-toggle-item"]');
+let toggleItemUrl = null;
+if (toggleItemMeta) {
+  toggleItemUrl = toggleItemMeta.getAttribute('content');
+}
 
-document.querySelectorAll('a.add-to-inquiry-list').forEach(link => {
-  link.addEventListener('click', function (e) {
-    e.preventDefault();
+function addClickListenerToInquiryLinks() {
+  if (!toggleItemUrl) {
+    return;
+  }
 
-    fetch(link.getAttribute('href'), {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Netzwerk-Antwort war nicht ok');
-      }
-      return response.json();
-    })
-    .then(data => {
+  document.querySelectorAll('.toggle-inquiry-item-status-button').forEach(link => {
+    if (link._inquiryListenerAdded) return;
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
 
-      link.classList.add('added-to-inquiry-list');
+      const uid = this.getAttribute('data-inquiry-item-uid');
+      const type = this.getAttribute('data-inquiry-item-type');
+      let url = new URL(toggleItemUrl);
+      url.searchParams.append('uid', uid);
+      url.searchParams.append('type', type);
 
-      document.querySelectorAll('a.to-inquiry-list').forEach(link => {
-        let countSpan = link.querySelector('.inquiry-count');
-        if (!countSpan) {
-          countSpan = document.createElement('span');
-          countSpan.className = 'inquiry-count calltoaction-item-counter';
-          link.appendChild(countSpan);
+      fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
-        countSpan.textContent = data.count;
-      });
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Netzwerk-Antwort war nicht ok');
+          }
+          return response.json();
+        })
+        .then(data => {
 
-    })
-    .catch(error => {
-      console.error('Fehler beim Abrufen:', error);
+          inquiryListItems = data.items;
+
+          const addToListLabel = link.getAttribute('data-add-label');
+          const removeFromListLabel = link.getAttribute('data-remove-label');
+          const labelSpan = link.querySelector('.inquiry-button-label');
+
+          if (data.added) {
+            link.classList.add('added');
+            if (labelSpan && removeFromListLabel) {
+              labelSpan.textContent = removeFromListLabel;
+            }
+          } else if (data.removed) {
+            link.classList.remove('added');
+            if (labelSpan && removeFromListLabel) {
+              labelSpan.textContent = addToListLabel;
+            }
+          }
+
+          let count = data.items.length;
+
+          document.querySelectorAll('.to-inquiry-list').forEach(link => {
+            let countSpan = link.querySelector('.inquiry-item-counter');
+            if (!countSpan) {
+              countSpan = document.createElement('span');
+              countSpan.className = 'inquiry-item-counter';
+              link.appendChild(countSpan);
+            }
+            countSpan.textContent = count;
+          });
+
+        })
+        .catch(error => {
+          console.error('Fehler beim Abrufen:', error);
+        });
     });
+    link._inquiryListenerAdded = true;
   });
-});
 
+}
+
+
+let inquiryListItems = [];
 
 const itemsListMeta = document.querySelector('meta[name="inquiry-items-list"]');
 if (itemsListMeta) {
@@ -53,47 +92,59 @@ if (itemsListMeta) {
       return response.json();
     })
     .then(data => {
-      let items = Object.values(data.items);
+      inquiryListItems = Object.values(data.items);
 
-      let count = items.length;
+      let count = inquiryListItems.length;
       if (count == 0) {
         return;
       }
 
-      document.querySelectorAll('a.to-inquiry-list').forEach(link => {
+      /* inquiry links/buttons */
+      document.querySelectorAll('.to-inquiry-list').forEach(link => {
         let countSpan = link.querySelector('.inquiry-count');
         if (!countSpan) {
           countSpan = document.createElement('span');
-          countSpan.className = 'inquiry-count calltoaction-item-counter';
+          countSpan.className = 'inquiry-item-counter';
           link.appendChild(countSpan);
         }
         countSpan.textContent = count;
       });
 
 
-      items.forEach(item => {
-        const inquiryLinks = document.querySelectorAll('a[data-inquiry-item-uid][data-inquiry-item-type]');
-        inquiryLinks.forEach(link => {
-          const uid = link.getAttribute('data-inquiry-item-uid');
-          const type = link.getAttribute('data-inquiry-item-type');
-          const addToListLabel = link.getAttribute('data-add-label');
-          const removeFromListLabel = link.getAttribute('data-remove-label');
-          if (uid === item.uid && type === item.type) {
-            link.classList.add('added-to-inquiry-list');
-            const labelSpan = link.querySelector('.inquiry-button-label');
-            console.debug(link);
-            if (labelSpan && removeFromListLabel) {
-              labelSpan.textContent = removeFromListLabel;
-            }
-          }
+      updateInquiryLinks();
 
-        });
-      });
     })
     .catch(error => {
       console.error('Fehler beim Abrufen:', error);
     });
 }
+
+function updateInquiryLinks() {
+  inquiryListItems.forEach(item => {
+    const inquiryLinks = document.querySelectorAll('a[data-inquiry-item-uid][data-inquiry-item-type], button[data-inquiry-item-uid][data-inquiry-item-type]');
+    inquiryLinks.forEach(link => {
+      const uid = link.getAttribute('data-inquiry-item-uid');
+      const type = link.getAttribute('data-inquiry-item-type');
+      const addToListLabel = link.getAttribute('data-add-label');
+      const removeFromListLabel = link.getAttribute('data-remove-label');
+      if (uid == item.uid && type == item.type) {
+        link.classList.add('added');
+        const labelSpan = link.querySelector('.inquiry-button-label');
+        if (labelSpan && removeFromListLabel) {
+          labelSpan.textContent = removeFromListLabel;
+        }
+      }
+    });
+  });
+}
+
+const observer = new MutationObserver(() => {
+  observer.disconnect();
+  updateInquiryLinks();
+  addClickListenerToInquiryLinks();
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+observer.observe(document.body, { childList: true, subtree: true });
 
 document.querySelectorAll('button.inquiry-item-delete').forEach(btn => {
   btn.addEventListener('click', function(e) {
@@ -111,6 +162,7 @@ document.querySelectorAll('button.inquiry-item-delete').forEach(btn => {
 })
 
 document.addEventListener('DOMContentLoaded', function() {
+  addClickListenerToInquiryLinks();
   const form = document.getElementById('inquiryFormPage');
   if (form) {
     form.addEventListener('submit', function(e) {

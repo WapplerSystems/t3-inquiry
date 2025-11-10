@@ -3,19 +3,25 @@
 namespace WapplerSystems\Inquiry\Event;
 
 
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Extbase\Domain\Model\FileReference;
+
 class ResolveItemEvent
 {
     private int $uid;
     private string $type;
 
-    private string $resolvedName;
-    private mixed $resolvedImage = null;
+    private ?string $resolvedName = null;
+    private ?FileReference $resolvedImage = null;
     private mixed $resolvedObject = null;
+    private ?string $htmlPreview = null;
+    private ServerRequestInterface $request;
 
-    public function __construct(int $uid, string $type)
+    public function __construct(int $uid, string $type, ServerRequestInterface $request)
     {
         $this->uid = $uid;
         $this->type = $type;
+        $this->request = $request;
     }
 
     public function getUid(): int
@@ -38,7 +44,7 @@ class ResolveItemEvent
         $this->type = $type;
     }
 
-    public function getResolvedName(): string
+    public function getResolvedName(): ?string
     {
         return $this->resolvedName;
     }
@@ -58,14 +64,34 @@ class ResolveItemEvent
         $this->resolvedObject = $resolvedObject;
     }
 
-    public function getResolvedImage(): mixed
+    public function getResolvedImage(): ?FileReference
     {
         return $this->resolvedImage;
     }
 
-    public function setResolvedImage(mixed $resolvedImage): void
+    public function setResolvedImage(FileReference $resolvedImage): void
     {
         $this->resolvedImage = $resolvedImage;
+    }
+
+    public function getHtmlPreview(): ?string
+    {
+        return $this->htmlPreview;
+    }
+
+    public function setHtmlPreview(string $htmlPreview): void
+    {
+        $this->htmlPreview = $htmlPreview;
+    }
+
+    public function getRequest(): ServerRequestInterface
+    {
+        return $this->request;
+    }
+
+    public function setRequest(ServerRequestInterface $request): void
+    {
+        $this->request = $request;
     }
 
 }

@@ -5,9 +5,10 @@ namespace WapplerSystems\Inquiry\Controller;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
-use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
+use WapplerSystems\Inquiry\Event\CanResolveItemEvent;
+use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 
 class InquiryController extends ActionController
 {
@@ -25,6 +26,12 @@ class InquiryController extends ActionController
         $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
         $userSession = $frontendUserAuthentication->getSession();
 
+        if (($this->settings['subject'] ?? '') === '') {
+            return $this->htmlResponse('<div class="alert alert-warning">The inquiry form subject setting is required.</div>');
+        }
+        if (count($this->settings['recipients'] ?? []) === 0) {
+            return $this->htmlResponse('<div class="alert alert-warning">Please set recipients.</div>');
+        }
 
         $items = $userSession->get('items') ?? [];
 
@@ -63,36 +70,53 @@ class InquiryController extends ActionController
     public function quickFormAction(): ResponseInterface
     {
 
-//        DebugUtility::debug($this->request);
+        $uid = (int)($this->request->getQueryParams()['item-uid'] ?? null);
+        $type = $this->request->getQueryParams()['item-type'] ?? null;
 
-        // TODO: implement quick form
+
+        $event = new ResolveItemEvent($uid, $type, $this->request);
+        $this->eventDispatcher->dispatch($event);
+
+        if ($event->getResolvedObject() === null) {
+            return $this->htmlResponse('<div class="alert alert-warning">Item could not be resolved.</div>');
+        }
+
+        $this->settings['resolvedItem'] = $event->getResolvedObject();
+
         $this->view->assignMultiple([
-            'item' => null
+            'item' => $event->getResolvedObject(),
+            'settings' => $this->settings,
         ]);
 
         return $this->htmlResponse();
     }
 
 
-    public function addItemAction(): ResponseInterface
+    public function toggleItemStatusAction(): ResponseInterface
     {
 
-        $params = $this->request->getParsedBody();
-        $uid = $params['tx_inquiry_additemform']['uid'] ?? $this->request->getArguments()['uid'] ?? null;
-        $type = $params['tx_inquiry_additemform']['type'] ?? $this->request->getArguments()['type'] ?? null;
+        $uid = (int)($this->request->getQueryParams()['uid'] ?? null);
+        $type = $this->request->getQueryParams()['type'] ?? null;
         if (!$uid || !$type) {
             $accept = $this->request->getHeader('accept')[0] ?? '';
             if (str_contains($accept, 'application/json')) {
-                return $this->jsonResponse(json_encode(['success' => false, 'message' => 'No uid or type given']));
+                return $this->jsonResponse(json_encode(['message' => 'No uid or type given']));
             }
             return $this->htmlResponse('No uid or type given');
         }
 
-        $hash = md5($uid . '_' . $type);
+        $event = new CanResolveItemEvent($uid, $type);
+        $this->eventDispatcher->dispatch($event);
+        if (!$event->isResult()) {
+            $accept = $this->request->getHeader('accept')[0] ?? '';
+            if (str_contains($accept, 'application/json')) {
+                return $this->jsonResponse(json_encode(['message' => 'Item cannot be resolved']));
+            }
+            return $this->htmlResponse('Item cannot be resolved');
+        }
 
-        $items = [
-            ['uid' => $uid, 'type' => $type, 'hash' => md5($uid . '_' . $type)]
-        ];
+
+        $hash = md5($uid . '_' . $type);
 
         // check if item is allowed to be added
 
@@ -101,33 +125,34 @@ class InquiryController extends ActionController
         $userSession = $frontendUserAuthentication->getSession();
         $storedItems = $userSession->get('items') ?? [];
 
-        if (in_array($hash, array_column($storedItems, 'hash'))) {
-            $accept = $this->request->getHeader('accept')[0] ?? '';
-            if (str_contains($accept, 'application/json')) {
-                return $this->jsonResponse(json_encode(['success' => false, 'code' => 1000, 'count' => count($storedItems), 'message' => 'Item already in inquiry']));
-            }
-            return $this->htmlResponse('Item already in inquiry');
-        }
-        $items = array_merge($storedItems, $items);
-        $userSession->set('items', $items);
+        if (!in_array($hash, array_column($storedItems, 'hash'), true)) {
+            $items = array_merge($storedItems, [['uid' => $uid, 'type' => $type, 'hash' => md5($uid . '_' . $type)]]);
+            $userSession->set('items', $items);
+            $frontendUserAuthentication->storeSessionData();
 
+            $data = [
+                'items' => $items,
+                'added' => true,
+            ];
+            return $this->jsonResponse(json_encode($data));
+        }
+
+        // remove item
+        foreach ($storedItems as $item) {
+            if ($item['hash'] === $hash) {
+                unset($storedItems[array_search($item, $storedItems, true)]);
+            }
+        }
+        $userSession->set('items', $storedItems);
         $frontendUserAuthentication->storeSessionData();
 
         $data = [
-            'success' => true,
-            'count' => count($items)
+            'items' => $storedItems,
+            'removed' => true,
         ];
-
-        $accept = $this->request->getHeader('accept')[0] ?? '';
-        if (str_contains($accept, 'application/json')) {
-            return $this->jsonResponse(json_encode($data));
-        }
-        $this->view->assignMultiple([
-            'items' => $items,
-            'count' => count($items)
-        ]);
-        return $this->htmlResponse();
+        return $this->jsonResponse(json_encode($data));
     }
+
 
     public function removeItemAction(): ResponseInterface
     {
@@ -138,7 +163,6 @@ class InquiryController extends ActionController
 
 
         $data = [
-            'success' => true,
             'count' => count($items)
         ];
 
@@ -158,8 +182,15 @@ class InquiryController extends ActionController
             $items = [];
         }
 
+        foreach ($items as &$item) {
+            $event = new CanResolveItemEvent($item['uid'], $item['type']);
+            $this->eventDispatcher->dispatch($event);
+            if (!$event->isResult()) {
+                unset($item);
+            }
+        }
+
         $data = [
-            'success' => true,
             'count' => count($items)
         ];
 
@@ -178,8 +209,15 @@ class InquiryController extends ActionController
             $items = [];
         }
 
+        foreach ($items as &$item) {
+            $event = new CanResolveItemEvent($item['uid'], $item['type']);
+            $this->eventDispatcher->dispatch($event);
+            if (!$event->isResult()) {
+                unset($item);
+            }
+        }
+
         $data = [
-            'success' => true,
             'items' => $items
         ];
 
