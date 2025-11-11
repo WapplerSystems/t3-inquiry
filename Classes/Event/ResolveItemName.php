@@ -10,7 +10,7 @@ class ResolveItemName
 {
 
     private mixed $item;
-    private string $name;
+    private string $name = '';
 
     public function __construct(mixed $item)
     {
