@@ -31,7 +31,7 @@ use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Domain\Model\RequestTextTemplate;
 use WapplerSystems\Inquiry\Domain\Repository\RequestTextTemplateRepository;
 use WapplerSystems\Inquiry\Event\BuildInquiryFormEvent;
-use WapplerSystems\Inquiry\Event\BuildInquiryFormProductEvent;
+use WapplerSystems\Inquiry\Event\BuildInquiryFormItemEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemsEvent;
 

@@ -31,7 +31,8 @@ use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Domain\Model\RequestTextTemplate;
 use WapplerSystems\Inquiry\Domain\Repository\RequestTextTemplateRepository;
 use WapplerSystems\Inquiry\Event\BuildInquiryFormEvent;
-use WapplerSystems\Inquiry\Event\BuildInquiryFormProductEvent;
+use WapplerSystems\Inquiry\Event\BuildInquiryFormItemEvent;
+use WapplerSystems\Inquiry\Event\BuildInquiryFormContactEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemsEvent;
 
@@ -223,23 +224,23 @@ class InquiryFormFactory extends AbstractFormFactory
                 ]
             );
 
-            $this->eventDispatcher->dispatch(new BuildInquiryFormProductEvent($formDefinition, $fieldsetProduct));
+            $this->eventDispatcher->dispatch(new BuildInquiryFormItemEvent($formDefinition, $fieldsetProduct, $hash));
 
 
             $i++;
         }
 
 
-        /** @var Section $rightColumn */
-        $rightColumn = $this->addFormElement(
+        /** @var Section $fieldsetContact */
+        $fieldsetContact = $this->addFormElement(
             $gridRow,
             type: 'Fieldset',
-            id: 'rightColumn',
+            id: 'fieldsetContact',
         );
 
 
         $this->addFormElement(
-            $rightColumn,
+            $fieldsetContact,
             type: 'Text',
             id: 'name',
             label: 'name',
@@ -255,7 +256,7 @@ class InquiryFormFactory extends AbstractFormFactory
         );
 
         $this->addFormElement(
-            $rightColumn,
+            $fieldsetContact,
             type: 'Email',
             id: 'email',
             label: 'email',
@@ -271,7 +272,7 @@ class InquiryFormFactory extends AbstractFormFactory
             ]
         );
         $this->addFormElement(
-            $rightColumn,
+            $fieldsetContact,
             type: 'Text',
             id: 'phonenumber',
             label: 'phonenumber',
@@ -285,7 +286,7 @@ class InquiryFormFactory extends AbstractFormFactory
             ]
         );
         $this->addFormElement(
-            $rightColumn,
+            $fieldsetContact,
             type: 'Text',
             id: 'company',
             label: 'company',
@@ -300,7 +301,7 @@ class InquiryFormFactory extends AbstractFormFactory
             ]
         );
         $this->addFormElement(
-            $rightColumn,
+            $fieldsetContact,
             type: 'Text',
             id: 'country',
             label: 'country',
@@ -314,6 +315,8 @@ class InquiryFormFactory extends AbstractFormFactory
                 $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
             ]
         );
+
+        $this->eventDispatcher->dispatch(new BuildInquiryFormContactEvent($formDefinition, $fieldsetContact));
 
         $recipients = [];
         foreach ($configuration['recipients'] ?? [] as $recipient) {

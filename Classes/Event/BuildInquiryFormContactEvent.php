@@ -5,16 +5,16 @@ namespace WapplerSystems\Inquiry\Event;
 use TYPO3\CMS\Form\Domain\Model\FormDefinition;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Section;
 
-class BuildInquiryFormProductEvent
+class BuildInquiryFormContactEvent
 {
     private FormDefinition $formDefinition;
 
-    private Section $fieldsetProduct;
+    private Section $fieldsetContact;
 
-    public function __construct(FormDefinition $formDefinition, Section $fieldsetProduct)
+    public function __construct(FormDefinition $formDefinition, Section $fieldsetContact)
     {
         $this->formDefinition = $formDefinition;
-        $this->fieldsetProduct = $fieldsetProduct;
+        $this->fieldsetContact = $fieldsetContact;
     }
 
     public function getFormDefinition(): FormDefinition
@@ -22,8 +22,8 @@ class BuildInquiryFormProductEvent
         return $this->formDefinition;
     }
 
-    public function getFieldsetProduct(): Section
+    public function getFieldsetContact(): Section
     {
-        return $this->fieldsetProduct;
+        return $this->fieldsetContact;
     }
 }
