@@ -8,19 +8,19 @@ use TYPO3\CMS\Form\Domain\Model\FormDefinition;
 class BuildInquiryFormEvent
 {
     private FormDefinition $formDefinition;
-    private Section $fieldsetProduct;
+    private Section $fieldsetItem;
 
 
 
-    public function __construct(FormDefinition $formDefinition, Section &$fieldsetProduct)
+    public function __construct(FormDefinition $formDefinition, Section &$fieldsetItem)
     {
         $this->formDefinition = $formDefinition;
-        $this->fieldsetProduct = $fieldsetProduct;
+        $this->fieldsetItem = $fieldsetItem;
     }
 
-    public function getFieldsetProduct(): Section
+    public function getFieldsetItem(): Section
     {
-        return $this->fieldsetProduct;
+        return $this->fieldsetItem;
     }
 
 

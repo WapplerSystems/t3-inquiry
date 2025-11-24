@@ -111,6 +111,15 @@ class InquiryFormFactory extends AbstractFormFactory
                         'lg' => [
                             'numbersOfColumnsToUse' => 8
                         ],
+                        'md' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'sm' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'xs' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
                     ]
                 ]
             ],
@@ -155,11 +164,11 @@ class InquiryFormFactory extends AbstractFormFactory
                 continue;
             }
 
-            /** @var Section $fieldsetProduct */
-            $fieldsetProduct = $this->addFormElement(
+            /** @var Section $fieldsetItem */
+            $fieldsetItem = $this->addFormElement(
                 $leftColumn,
                 type: 'InquiryItemFieldset',
-                id: 'fieldsetProduct_' . $hash,
+                id: 'fieldsetItem_' . $hash,
                 properties: [
                     'hash' => $hash,
                     'event' => $event
@@ -169,7 +178,7 @@ class InquiryFormFactory extends AbstractFormFactory
 
 
             $this->addFormElement(
-                $fieldsetProduct,
+                $fieldsetItem,
                 //type: 'RequestTypeSelect',
                 type: 'SingleSelect',
                 id: 'requestType_' . $hash,
@@ -184,7 +193,7 @@ class InquiryFormFactory extends AbstractFormFactory
             );
 
             $this->addFormElement(
-                $fieldsetProduct,
+                $fieldsetItem,
                 type: 'Textarea',
                 id: 'message_' . $hash,
                 label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryFormPage.element.message.properties.label'),
@@ -199,7 +208,7 @@ class InquiryFormFactory extends AbstractFormFactory
             );
 
             $this->addFormElement(
-                $fieldsetProduct,
+                $fieldsetItem,
                 type: 'Hidden',
                 id: 'itemUid_' . $hash,
                 defaultValue: $item['uid'],
@@ -209,14 +218,14 @@ class InquiryFormFactory extends AbstractFormFactory
             );
 
             $this->addFormElement(
-                $fieldsetProduct,
+                $fieldsetItem,
                 type: 'Hidden',
                 id: 'itemType_' . $hash,
                 defaultValue: $item['type']
             );
 
             $this->addFormElement(
-                $fieldsetProduct,
+                $fieldsetItem,
                 type: 'Hidden',
                 id: 'itemDelete_' . $hash,
                 renderingOptions: [
@@ -224,7 +233,7 @@ class InquiryFormFactory extends AbstractFormFactory
                 ]
             );
 
-            $this->eventDispatcher->dispatch(new BuildInquiryFormItemEvent($formDefinition, $fieldsetProduct, $hash));
+            $this->eventDispatcher->dispatch(new BuildInquiryFormItemEvent($formDefinition, $fieldsetItem, $hash));
 
 
             $i++;
@@ -322,6 +331,9 @@ class InquiryFormFactory extends AbstractFormFactory
         foreach ($configuration['recipients'] ?? [] as $recipient) {
             $recipients[$recipient['container']['address']] = $recipient['container']['name'];
         }
+        $replyToRecipients = [
+            '{email}' => '{name}'
+        ];
 
         $mailSettings = $GLOBALS['TYPO3_CONF_VARS']['MAIL'];
 
@@ -331,8 +343,7 @@ class InquiryFormFactory extends AbstractFormFactory
             'recipients' => $recipients,
             'senderName' => $mailSettings['defaultMailFromName'],
             'senderAddress' => $mailSettings['defaultMailFromAddress'],
-            'replyToAddress' => '{email}',
-            'replyToName' => '{name}',
+            'replyToRecipients' => $replyToRecipients,
             'templateName' => 'MailToReceiver',
             'templateRootPaths' => [
                 34240 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/EmailToReceiver/',

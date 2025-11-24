@@ -9,13 +9,13 @@ class BuildInquiryFormItemEvent
 {
     private FormDefinition $formDefinition;
 
-    private Section $fieldsetProduct;
+    private Section $fieldsetItem;
     private string $hash;
 
-    public function __construct(FormDefinition $formDefinition, Section $fieldsetProduct, string $hash)
+    public function __construct(FormDefinition $formDefinition, Section $fieldsetItem, string $hash)
     {
         $this->formDefinition = $formDefinition;
-        $this->fieldsetProduct = $fieldsetProduct;
+        $this->fieldsetItem = $fieldsetItem;
         $this->hash = $hash;
     }
 
@@ -24,9 +24,9 @@ class BuildInquiryFormItemEvent
         return $this->formDefinition;
     }
 
-    public function getFieldsetProduct(): Section
+    public function getFieldsetItem(): Section
     {
-        return $this->fieldsetProduct;
+        return $this->fieldsetItem;
     }
 
     public function getHash(): string
