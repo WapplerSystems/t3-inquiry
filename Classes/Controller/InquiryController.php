@@ -140,6 +140,14 @@ class InquiryController extends ActionController
     }
 
 
+    public function removeAllItems() : ResponseInterface
+    {
+
+
+        return $this->jsonResponse();
+    }
+
+
     public function removeItemAction(): ResponseInterface
     {
 
@@ -149,7 +157,6 @@ class InquiryController extends ActionController
 
 
         $data = [
-            'count' => count($items)
         ];
 
         return $this->jsonResponse(json_encode($data));

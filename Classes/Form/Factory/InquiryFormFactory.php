@@ -33,6 +33,7 @@ use WapplerSystems\Inquiry\Domain\Repository\RequestTextTemplateRepository;
 use WapplerSystems\Inquiry\Event\BuildInquiryFormEvent;
 use WapplerSystems\Inquiry\Event\BuildInquiryFormItemEvent;
 use WapplerSystems\Inquiry\Event\BuildInquiryFormContactEvent;
+use WapplerSystems\Inquiry\Event\CreateEmailToReceiverFinisherEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemsEvent;
 
@@ -349,6 +350,9 @@ class InquiryFormFactory extends AbstractFormFactory
                 34240 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/EmailToReceiver/',
             ]
         ]);
+        $this->eventDispatcher->dispatch(new CreateEmailToReceiverFinisherEvent($emailToReceiver));
+
+        $inquiryFinisher = $formDefinition->createFinisher('Inquiry');
 
 
         $confirmationFinisher = $formDefinition->createFinisher('Confirmation');

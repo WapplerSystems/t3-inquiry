@@ -1,0 +1,8 @@
+prototypes:
+  standard:
+    finishersDefinition:
+      Inquiry:
+        implementationClassName: WapplerSystems\Inquiry\Domain\Finishers\InquiryFinisher
+        formEditor:
+          iconIdentifier: form-finisher
+          label: 'Inquiry Finisher'
