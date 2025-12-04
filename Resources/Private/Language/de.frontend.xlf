@@ -4,12 +4,15 @@
 		<body>
 			<trans-unit id="addToList">
 				<source>Add to inquiry list</source>
+				<target>Zur Anfrageliste hinzufügen</target>
 			</trans-unit>
 			<trans-unit id="removeFromList">
 				<source>Remove from inquiry list</source>
+				<target>Von Anfrageliste entfernen</target>
 			</trans-unit>
 			<trans-unit id="removeItemButton">
 				<source>Remove</source>
+				<target>Entfernen</target>
 			</trans-unit>
 		</body>
 	</file>

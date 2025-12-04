@@ -16,7 +16,7 @@
                 <legend>{formvh:translateElementProperty(element: element, property: 'label')}</legend>
             </f:if>
 
-            <button type="button" data-target="inquiryFormPage-itemDelete_{element.properties.hash}" class="inquiry-item-delete">Remove</button>
+            <button type="button" data-target="inquiryFormPage-itemDelete_{element.properties.hash}" class="inquiry-item-delete">{f:translate(key:'LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:removeItemButton')}</button>
         </div>
 
         <div class="inquiry-item-content row">
