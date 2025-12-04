@@ -52,6 +52,8 @@ function addClickListenerToInquiryLinks() {
             }
           }
 
+          link.blur();
+
           let count = data.items.length;
 
           document.querySelectorAll('.to-inquiry-list').forEach(link => {
@@ -70,6 +72,7 @@ function addClickListenerToInquiryLinks() {
         });
     });
     link._inquiryListenerAdded = true;
+
   });
 
 }
