@@ -1,8 +1,15 @@
 let toggleItemMeta = document.querySelector('meta[name="inquiry-toggle-item"]');
 let toggleItemUrl = null;
 if (toggleItemMeta) {
-  toggleItemUrl = toggleItemMeta.getAttribute('content');
+  toggleItemUrl = new URL(toggleItemMeta.getAttribute('content'));
 }
+
+let removeItemMeta = document.querySelector('meta[name="inquiry-remove-item"]');
+let removeItemUrl = null;
+if (removeItemMeta) {
+  removeItemUrl = new URL(removeItemMeta.getAttribute('content'));
+}
+
 
 function addClickListenerToInquiryLinks() {
   if (!toggleItemUrl) {
@@ -16,11 +23,10 @@ function addClickListenerToInquiryLinks() {
 
       const uid = this.getAttribute('data-inquiry-item-uid');
       const type = this.getAttribute('data-inquiry-item-type');
-      let url = new URL(toggleItemUrl);
-      url.searchParams.append('uid', uid);
-      url.searchParams.append('type', type);
+      toggleItemUrl.searchParams.append('tx_inquiry[uid]', uid);
+      toggleItemUrl.searchParams.append('tx_inquiry[type]', type);
 
-      fetch(url, {
+      fetch(toggleItemUrl, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
@@ -149,18 +155,42 @@ const observer = new MutationObserver(() => {
 });
 observer.observe(document.body, { childList: true, subtree: true });
 
-document.querySelectorAll('button.inquiry-item-delete').forEach(btn => {
+document.querySelectorAll('.inquiry-item-delete').forEach(btn => {
   btn.addEventListener('click', function(e) {
     e.preventDefault();
-    const targetId = btn.getAttribute('data-target');
-    const input = document.getElementById(targetId);
-    if (input) {
-      input.value = '1';
-      const form = input.form;
-      if (form) {
-        form.submit();
+
+    let fieldSetId = this.getAttribute('data-target');
+    let newRemoveItemUrl = removeItemUrl;
+    const uid = this.getAttribute('data-inquiry-item-uid');
+    const type = this.getAttribute('data-inquiry-item-type');
+    newRemoveItemUrl.searchParams.append('tx_inquiry[uid]', uid);
+    newRemoveItemUrl.searchParams.append('tx_inquiry[type]', type);
+
+    fetch(newRemoveItemUrl, {
+      headers: {
+        'Accept': 'application/json'
       }
-    }
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Netzwerk-Antwort war nicht ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.removed === true) {
+          let fieldSet = document.getElementById(fieldSetId);
+          if (fieldSet) {
+            fieldSet.remove();
+          }
+        }
+
+
+      })
+      .catch(error => {
+        console.error('Fehler beim Abrufen:', error);
+      });
+
   });
 })
 

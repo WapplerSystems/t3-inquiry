@@ -2,6 +2,7 @@
 
 namespace WapplerSystems\Inquiry\Event;
 
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Form\Domain\Model\FormDefinition;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Section;
 
@@ -11,7 +12,9 @@ class BuildInquiryFormContactEvent
 
     private Section $fieldsetContact;
 
-    public function __construct(FormDefinition $formDefinition, Section $fieldsetContact)
+    private ?ServerRequestInterface $request = null;
+
+    public function __construct(FormDefinition $formDefinition, Section $fieldsetContact, ?ServerRequestInterface $request = null)
     {
         $this->formDefinition = $formDefinition;
         $this->fieldsetContact = $fieldsetContact;
@@ -25,5 +28,10 @@ class BuildInquiryFormContactEvent
     public function getFieldsetContact(): Section
     {
         return $this->fieldsetContact;
+    }
+
+    public function getRequest(): ?ServerRequestInterface
+    {
+        return $this->request;
     }
 }

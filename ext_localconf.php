@@ -3,6 +3,9 @@
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 use WapplerSystems\Inquiry\Controller\InquiryController;
 
+array_push($GLOBALS['TYPO3_CONF_VARS']['FE']['cacheHash']['excludedParameters'], 'tx_inquiry[uid]', 'tx_inquiry[type]');
+
+
 $boot = static function (): void {
 
 

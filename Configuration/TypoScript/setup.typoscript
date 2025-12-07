@@ -26,6 +26,8 @@ plugin.tx_inquiry {
     ajaxItemsListTypeNum = {$plugin.tx_inquiry.settings.ajaxItemsListTypeNum}
     ajaxRemoveItemTypeNum = {$plugin.tx_inquiry.settings.ajaxRemoveItemTypeNum}
 
+    emptyList = {$plugin.tx_inquiry.settings.emptyList}
+
   }
 }
 

@@ -4,8 +4,6 @@ namespace WapplerSystems\Inquiry\Form\Factory;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
-use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\EmailAddressValidator;
@@ -18,24 +16,21 @@ use TYPO3\CMS\Form\Domain\Exception\TypeDefinitionNotFoundException;
 use TYPO3\CMS\Form\Domain\Factory\AbstractFormFactory;
 use TYPO3\CMS\Form\Domain\Model\Exception\FinisherPresetNotFoundException;
 use TYPO3\CMS\Form\Domain\Model\FormDefinition;
-use TYPO3\CMS\Form\Domain\Model\FormElements\AbstractFormElement;
 use TYPO3\CMS\Form\Domain\Model\FormElements\AbstractSection;
-use TYPO3\CMS\Form\Domain\Model\FormElements\Section;
-use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
-use TYPO3\CMS\Form\Domain\Model\FormElements\GridRow;
 use TYPO3\CMS\Form\Domain\Model\FormElements\GenericFormElement;
+use TYPO3\CMS\Form\Domain\Model\FormElements\GridRow;
+use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
+use TYPO3\CMS\Form\Domain\Model\FormElements\Section;
 use TYPO3\CMS\Form\Domain\Model\Renderable\AbstractRenderable;
 use TYPO3\CMS\Form\Domain\Renderer\FluidFormRenderer;
-use TYPO3\CMS\Form\Mvc\Validation\EmptyValidator;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Domain\Model\RequestTextTemplate;
 use WapplerSystems\Inquiry\Domain\Repository\RequestTextTemplateRepository;
-use WapplerSystems\Inquiry\Event\BuildInquiryFormEvent;
-use WapplerSystems\Inquiry\Event\BuildInquiryFormItemEvent;
 use WapplerSystems\Inquiry\Event\BuildInquiryFormContactEvent;
+use WapplerSystems\Inquiry\Event\BuildInquiryFormItemEvent;
+use WapplerSystems\Inquiry\Event\CreateConfirmationFinisherEvent;
 use WapplerSystems\Inquiry\Event\CreateEmailToReceiverFinisherEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemEvent;
-use WapplerSystems\Inquiry\Event\ResolveItemsEvent;
 
 class InquiryFormFactory extends AbstractFormFactory
 {
@@ -129,7 +124,6 @@ class InquiryFormFactory extends AbstractFormFactory
 
         $requestTextTemplates = $this->requestTextTemplateRepository->findAll();
         $requestTextTemplatesOptions = [];
-        //DebugUtility::debug($requestTextTemplates);
         /** @var RequestTextTemplate $requestTextTemplate */
         foreach ($requestTextTemplates as $requestTextTemplate) {
             /*
@@ -139,19 +133,11 @@ class InquiryFormFactory extends AbstractFormFactory
             ];*/
             $requestTextTemplatesOptions[$requestTextTemplate->getUid()] = $requestTextTemplate->getTitle();
         }
-        //DebugUtility::debug($requestTextTemplatesOptions);
 
         $items = [];
         if ($userSession->get('items')) {
             $items = $userSession->get('items');
         }
-
-        /*
-        $event = new ResolveItemsEvent($items);
-        $this->eventDispatcher->dispatch($event);
-
-        $resolvedItems = $event->getResolvedItems();*/
-        //DebugUtility::debug($resolvedItems, 'resolvedItems');
 
 
         $i = 0;
@@ -172,6 +158,8 @@ class InquiryFormFactory extends AbstractFormFactory
                 id: 'fieldsetItem_' . $hash,
                 properties: [
                     'hash' => $hash,
+                    'uid' => $item['uid'],
+                    'type' => $item['type'],
                     'event' => $event
                 ],
                 label: $event->getResolvedName(),
@@ -225,17 +213,7 @@ class InquiryFormFactory extends AbstractFormFactory
                 defaultValue: $item['type']
             );
 
-            $this->addFormElement(
-                $fieldsetItem,
-                type: 'Hidden',
-                id: 'itemDelete_' . $hash,
-                renderingOptions: [
-
-                ]
-            );
-
-            $this->eventDispatcher->dispatch(new BuildInquiryFormItemEvent($formDefinition, $fieldsetItem, $hash));
-
+            $this->eventDispatcher->dispatch(new BuildInquiryFormItemEvent($formDefinition, $fieldsetItem, $hash, $request));
 
             $i++;
         }
@@ -326,7 +304,7 @@ class InquiryFormFactory extends AbstractFormFactory
             ]
         );
 
-        $this->eventDispatcher->dispatch(new BuildInquiryFormContactEvent($formDefinition, $fieldsetContact));
+        $this->eventDispatcher->dispatch(new BuildInquiryFormContactEvent($formDefinition, $fieldsetContact, $request));
 
         $recipients = [];
         foreach ($configuration['recipients'] ?? [] as $recipient) {
@@ -353,6 +331,9 @@ class InquiryFormFactory extends AbstractFormFactory
         $this->eventDispatcher->dispatch(new CreateEmailToReceiverFinisherEvent($emailToReceiver));
 
         $inquiryFinisher = $formDefinition->createFinisher('Inquiry');
+        $inquiryFinisher->setOptions([
+            'emptyList' => ($configuration['emptyList']  ?? '1') === '1',
+        ]);
 
 
         $confirmationFinisher = $formDefinition->createFinisher('Confirmation');
@@ -363,6 +344,7 @@ class InquiryFormFactory extends AbstractFormFactory
                 10 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/Confirmation/',
             ]
         ]);
+        $this->eventDispatcher->dispatch(new CreateConfirmationFinisherEvent($emailToReceiver));
 
 
         $this->triggerFormBuildingFinished($formDefinition);

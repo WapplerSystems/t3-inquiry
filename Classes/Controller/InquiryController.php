@@ -7,7 +7,7 @@ use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
-use WapplerSystems\Inquiry\Event\CanResolveItemEvent;
+use WapplerSystems\Inquiry\Event\CanResolveItemByIdentifierEvent;
 
 class InquiryController extends ActionController
 {
@@ -80,9 +80,9 @@ class InquiryController extends ActionController
 
     public function toggleItemStatusAction(): ResponseInterface
     {
-
-        $uid = (int)($this->request->getQueryParams()['uid'] ?? null);
-        $type = $this->request->getQueryParams()['type'] ?? null;
+        $params = $this->request->getQueryParams()['tx_inquiry'] ?? [];
+        $uid = (int)($params['uid'] ?? null);
+        $type = $params['type'] ?? null;
         if (!$uid || !$type) {
             $accept = $this->request->getHeader('accept')[0] ?? '';
             if (str_contains($accept, 'application/json')) {
@@ -91,7 +91,7 @@ class InquiryController extends ActionController
             return $this->htmlResponse('No uid or type given');
         }
 
-        $event = new CanResolveItemEvent($uid, $type);
+        $event = new CanResolveItemByIdentifierEvent($uid, $type, $this->request);
         $this->eventDispatcher->dispatch($event);
         if (!$event->isResult()) {
             $accept = $this->request->getHeader('accept')[0] ?? '';
@@ -143,6 +143,11 @@ class InquiryController extends ActionController
     public function removeAllItems() : ResponseInterface
     {
 
+        /** @var FrontendUserAuthentication $frontendUserAuthentication */
+        $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
+        $userSession = $frontendUserAuthentication->getSession();
+        $userSession->set('items', []);
+        $frontendUserAuthentication->storeSessionData();
 
         return $this->jsonResponse();
     }
@@ -150,13 +155,42 @@ class InquiryController extends ActionController
 
     public function removeItemAction(): ResponseInterface
     {
+        $params = $this->request->getQueryParams()['tx_inquiry'] ?? [];
+        $uid = (int)($params['uid'] ?? null);
+        $type = $params['type'] ?? null;
+        if (!$uid || !$type) {
+            $accept = $this->request->getHeader('accept')[0] ?? '';
+            if (str_contains($accept, 'application/json')) {
+                return $this->jsonResponse(json_encode(['message' => 'No uid or type given']));
+            }
+            return $this->htmlResponse('No uid or type given');
+        }
+
+        $event = new CanResolveItemByIdentifierEvent($uid, $type, $this->request);
+        $this->eventDispatcher->dispatch($event);
+        if (!$event->isResult()) {
+            $accept = $this->request->getHeader('accept')[0] ?? '';
+            if (str_contains($accept, 'application/json')) {
+                return $this->jsonResponse(json_encode(['message' => 'Item cannot be resolved']));
+            }
+            return $this->htmlResponse('Item cannot be resolved');
+        }
+
 
         /** @var FrontendUserAuthentication $frontendUserAuthentication */
         $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
         $userSession = $frontendUserAuthentication->getSession();
-
+        $storedItems = $userSession->get('items') ?? [];
+        foreach ($storedItems as $item) {
+            if ((int)$item['uid'] === $uid && $item['type'] === $type) {
+                unset($storedItems[array_search($item, $storedItems, true)]);
+            }
+        }
+        $userSession->set('items', $storedItems);
+        $frontendUserAuthentication->storeSessionData();
 
         $data = [
+            'removed' => true,
         ];
 
         return $this->jsonResponse(json_encode($data));
@@ -176,7 +210,7 @@ class InquiryController extends ActionController
         }
 
         foreach ($items as &$item) {
-            $event = new CanResolveItemEvent($item['uid'], $item['type']);
+            $event = new CanResolveItemByIdentifierEvent($item['uid'], $item['type'], $this->request);
             $this->eventDispatcher->dispatch($event);
             if (!$event->isResult()) {
                 unset($item);
@@ -203,7 +237,7 @@ class InquiryController extends ActionController
         }
 
         foreach ($items as &$item) {
-            $event = new CanResolveItemEvent($item['uid'], $item['type']);
+            $event = new CanResolveItemByIdentifierEvent($item['uid'], $item['type'], $this->request);
             $this->eventDispatcher->dispatch($event);
             if (!$event->isResult()) {
                 unset($item);

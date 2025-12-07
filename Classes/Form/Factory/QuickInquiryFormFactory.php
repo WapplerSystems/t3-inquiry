@@ -4,8 +4,6 @@ namespace WapplerSystems\Inquiry\Form\Factory;
 
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
-use TYPO3\CMS\Core\Utility\DebugUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Extbase\Validation\Validator\EmailAddressValidator;
@@ -18,22 +16,16 @@ use TYPO3\CMS\Form\Domain\Exception\TypeDefinitionNotFoundException;
 use TYPO3\CMS\Form\Domain\Factory\AbstractFormFactory;
 use TYPO3\CMS\Form\Domain\Model\Exception\FinisherPresetNotFoundException;
 use TYPO3\CMS\Form\Domain\Model\FormDefinition;
-use TYPO3\CMS\Form\Domain\Model\FormElements\AbstractFormElement;
 use TYPO3\CMS\Form\Domain\Model\FormElements\AbstractSection;
-use TYPO3\CMS\Form\Domain\Model\FormElements\Section;
-use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
-use TYPO3\CMS\Form\Domain\Model\FormElements\GridRow;
 use TYPO3\CMS\Form\Domain\Model\FormElements\GenericFormElement;
+use TYPO3\CMS\Form\Domain\Model\FormElements\GridRow;
+use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
+use TYPO3\CMS\Form\Domain\Model\FormElements\Section;
 use TYPO3\CMS\Form\Domain\Model\Renderable\AbstractRenderable;
 use TYPO3\CMS\Form\Domain\Renderer\FluidFormRenderer;
-use TYPO3\CMS\Form\Mvc\Validation\EmptyValidator;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Domain\Model\RequestTextTemplate;
 use WapplerSystems\Inquiry\Domain\Repository\RequestTextTemplateRepository;
-use WapplerSystems\Inquiry\Event\BuildInquiryFormEvent;
-use WapplerSystems\Inquiry\Event\BuildInquiryFormItemEvent;
-use WapplerSystems\Inquiry\Event\ResolveItemEvent;
-use WapplerSystems\Inquiry\Event\ResolveItemsEvent;
 
 class QuickInquiryFormFactory extends AbstractFormFactory
 {
@@ -159,15 +151,6 @@ class QuickInquiryFormFactory extends AbstractFormFactory
         if ($userSession->get('items')) {
             $items = $userSession->get('items');
         }
-
-        /*
-        $event = new ResolveItemsEvent($items);
-        $this->eventDispatcher->dispatch($event);
-
-        $resolvedItems = $event->getResolvedItems();*/
-        //DebugUtility::debug($resolvedItems, 'resolvedItems');
-
-
 
         /** @var Section $rightColumn */
         $rightColumn = $this->addFormElement(

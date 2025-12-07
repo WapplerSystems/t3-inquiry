@@ -4,39 +4,25 @@ namespace WapplerSystems\Inquiry\Event;
 
 
 use Psr\Http\Message\ServerRequestInterface;
-use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 
 class CanResolveItemEvent
 {
+    private mixed $item;
+    private bool $result = false;
+    private ?ServerRequestInterface $request = null;
     private int $uid;
     private string $type;
-    private bool $result = false;
 
 
-    public function __construct(int $uid, string $type)
+    public function __construct(mixed $item, ?ServerRequestInterface $request = null)
     {
-        $this->uid = $uid;
-        $this->type = $type;
+        $this->item = $item;
+        $this->request = $request;
     }
 
-    public function getUid(): int
+    public function getItem(): mixed
     {
-        return $this->uid;
-    }
-
-    public function setUid(int $uid): void
-    {
-        $this->uid = $uid;
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    public function setType(string $type): void
-    {
-        $this->type = $type;
+        return $this->item;
     }
 
     public function isResult(): bool
@@ -47,6 +33,31 @@ class CanResolveItemEvent
     public function setResult(bool $result): void
     {
         $this->result = $result;
+    }
+
+    public function getRequest(): ?ServerRequestInterface
+    {
+        return $this->request;
+    }
+
+    public function getResolvedItemUid(): int
+    {
+        return $this->uid;
+    }
+
+    public function setResolvedItemUid(int $uid): void
+    {
+        $this->uid = $uid;
+    }
+
+    public function getResolvedItemType(): string
+    {
+        return $this->type;
+    }
+
+    public function setResolvedItemType(string $type): void
+    {
+        $this->type = $type;
     }
 
 }
