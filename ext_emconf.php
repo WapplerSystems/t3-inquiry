@@ -3,7 +3,7 @@
 
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Inquiry',
-    'description' => '',
+    'description' => 'The extension is a universal TYPO3 extension that allows visitors to create enquiries for quotes.',
     'category' => 'fe',
     'author' => 'Sven Wappler',
     'author_email' => 'typo3YYYY@wappler.systems',

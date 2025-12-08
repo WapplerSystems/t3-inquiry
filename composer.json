@@ -1,11 +1,13 @@
 {
 	"name": "wapplersystems/inquiry",
 	"type": "typo3-cms-extension",
-	"description": "",
+	"description": "The extension is a universal TYPO3 extension that allows visitors to create enquiries for quotes.",
 	"keywords": [
 		"TYPO3",
 		"extension",
-		"inquiry"
+		"inquiry",
+		"offer",
+		"quote"
 	],
 	"homepage": "https://wappler.systems",
 	"authors": [
