@@ -86,9 +86,9 @@ class InquiryController extends ActionController
         if (!$uid || !$type) {
             $accept = $this->request->getHeader('accept')[0] ?? '';
             if (str_contains($accept, 'application/json')) {
-                return $this->jsonResponse(json_encode(['message' => 'No uid or type given']));
+                return $this->jsonResponse(json_encode(['message' => 'No uid or type given']))->withStatus(500);
             }
-            return $this->htmlResponse('No uid or type given');
+            return $this->htmlResponse('No uid or type given')->withStatus(500);
         }
 
         $event = new CanResolveItemByIdentifierEvent($uid, $type, $this->request);
@@ -96,9 +96,9 @@ class InquiryController extends ActionController
         if (!$event->isResult()) {
             $accept = $this->request->getHeader('accept')[0] ?? '';
             if (str_contains($accept, 'application/json')) {
-                return $this->jsonResponse(json_encode(['message' => 'Item cannot be resolved']));
+                return $this->jsonResponse(json_encode(['message' => 'Item cannot be resolved']))->withStatus(500);
             }
-            return $this->htmlResponse('Item cannot be resolved');
+            return $this->htmlResponse('Item cannot be resolved')->withStatus(500);
         }
 
 
@@ -161,9 +161,9 @@ class InquiryController extends ActionController
         if (!$uid || !$type) {
             $accept = $this->request->getHeader('accept')[0] ?? '';
             if (str_contains($accept, 'application/json')) {
-                return $this->jsonResponse(json_encode(['message' => 'No uid or type given']));
+                return $this->jsonResponse(json_encode(['message' => 'No uid or type given']))->withStatus(500);
             }
-            return $this->htmlResponse('No uid or type given');
+            return $this->htmlResponse('No uid or type given')->withStatus(500);
         }
 
         $event = new CanResolveItemByIdentifierEvent($uid, $type, $this->request);
@@ -171,9 +171,9 @@ class InquiryController extends ActionController
         if (!$event->isResult()) {
             $accept = $this->request->getHeader('accept')[0] ?? '';
             if (str_contains($accept, 'application/json')) {
-                return $this->jsonResponse(json_encode(['message' => 'Item cannot be resolved']));
+                return $this->jsonResponse(json_encode(['message' => 'Item cannot be resolved']))->withStatus(500);
             }
-            return $this->htmlResponse('Item cannot be resolved');
+            return $this->htmlResponse('Item cannot be resolved')->withStatus(500);
         }
 
 

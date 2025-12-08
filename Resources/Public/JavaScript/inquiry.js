@@ -26,56 +26,59 @@ function addClickListenerToInquiryLinks() {
       toggleItemUrl.searchParams.append('tx_inquiry[uid]', uid);
       toggleItemUrl.searchParams.append('tx_inquiry[type]', type);
 
-      fetch(toggleItemUrl, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Netzwerk-Antwort war nicht ok');
+        fetch(toggleItemUrl, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           }
-          return response.json();
         })
-        .then(data => {
-
-          inquiryListItems = data.items;
-
-          const addToListLabel = link.getAttribute('data-add-label');
-          const removeFromListLabel = link.getAttribute('data-remove-label');
-          const labelSpan = link.querySelector('.inquiry-button-label');
-
-          if (data.added) {
-            link.classList.add('added');
-            if (labelSpan && removeFromListLabel) {
-              labelSpan.textContent = removeFromListLabel;
+          .then(response => {
+            if (!response.ok) {
+              const fs = async function() {
+                const data = await response.json();
+                throw new Error(data.message || 'No error message provided');
+              }
+              return fs();
             }
-          } else if (data.removed) {
-            link.classList.remove('added');
-            if (labelSpan && removeFromListLabel) {
-              labelSpan.textContent = addToListLabel;
+            return response.json();
+          })
+          .then(data => {
+            inquiryListItems = data.items;
+
+            const addToListLabel = link.getAttribute('data-add-label');
+            const removeFromListLabel = link.getAttribute('data-remove-label');
+            const labelSpan = link.querySelector('.inquiry-button-label');
+
+            if (data.added) {
+              link.classList.add('added');
+              if (labelSpan && removeFromListLabel) {
+                labelSpan.textContent = removeFromListLabel;
+              }
+            } else if (data.removed) {
+              link.classList.remove('added');
+              if (labelSpan && removeFromListLabel) {
+                labelSpan.textContent = addToListLabel;
+              }
             }
-          }
 
-          link.blur();
+            link.blur();
 
-          let count = data.items.length;
+            let count = data.items.length;
 
-          document.querySelectorAll('.to-inquiry-list').forEach(link => {
-            let countSpan = link.querySelector('.inquiry-item-counter');
-            if (!countSpan) {
-              countSpan = document.createElement('span');
-              countSpan.className = 'inquiry-item-counter';
-              link.appendChild(countSpan);
-            }
-            countSpan.textContent = count;
+            document.querySelectorAll('.to-inquiry-list').forEach(link => {
+              let countSpan = link.querySelector('.inquiry-item-counter');
+              if (!countSpan) {
+                countSpan = document.createElement('span');
+                countSpan.className = 'inquiry-item-counter';
+                link.appendChild(countSpan);
+              }
+              countSpan.textContent = count;
+            });
+
+          })
+          .catch(error => {
+            alert(error);
           });
-
-        })
-        .catch(error => {
-          console.error('Fehler beim Abrufen:', error);
-        });
     });
     link._inquiryListenerAdded = true;
 
@@ -151,12 +154,12 @@ const observer = new MutationObserver(() => {
   observer.disconnect();
   updateInquiryLinks();
   addClickListenerToInquiryLinks();
-  observer.observe(document.body, { childList: true, subtree: true });
+  observer.observe(document.body, {childList: true, subtree: true});
 });
-observer.observe(document.body, { childList: true, subtree: true });
+observer.observe(document.body, {childList: true, subtree: true});
 
 document.querySelectorAll('.inquiry-item-delete').forEach(btn => {
-  btn.addEventListener('click', function(e) {
+  btn.addEventListener('click', function (e) {
     e.preventDefault();
 
     let fieldSetId = this.getAttribute('data-target');
@@ -194,11 +197,11 @@ document.querySelectorAll('.inquiry-item-delete').forEach(btn => {
   });
 })
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   addClickListenerToInquiryLinks();
   const form = document.getElementById('inquiryFormPage');
   if (form) {
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', function (e) {
       const completedField = document.getElementById('inquiryFormPage-completed');
       if (completedField) {
         completedField.value = '1';
@@ -207,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const completedField = document.getElementById('inquiryFormPage-completed');
   if (completedField) {
     completedField.value = '';
