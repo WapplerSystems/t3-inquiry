@@ -45,6 +45,9 @@
 			<trans-unit id="inquiryFormPage.element.requestType.properties.prependOptionLabel">
 				<source>Please select</source>
 			</trans-unit>
+			<trans-unit id="quickForm.title">
+				<source>We would be happy to provide you with a quote and advise you on individual configuration.</source>
+			</trans-unit>
 
 		</body>
 	</file>

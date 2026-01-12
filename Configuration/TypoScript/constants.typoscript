@@ -32,6 +32,12 @@ plugin.tx_inquiry {
 
     }
 
+    form {
+
+
+
+    }
+
   }
 
 

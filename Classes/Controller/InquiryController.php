@@ -8,6 +8,7 @@ use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Event\CanResolveItemByIdentifierEvent;
+use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 
 class InquiryController extends ActionController
 {
@@ -69,9 +70,22 @@ class InquiryController extends ActionController
     public function quickFormAction(): ResponseInterface
     {
 
-        // TODO: implement quick form
+        $uid = (int)($this->request->getQueryParams()['item-uid'] ?? null);
+        $type = $this->request->getQueryParams()['item-type'] ?? null;
+
+
+        $event = new ResolveItemEvent($uid, $type, $this->request);
+        $this->eventDispatcher->dispatch($event);
+
+        if ($event->getResolvedObject() === null) {
+            return $this->htmlResponse('<div class="alert alert-warning">Item could not be resolved.</div>');
+        }
+
+        $this->settings['resolvedItem'] = $event->getResolvedObject();
+
         $this->view->assignMultiple([
-            'item' => null
+            'item' => $event->getResolvedObject(),
+            'settings' => $this->settings,
         ]);
 
         return $this->htmlResponse();

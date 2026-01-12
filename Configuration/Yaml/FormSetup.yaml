@@ -2,6 +2,7 @@
 imports:
   - { resource: "./FormElements/InquiryItemFieldset.yaml" }
   - { resource: "./FormElements/RequestTypeSelect.yaml" }
+  - { resource: "./FormElements/ItemName.yaml" }
   - { resource: "./Finishers/Inquiry.yaml" }
 
 
