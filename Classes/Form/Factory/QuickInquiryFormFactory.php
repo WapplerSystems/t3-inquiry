@@ -102,7 +102,8 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             $page,
             type: 'Textarea',
             id: 'Custom',
-            label: 'Do you have any special requests?',
+//            label: 'Do you have any special requests?',
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:quickForm.inquiryFormPage.special-request'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 1500

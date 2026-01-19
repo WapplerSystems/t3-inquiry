@@ -6,50 +6,65 @@
 
 			<trans-unit id="element.name.properties.label">
 				<source>Name</source>
+				<target>Name</target>
 			</trans-unit>
 			<trans-unit id="element.email.properties.label">
 				<source>Email</source>
+				<target>Email</target>
 			</trans-unit>
 			<trans-unit id="element.phonenumber.properties.label">
 				<source>Phone number</source>
+				<target>Telefon</target>
 			</trans-unit>
 			<trans-unit id="element.company.properties.label">
 				<source>Company</source>
+				<target>Firma</target>
 			</trans-unit>
 			<trans-unit id="element.country.properties.label">
 				<source>Country</source>
+				<target>Land</target>
 			</trans-unit>
 			<trans-unit id="element.requestType.properties.label">
 				<source>Type of request</source>
+				<target>Art der Anfrage</target>
 			</trans-unit>
 			<trans-unit id="element.message.properties.label">
 				<source>Type of request</source>
+				<target>Art der Anfrage</target>
 			</trans-unit>
 
 			<trans-unit id="inquiryFormPage.element.requestType.properties.label">
 				<source>Your type of request</source>
+				<target>Ihre Anfrageart</target>
 			</trans-unit>
 			<trans-unit id="inquiryFormPage.element.message.properties.label">
 				<source>Your message</source>
+				<target>Ihre Nachricht</target>
 			</trans-unit>
 			<trans-unit id="element.inquiryFormPage.renderingOptions.submitButtonLabel">
 				<source>Send inquiry</source>
+				<target>Anfrage absenden</target>
 			</trans-unit>
 
 			<trans-unit id="confirmation.title">
 				<source>Thank you</source>
+				<target>Vielen Dank</target>
 			</trans-unit>
 			<trans-unit id="confirmation.message">
 				<source>Thank you for your inquiry. We will get back to you as soon as possible.</source>
+				<target>Vielen Dank für Ihre Anfrage. Wir werden uns so schnell wie möglich bei Ihnen melden.</target>
 			</trans-unit>
 			<trans-unit id="inquiryFormPage.element.requestType.properties.prependOptionLabel">
 				<source>Please select</source>
+				<target>Bitte auswählen</target>
 			</trans-unit>
 			<trans-unit id="quickForm.title">
 				<source>We would be happy to provide you with a quote and advise you on individual configuration.</source>
+				<target>Gerne erstellen wir Ihnen ein Angebot und beraten Sie zur individuellen Konfiguration.</target>
 			</trans-unit>
 			<trans-unit id="quickForm.inquiryFormPage.special-request">
 				<source>Do you have any special requests?</source>
+				<target>Haben Sie besondere Ausstattungswünsche?</target>
 			</trans-unit>
 
 		</body>
