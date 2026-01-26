@@ -53,7 +53,7 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
         $this->tag->addAttribute('data-add-label', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:addToList', 'inquiry'));
         $this->tag->addAttribute('title', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:addToList', 'inquiry'));
         $this->tag->addAttribute('data-remove-label', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:removeFromList', 'inquiry'));
-        $this->tag->addAttribute('class', $this->tag->getAttribute('class') . ' toggle-inquiry-item-status-button');
+        $this->tag->addAttribute('class', $this->tag->getAttribute('class') . ' quick-inquiry-button');
 
         $this->tag->setContent('<span class="inquiry-button-label">'.LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:addToList', 'inquiry').'</span>');
         $this->tag->forceClosingTag(true);
