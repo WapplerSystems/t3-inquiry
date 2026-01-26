@@ -57,7 +57,6 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
 
         $this->tag->setContent('<i class="t3b-icon-pencil tg-product-icon"></i><span class="inquiry-button-label">'.LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:directInquiry', 'inquiry').'</span>');
         $this->tag->forceClosingTag(true);
-        debug($this->tag);
         return $this->tag->render();
     }
 
