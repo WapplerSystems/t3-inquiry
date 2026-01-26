@@ -68,11 +68,10 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
         $this->tag->addAttribute('data-remove-label', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:removeFromList', 'inquiry'));
         $this->tag->addAttribute('class', $this->tag->getAttribute('class') . ' quick-inquiry-button');
 
-        $this->tag->setContent('<i class="t3b-icon-pencil tg-product-icon"></i><span class="inquiry-button-label">'.LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:directInquiry', 'inquiry').'</span>');
+        $this->tag->setContent('<i class="t3b-icon-pencil tg-product-icon"></i><span class="inquiry-button-label">' . LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:directInquiry', 'inquiry') . '</span>');
         $this->tag->forceClosingTag(true);
         return $this->tag->render();
     }
-
 
 
     protected function renderFrontendLinkWithCoreContext(ServerRequestInterface $request): string
@@ -84,10 +83,10 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
         $language = isset($this->arguments['language']) ? (string)$this->arguments['language'] : null;
         $linkAccessRestrictedPages = isset($this->arguments['linkAccessRestrictedPages']) && (bool)$this->arguments['linkAccessRestrictedPages'];
 
-        $additionalParams = array(
-            "item-type"    => $this->arguments['itemType'],
-            "item-uid"  => $this->arguments['pageUid'],
-        );
+        $additionalParams = [
+            'item-type' => $this->arguments['itemType'],
+            'item-uid' => $this->arguments['pageUid'],
+        ];
         $absolute = isset($this->arguments['absolute']) && (bool)$this->arguments['absolute'];
         $addQueryString = $this->arguments['addQueryString'] ?? false;
         $argumentsToBeExcludedFromQueryString = isset($this->arguments['argumentsToBeExcludedFromQueryString']) ? (array)$this->arguments['argumentsToBeExcludedFromQueryString'] : [];
