@@ -50,13 +50,14 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
         }
         $this->tag->addAttribute('data-inquiry-item-uid', $event->getResolvedItemUid());
         $this->tag->addAttribute('data-inquiry-item-type', $event->getResolvedItemType());
-        $this->tag->addAttribute('data-add-label', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:addToList', 'inquiry'));
-        $this->tag->addAttribute('title', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:addToList', 'inquiry'));
+        $this->tag->addAttribute('data-add-label', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:directInquiry', 'inquiry'));
+        $this->tag->addAttribute('title', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:directInquiry', 'inquiry'));
         $this->tag->addAttribute('data-remove-label', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:removeFromList', 'inquiry'));
         $this->tag->addAttribute('class', $this->tag->getAttribute('class') . ' quick-inquiry-button');
 
-        $this->tag->setContent('<span class="inquiry-button-label">'.LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:addToList', 'inquiry').'</span>');
+        $this->tag->setContent('<i class="t3b-icon-pencil tg-product-icon"></i><span class="inquiry-button-label">'.LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:directInquiry', 'inquiry').'</span>');
         $this->tag->forceClosingTag(true);
+        debug($this->tag);
         return $this->tag->render();
     }
 

@@ -11,6 +11,10 @@
 			<trans-unit id="removeItemButton">
 				<source>Remove</source>
 			</trans-unit>
+
+			<trans-unit id="direct-inquiry">
+				<source>Direct Inquiry</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
