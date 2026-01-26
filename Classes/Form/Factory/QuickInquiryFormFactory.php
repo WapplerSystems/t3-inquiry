@@ -26,6 +26,9 @@ use TYPO3\CMS\Form\Domain\Renderer\FluidFormRenderer;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Domain\Model\RequestTextTemplate;
 use WapplerSystems\Inquiry\Domain\Repository\RequestTextTemplateRepository;
+use WapplerSystems\Inquiry\Event\BuildInquiryQuickFormContactEvent;
+use WapplerSystems\Inquiry\Event\CreateConfirmationFinisherEvent;
+use WapplerSystems\Inquiry\Event\CreateEmailToReceiverFinisherEvent;
 
 class QuickInquiryFormFactory extends AbstractFormFactory
 {
@@ -63,6 +66,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
         $formDefinition = GeneralUtility::makeInstance(FormDefinition::class, 'inquiryFormPage', $prototypeConfiguration);
         $formDefinition->setRendererClassName(FluidFormRenderer::class);
         $formDefinition->setRenderingOption('controllerAction', 'form');
+        debug($formDefinition);
         $resolver = GeneralUtility::makeInstance(ValidatorResolver::class);
 
         /** @var Page $page */
@@ -79,9 +83,23 @@ class QuickInquiryFormFactory extends AbstractFormFactory
 
         $this->addFormElement(
             $page,
+            type: 'ItemName',
+            id: 'itemName',
+            label: 'Item Name',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 1500
+                ],
+                'item' => $configuration['resolvedItem']
+            ]
+        );
+
+        $this->addFormElement(
+            $page,
             type: 'Textarea',
             id: 'Custom',
-            label: 'Do you have any special requests?',
+//            label: 'Do you have any special requests?',
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:quickForm.inquiryFormPage.special-request'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 1500
@@ -349,20 +367,35 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             ]
         );
 
+        $this->eventDispatcher->dispatch(new BuildInquiryQuickFormContactEvent($formDefinition, $gridRow, $request));
+
+        $recipients = [];
+        foreach ($configuration['recipients'] ?? [] as $recipient) {
+            $recipients[$recipient['container']['address']] = $recipient['container']['name'];
+        }
+        $replyToRecipients = [
+            '{email}' => '{name}'
+        ];
+
+        $mailSettings = $GLOBALS['TYPO3_CONF_VARS']['MAIL'];
+
         $emailToReceiver = $formDefinition->createFinisher('EmailToReceiver');
         $emailToReceiver->setOptions([
-            'subject' => 'New inquiry',
-            'recipients' => [
-                'wappler@wappler.systems' => 'WDWDWDWDDD'
-            ],
-            'senderName' => 'Mail from inquiry form',
-            'senderAddress' => 'dwddwdw@ededed.de',
-            'replyToAddress' => '{email}',
-            'replyToName' => '{name}',
+            'subject' => $configuration['subject'] ?? 'Mail from inquiry form',
+            'recipients' => $recipients,
+            'senderName' => $mailSettings['defaultMailFromName'],
+            'senderAddress' => $mailSettings['defaultMailFromAddress'],
+            'replyToRecipients' => $replyToRecipients,
             'templateName' => 'MailToReceiver',
             'templateRootPaths' => [
                 34240 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/EmailToReceiver/',
             ]
+        ]);
+        $this->eventDispatcher->dispatch(new CreateEmailToReceiverFinisherEvent($emailToReceiver));
+
+        $inquiryFinisher = $formDefinition->createFinisher('Inquiry');
+        $inquiryFinisher->setOptions([
+            'emptyList' => ($configuration['emptyList']  ?? '1') === '1',
         ]);
 
 
@@ -374,6 +407,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
                 10 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/Confirmation/',
             ]
         ]);
+        $this->eventDispatcher->dispatch(new CreateConfirmationFinisherEvent($emailToReceiver));
 
 
         $this->triggerFormBuildingFinished($formDefinition);

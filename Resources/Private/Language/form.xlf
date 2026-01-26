@@ -48,6 +48,9 @@
 			<trans-unit id="quickForm.title">
 				<source>We would be happy to provide you with a quote and advise you on individual configuration.</source>
 			</trans-unit>
+			<trans-unit id="quickForm.inquiryFormPage.special-request">
+				<source>Do you have any special requests?</source>
+			</trans-unit>
 
 		</body>
 	</file>

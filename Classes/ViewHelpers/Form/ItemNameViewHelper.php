@@ -32,6 +32,6 @@ class ItemNameViewHelper extends AbstractViewHelper
         $event = new ResolveItemName($item);
         $this->eventDispatcher->dispatch($event);
 
-        return $event->getName();
+        return $event->getItem()->getTitle();
     }
 }

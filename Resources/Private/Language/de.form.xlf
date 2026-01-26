@@ -58,6 +58,14 @@
 				<source>Please select</source>
 				<target>Bitte auswählen</target>
 			</trans-unit>
+			<trans-unit id="quickForm.title">
+				<source>We would be happy to provide you with a quote and advise you on individual configuration.</source>
+				<target>Gerne erstellen wir Ihnen ein Angebot und beraten Sie zur individuellen Konfiguration.</target>
+			</trans-unit>
+			<trans-unit id="quickForm.inquiryFormPage.special-request">
+				<source>Do you have any special requests?</source>
+				<target>Haben Sie besondere Ausstattungswünsche?</target>
+			</trans-unit>
 
 		</body>
 	</file>
