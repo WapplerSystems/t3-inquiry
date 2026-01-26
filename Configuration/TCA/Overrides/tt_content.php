@@ -26,7 +26,7 @@ ExtensionManagementUtility::addPiFlexFormValue(
     $pluginSignature
 );
 
-ExtensionUtility::registerPlugin(
+$pluginSignature = ExtensionUtility::registerPlugin(
     extensionName: 'inquiry',
     pluginName: 'QuickForm',
     pluginTitle: 'Quick Inquiry form for single item',
@@ -34,3 +34,15 @@ ExtensionUtility::registerPlugin(
     pluginDescription: '',
 );
 
+ExtensionManagementUtility::addToAllTCAtypes(
+    'tt_content',
+    '--div--;Configuration,pi_flexform;Mail Optionen,',
+    $pluginSignature,
+    'after:subheader',
+);
+
+ExtensionManagementUtility::addPiFlexFormValue(
+    '*',
+    'FILE:EXT:inquiry/Configuration/FlexForm/MailOptions.xml',
+    $pluginSignature
+);
