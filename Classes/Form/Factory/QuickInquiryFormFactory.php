@@ -66,7 +66,6 @@ class QuickInquiryFormFactory extends AbstractFormFactory
         $formDefinition = GeneralUtility::makeInstance(FormDefinition::class, 'inquiryFormPage', $prototypeConfiguration);
         $formDefinition->setRendererClassName(FluidFormRenderer::class);
         $formDefinition->setRenderingOption('controllerAction', 'form');
-        debug($formDefinition);
         $resolver = GeneralUtility::makeInstance(ValidatorResolver::class);
 
         /** @var Page $page */
