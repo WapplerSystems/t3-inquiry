@@ -31,7 +31,6 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
 
     public function __construct(
         private EventDispatcherInterface $eventDispatcher,
-        private UriBuilder $uriBuilder
     )
     {
         parent::__construct();
@@ -43,6 +42,7 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
         $this->registerArgument('item', 'mixed', 'The item which should be added to the list', true);
         $this->registerArgument('pageUid', 'number', 'The page Uid of the product', true);
         $this->registerArgument('pageType', 'number', 'The page type of the product', true);
+        $this->registerArgument('itemType', 'string', 'The page type of the product', true);
     }
 
     public function render(): string
@@ -59,25 +59,10 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
         }
 
         $uri = $this->renderFrontendLinkWithCoreContext($request);
-        debug($uri);
-
-        /*
-        ->setArguments([
-                        'item-type' => $this->arguments['pageType'],
-                        'item-uid' => $this->arguments['pageUid'],
-                        // weitere Parameter...
-                    ])
-
-        */
-
-
-
-
-        $link = "de/".$item['slug']."quickInquiryForm?item-type=".$this->arguments['pageType']."&item-uid=".$this->arguments['pageUid']."&cHash=4dd9cc13169dca4c983360e3847645c9";
 
         $this->tag->addAttribute('data-inquiry-item-uid', $event->getResolvedItemUid());
         $this->tag->addAttribute('data-inquiry-item-type', $event->getResolvedItemType());
-        $this->tag->addAttribute('href', $link);
+        $this->tag->addAttribute('data-url', $uri);
         $this->tag->addAttribute('data-add-label', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:directInquiry', 'inquiry'));
         $this->tag->addAttribute('title', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:directInquiry', 'inquiry'));
         $this->tag->addAttribute('data-remove-label', LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:removeFromList', 'inquiry'));
@@ -98,7 +83,11 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
         $section = isset($this->arguments['section']) ? (string)$this->arguments['section'] : '';
         $language = isset($this->arguments['language']) ? (string)$this->arguments['language'] : null;
         $linkAccessRestrictedPages = isset($this->arguments['linkAccessRestrictedPages']) && (bool)$this->arguments['linkAccessRestrictedPages'];
-        $additionalParams = isset($this->arguments['additionalParams']) ? (array)$this->arguments['additionalParams'] : [];
+
+        $additionalParams = array(
+            "item-type"    => $this->arguments['itemType'],
+            "item-uid"  => $this->arguments['pageUid'],
+        );
         $absolute = isset($this->arguments['absolute']) && (bool)$this->arguments['absolute'];
         $addQueryString = $this->arguments['addQueryString'] ?? false;
         $argumentsToBeExcludedFromQueryString = isset($this->arguments['argumentsToBeExcludedFromQueryString']) ? (array)$this->arguments['argumentsToBeExcludedFromQueryString'] : [];

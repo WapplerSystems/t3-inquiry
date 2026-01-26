@@ -12,7 +12,7 @@
 				<source>Remove</source>
 			</trans-unit>
 
-			<trans-unit id="direct-inquiry">
+			<trans-unit id="directInquiry">
 				<source>Direct Inquiry</source>
 			</trans-unit>
 		</body>
