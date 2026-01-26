@@ -6,8 +6,12 @@ namespace WapplerSystems\Inquiry\ViewHelpers\Button;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\HttpUtility;
 use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
+use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
+use TYPO3\CMS\Frontend\Typolink\LinkFactory;
+use TYPO3\CMS\Frontend\Typolink\UnableToLinkException;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
 use WapplerSystems\Inquiry\Event\CanResolveItemEvent;
 
@@ -54,18 +58,20 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
             return $this->tag->render();
         }
 
-        $this->uriBuilder->setRequest($request);
-        $uri = $this->uriBuilder
-            ->reset()
-            ->setTargetPageUid($this->arguments['pageUid'])
-            ->setArguments([
-                'item-type' => $this->arguments['pageType'],
-                'item-uid' => $this->arguments['pageUid'],
-                // weitere Parameter...
-            ])
-            ->setCreateAbsoluteUri(true)
-            ->build();
+        $uri = $this->renderFrontendLinkWithCoreContext($request);
         debug($uri);
+
+        /*
+        ->setArguments([
+                        'item-type' => $this->arguments['pageType'],
+                        'item-uid' => $this->arguments['pageUid'],
+                        // weitere Parameter...
+                    ])
+
+        */
+
+
+
 
         $link = "de/".$item['slug']."quickInquiryForm?item-type=".$this->arguments['pageType']."&item-uid=".$this->arguments['pageUid']."&cHash=4dd9cc13169dca4c983360e3847645c9";
 
@@ -80,6 +86,64 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
         $this->tag->setContent('<i class="t3b-icon-pencil tg-product-icon"></i><span class="inquiry-button-label">'.LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:directInquiry', 'inquiry').'</span>');
         $this->tag->forceClosingTag(true);
         return $this->tag->render();
+    }
+
+
+
+    protected function renderFrontendLinkWithCoreContext(ServerRequestInterface $request): string
+    {
+        $pageUid = isset($this->arguments['pageUid']) ? (int)$this->arguments['pageUid'] : 'current';
+        $pageType = isset($this->arguments['pageType']) ? (int)$this->arguments['pageType'] : 0;
+        $noCache = isset($this->arguments['noCache']) && (bool)$this->arguments['noCache'];
+        $section = isset($this->arguments['section']) ? (string)$this->arguments['section'] : '';
+        $language = isset($this->arguments['language']) ? (string)$this->arguments['language'] : null;
+        $linkAccessRestrictedPages = isset($this->arguments['linkAccessRestrictedPages']) && (bool)$this->arguments['linkAccessRestrictedPages'];
+        $additionalParams = isset($this->arguments['additionalParams']) ? (array)$this->arguments['additionalParams'] : [];
+        $absolute = isset($this->arguments['absolute']) && (bool)$this->arguments['absolute'];
+        $addQueryString = $this->arguments['addQueryString'] ?? false;
+        $argumentsToBeExcludedFromQueryString = isset($this->arguments['argumentsToBeExcludedFromQueryString']) ? (array)$this->arguments['argumentsToBeExcludedFromQueryString'] : [];
+
+        $typolinkConfiguration = [
+            'parameter' => $pageUid,
+        ];
+        if ($pageType) {
+            $typolinkConfiguration['parameter'] .= ',' . $pageType;
+        }
+        if ($noCache) {
+            $typolinkConfiguration['no_cache'] = 1;
+        }
+        if ($language !== null) {
+            $typolinkConfiguration['language'] = $language;
+        }
+        if ($section) {
+            $typolinkConfiguration['section'] = $section;
+        }
+        if ($linkAccessRestrictedPages) {
+            $typolinkConfiguration['linkAccessRestrictedPages'] = 1;
+        }
+        if ($additionalParams) {
+            $typolinkConfiguration['additionalParams'] = HttpUtility::buildQueryString($additionalParams, '&');
+        }
+        if ($absolute) {
+            $typolinkConfiguration['forceAbsoluteUrl'] = true;
+        }
+        if ($addQueryString && $addQueryString !== 'false') {
+            $typolinkConfiguration['addQueryString'] = $addQueryString;
+            if ($argumentsToBeExcludedFromQueryString !== []) {
+                $typolinkConfiguration['addQueryString.']['exclude'] = implode(',', $argumentsToBeExcludedFromQueryString);
+            }
+        }
+
+        try {
+            $cObj = GeneralUtility::makeInstance(ContentObjectRenderer::class);
+            $cObj->setRequest($request);
+            $linkFactory = GeneralUtility::makeInstance(LinkFactory::class);
+            $linkResult = $linkFactory->create((string)$this->renderChildren(), $typolinkConfiguration, $cObj);
+
+        } catch (UnableToLinkException) {
+        }
+
+        return $linkResult->getUrl();
     }
 
 }
