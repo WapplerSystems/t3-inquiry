@@ -35,6 +35,9 @@
 			<trans-unit id="element.inquiryForm.renderingOptions.submitButtonLabel">
 				<source>Send inquiry</source>
 			</trans-unit>
+			<trans-unit id="inquiryForm.element.requestType.properties.prependOptionLabel">
+				<source>Please select</source>
+			</trans-unit>
 
 			<trans-unit id="confirmation.title">
 				<source>Thank you</source>
@@ -42,8 +45,10 @@
 			<trans-unit id="confirmation.message">
 				<source>Thank you for your inquiry. We will get back to you as soon as possible.</source>
 			</trans-unit>
-			<trans-unit id="inquiryForm.element.requestType.properties.prependOptionLabel">
-				<source>Please select</source>
+
+
+			<trans-unit id="element.quickInquiryForm.renderingOptions.submitButtonLabel">
+				<source>Send inquiry</source>
 			</trans-unit>
 			<trans-unit id="quickInquiryForm.title">
 				<source>We would be happy to provide you with a quote and advise you on individual configuration.</source>

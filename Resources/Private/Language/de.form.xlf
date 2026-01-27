@@ -45,6 +45,10 @@
 				<source>Send inquiry</source>
 				<target>Anfrage absenden</target>
 			</trans-unit>
+			<trans-unit id="inquiryForm.element.requestType.properties.prependOptionLabel">
+				<source>Please select</source>
+				<target>Bitte auswählen</target>
+			</trans-unit>
 
 			<trans-unit id="confirmation.title">
 				<source>Thank you</source>
@@ -54,9 +58,10 @@
 				<source>Thank you for your inquiry. We will get back to you as soon as possible.</source>
 				<target>Vielen Dank für Ihre Anfrage. Wir werden uns schnellstmöglich bei Ihnen melden.</target>
 			</trans-unit>
-			<trans-unit id="inquiryForm.element.requestType.properties.prependOptionLabel">
-				<source>Please select</source>
-				<target>Bitte auswählen</target>
+
+			<trans-unit id="element.quickInquiryForm.renderingOptions.submitButtonLabel">
+				<source>Send inquiry</source>
+				<target>Anfrage absenden</target>
 			</trans-unit>
 			<trans-unit id="quickInquiryForm.title">
 				<source>We would be happy to provide you with a quote and advise you on individual configuration.</source>
