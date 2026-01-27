@@ -19,6 +19,15 @@
 			<trans-unit id="element.country.properties.label">
 				<source>Country</source>
 			</trans-unit>
+			<trans-unit id="element.street.properties.label">
+				<source>Street</source>
+			</trans-unit>
+			<trans-unit id="element.zipcode.properties.label">
+				<source>Zipcode</source>
+			</trans-unit>
+			<trans-unit id="element.city.properties.label">
+				<source>City</source>
+			</trans-unit>
 			<trans-unit id="element.requestType.properties.label">
 				<source>Type of request</source>
 			</trans-unit>
