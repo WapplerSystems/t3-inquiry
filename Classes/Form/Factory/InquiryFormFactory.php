@@ -65,7 +65,7 @@ class InquiryFormFactory extends AbstractFormFactory
         $configurationService = GeneralUtility::makeInstance(ConfigurationService::class);
         $prototypeConfiguration = $configurationService->getPrototypeConfiguration('standard');
 
-        $formDefinition = GeneralUtility::makeInstance(FormDefinition::class, 'inquiryFormPage', $prototypeConfiguration);
+        $formDefinition = GeneralUtility::makeInstance(FormDefinition::class, 'inquiryForm', $prototypeConfiguration);
         $formDefinition->setRendererClassName(FluidFormRenderer::class);
         $formDefinition->setRenderingOption('controllerAction', 'form');
         $resolver = GeneralUtility::makeInstance(ValidatorResolver::class);
@@ -171,10 +171,10 @@ class InquiryFormFactory extends AbstractFormFactory
                 //type: 'RequestTypeSelect',
                 type: 'SingleSelect',
                 id: 'requestType_' . $hash,
-                label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryFormPage.element.requestType.properties.label'),
+                label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryForm.element.requestType.properties.label'),
                 properties: [
                     'options' => $requestTextTemplatesOptions,
-                    'prependOptionLabel' => LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryFormPage.element.requestType.properties.prependOptionLabel')
+                    'prependOptionLabel' => LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryForm.element.requestType.properties.prependOptionLabel')
                 ],
                 validators: [
                     $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
@@ -185,7 +185,7 @@ class InquiryFormFactory extends AbstractFormFactory
                 $fieldsetItem,
                 type: 'Textarea',
                 id: 'message_' . $hash,
-                label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryFormPage.element.message.properties.label'),
+                label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryForm.element.message.properties.label'),
                 properties: [
                     'fluidAdditionalAttributes' => [
                         'maxlength' => 1000

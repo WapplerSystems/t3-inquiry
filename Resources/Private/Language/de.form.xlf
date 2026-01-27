@@ -33,15 +33,15 @@
 				<target>Ihr Anliegen</target>
 			</trans-unit>
 
-			<trans-unit id="inquiryFormPage.element.requestType.properties.label">
+			<trans-unit id="inquiryForm.element.requestType.properties.label">
 				<source>Your type of request</source>
 				<target>Ihr Anliegen</target>
 			</trans-unit>
-			<trans-unit id="inquiryFormPage.element.message.properties.label">
+			<trans-unit id="inquiryForm.element.message.properties.label">
 				<source>Your message</source>
-				<target>Ihre Nachricht</target>
+				<target>Ihre Nachricht1</target>
 			</trans-unit>
-			<trans-unit id="element.inquiryFormPage.renderingOptions.submitButtonLabel">
+			<trans-unit id="element.inquiryForm.renderingOptions.submitButtonLabel">
 				<source>Send inquiry</source>
 				<target>Anfrage absenden</target>
 			</trans-unit>
@@ -54,7 +54,7 @@
 				<source>Thank you for your inquiry. We will get back to you as soon as possible.</source>
 				<target>Vielen Dank für Ihre Anfrage. Wir werden uns schnellstmöglich bei Ihnen melden.</target>
 			</trans-unit>
-			<trans-unit id="inquiryFormPage.element.requestType.properties.prependOptionLabel">
+			<trans-unit id="inquiryForm.element.requestType.properties.prependOptionLabel">
 				<source>Please select</source>
 				<target>Bitte auswählen</target>
 			</trans-unit>

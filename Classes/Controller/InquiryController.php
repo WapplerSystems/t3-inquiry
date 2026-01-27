@@ -35,7 +35,7 @@ class InquiryController extends ActionController
 
         $items = $userSession->get('items') ?? [];
 
-        $arguments = $this->request->getArguments()['inquiryFormPage'] ?? [];
+        $arguments = $this->request->getArguments()['inquiryForm'] ?? [];
         foreach ($items as $key => $item) {
             if (($arguments['itemDelete_' . $item['hash']] ?? 0) === '1') {
                 unset($items[$key]);
