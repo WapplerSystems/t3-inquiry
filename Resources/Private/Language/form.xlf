@@ -45,10 +45,10 @@
 			<trans-unit id="inquiryFormPage.element.requestType.properties.prependOptionLabel">
 				<source>Please select</source>
 			</trans-unit>
-			<trans-unit id="quickForm.title">
+			<trans-unit id="quickInquiryForm.title">
 				<source>We would be happy to provide you with a quote and advise you on individual configuration.</source>
 			</trans-unit>
-			<trans-unit id="quickForm.inquiryFormPage.special-request">
+			<trans-unit id="quickInquiryForm.special-request">
 				<source>Do you have any special requests?</source>
 			</trans-unit>
 

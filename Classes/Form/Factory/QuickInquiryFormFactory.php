@@ -63,7 +63,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
         $configurationService = GeneralUtility::makeInstance(ConfigurationService::class);
         $prototypeConfiguration = $configurationService->getPrototypeConfiguration('standard');
 
-        $formDefinition = GeneralUtility::makeInstance(FormDefinition::class, 'inquiryFormPage', $prototypeConfiguration);
+        $formDefinition = GeneralUtility::makeInstance(FormDefinition::class, 'quickInquiryForm', $prototypeConfiguration);
         $formDefinition->setRendererClassName(FluidFormRenderer::class);
         $formDefinition->setRenderingOption('controllerAction', 'form');
         $resolver = GeneralUtility::makeInstance(ValidatorResolver::class);
@@ -98,7 +98,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             type: 'Textarea',
             id: 'Custom',
 //            label: 'Do you have any special requests?',
-            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:quickForm.inquiryFormPage.special-request'),
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:quickInquiryForm.special-request'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 1500
