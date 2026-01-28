@@ -23,6 +23,11 @@ plugin.tx_inquiry {
     # cat=plugin.tx_inquiry/list/b; type=int; label=UID of the page containing the inquiry list
     listPageUid =
 
+    # cat=plugin.tx_inquiry/list/c; type=int; label=page type of the Quickform
+    quickInquiryFormPageType =
+    # cat=plugin.tx_inquiry/list/d; type=int; label=Quickform page Uid
+    quickFormPageUid =
+
     # cat=plugin.tx_inquiry/debug/a; type=bool; label=Empty list after submission
     emptyList = 1
 

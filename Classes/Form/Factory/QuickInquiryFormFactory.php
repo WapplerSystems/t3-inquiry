@@ -66,19 +66,16 @@ class QuickInquiryFormFactory extends AbstractFormFactory
         $formDefinition = GeneralUtility::makeInstance(FormDefinition::class, 'quickInquiryForm', $prototypeConfiguration);
         $formDefinition->setRendererClassName(FluidFormRenderer::class);
         $formDefinition->setRenderingOption('controllerAction', 'form');
+        $formDefinition->setRenderingOption('additionalParams', [
+            'item-uid' => $configuration['itemData']['uid'],
+            'item-type' => $configuration['itemData']['type'],
+        ]);
+        $formDefinition->setRenderingOption('pageType', $configuration['quickInquiryFormPageType']);
+
         $resolver = GeneralUtility::makeInstance(ValidatorResolver::class);
 
         /** @var Page $page */
         $page = $formDefinition->createPage('page1');
-
-        $this->addFormElement(
-            $page,
-            type: 'Hidden',
-            id: 'completed',
-            validators: [
-                $resolver->createValidator(NotEmptyValidator::class)
-            ]
-        );
 
         $this->addFormElement(
             $page,
@@ -152,7 +149,6 @@ class QuickInquiryFormFactory extends AbstractFormFactory
 
         $requestTextTemplates = $this->requestTextTemplateRepository->findAll();
         $requestTextTemplatesOptions = [];
-        //DebugUtility::debug($requestTextTemplates);
         /** @var RequestTextTemplate $requestTextTemplate */
         foreach ($requestTextTemplates as $requestTextTemplate) {
             /*
@@ -162,7 +158,6 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             ];*/
             $requestTextTemplatesOptions[$requestTextTemplate->getUid()] = $requestTextTemplate->getTitle();
         }
-        //DebugUtility::debug($requestTextTemplatesOptions);
 
         $items = [];
         if ($userSession->get('items')) {

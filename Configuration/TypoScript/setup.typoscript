@@ -26,6 +26,8 @@ plugin.tx_inquiry {
     ajaxItemsListTypeNum = {$plugin.tx_inquiry.settings.ajaxItemsListTypeNum}
     ajaxRemoveItemTypeNum = {$plugin.tx_inquiry.settings.ajaxRemoveItemTypeNum}
 
+    quickInquiryFormPageType = {$plugin.tx_inquiry.settings.quickInquiryFormPageType}
+
     emptyList = {$plugin.tx_inquiry.settings.emptyList}
 
   }
@@ -152,9 +154,13 @@ quickInquiryPage {
     no_cache = 1
   }
 
-  10 = USER
-  10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
-  10.extensionName = Inquiry
-  10.pluginName = QuickForm
-  10.vendorName = wapplersystems
+  10 = CONTENT
+  10 {
+    table = tt_content
+    select {
+      pidInList = {$plugin.tx_inquiry.settings.quickFormPageUid}
+      where = colPos=0
+      orderBy = sorting
+    }
+  }
 }

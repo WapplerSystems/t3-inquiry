@@ -70,6 +70,13 @@ class InquiryController extends ActionController
     public function quickFormAction(): ResponseInterface
     {
 
+        if (($this->settings['subject'] ?? '') === '') {
+            return $this->htmlResponse('<div class="alert alert-warning">The inquiry form subject setting is required.</div>');
+        }
+        if (count($this->settings['recipients'] ?? []) === 0) {
+            return $this->htmlResponse('<div class="alert alert-warning">Please set recipients.</div>');
+        }
+
         $uid = (int)($this->request->getQueryParams()['item-uid'] ?? null);
         $type = $this->request->getQueryParams()['item-type'] ?? null;
 
@@ -82,6 +89,10 @@ class InquiryController extends ActionController
         }
 
         $this->settings['resolvedItem'] = $event->getResolvedObject();
+        $this->settings['itemData'] = [
+            'uid' => $uid,
+            'type' => $type,
+        ];
 
         $this->view->assignMultiple([
             'item' => $event->getResolvedObject(),
