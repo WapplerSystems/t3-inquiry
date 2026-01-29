@@ -401,7 +401,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
                 10 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/Confirmation/',
             ]
         ]);
-        $this->eventDispatcher->dispatch(new CreateConfirmationFinisherEvent($emailToReceiver));
+        $this->eventDispatcher->dispatch(new CreateConfirmationFinisherEvent($confirmationFinisher));
 
 
         $this->triggerFormBuildingFinished($formDefinition);
