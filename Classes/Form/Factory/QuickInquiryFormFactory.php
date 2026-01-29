@@ -82,6 +82,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             type: 'ItemName',
             id: 'itemName',
             label: 'Item Name',
+            defaultValue: $configuration['resolvedItem']->getTitle(),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 1500
