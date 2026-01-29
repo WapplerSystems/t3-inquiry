@@ -27,14 +27,14 @@ class ResolveItemName
         $this->item = $item;
     }
 
-    public function getName(): mixed
+    public function getName(): string
     {
-        return $this->item;
+        return $this->name;
     }
 
-    public function setName(mixed $item): void
+    public function setName(string $name): void
     {
-        $this->item = $item;
+        $this->name = $name;
     }
 
 
