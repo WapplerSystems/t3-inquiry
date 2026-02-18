@@ -81,7 +81,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             $page,
             type: 'ItemName',
             id: 'itemName',
-            label: 'Item Name',
+            label: LocalizationUtility::translate('LLL:EXT:testgmbh_inquiry/Resources/Private/Language/form.xlf:quickInquiryForm.item-name'),
             defaultValue: $configuration['resolvedItem']->getTitle(),
             properties: [
                 'fluidAdditionalAttributes' => [
@@ -96,7 +96,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             type: 'Textarea',
             id: 'Custom',
 //            label: 'Do you have any special requests?',
-            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:quickInquiryForm.special-request'),
+            label: LocalizationUtility::translate('LLL:EXT:testgmbh_inquiry/Resources/Private/Language/form.xlf:quickInquiryForm.special-request'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 1500
@@ -386,7 +386,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
                 34240 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/EmailToReceiver/',
             ]
         ]);
-        $this->eventDispatcher->dispatch(new CreateEmailToReceiverFinisherEvent($emailToReceiver));
+        $this->eventDispatcher->dispatch(new CreateEmailToReceiverFinisherEvent($emailToReceiver, $configuration));
 
         $inquiryFinisher = $formDefinition->createFinisher('Inquiry');
         $inquiryFinisher->setOptions([
