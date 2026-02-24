@@ -7,6 +7,9 @@
 			<trans-unit id="element.name.properties.label">
 				<source>Name</source>
 			</trans-unit>
+			<trans-unit id="element.salutaion.properties.label">
+				<source>Salutation</source>
+			</trans-unit>
 			<trans-unit id="element.email.properties.label">
 				<source>Email</source>
 			</trans-unit>

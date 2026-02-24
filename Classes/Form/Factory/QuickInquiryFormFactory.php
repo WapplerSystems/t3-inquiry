@@ -147,6 +147,75 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             ]
         );
 
+        /** @var GridRow $gridRowLeftColumn */
+        $gridRowLeftColumn = $this->addFormElement(
+            $leftColumn,
+            type: 'GridRow',
+            id: 'gridRowLeftColumn',
+        );
+
+        /** @var Section $leftNameColumn */
+        $leftNameColumn = $this->addFormElement(
+            $gridRowLeftColumn,
+            type: 'Fieldset',
+            id: 'leftNameColumn',
+            properties: [
+                'gridColumnClassAutoConfiguration' => [
+                    'viewPorts' => [
+                        'xxl' => [
+                            'numbersOfColumnsToUse' => 3
+                        ],
+                        'xl' => [
+                            'numbersOfColumnsToUse' => 3
+                        ],
+                        'lg' => [
+                            'numbersOfColumnsToUse' => 3
+                        ],
+                        'md' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'sm' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'xs' => [
+                            'numbersOfColumnsToUse' => 12
+                        ]
+                    ]
+                ]
+            ]
+        );
+
+        /** @var Section $rightNameColumn */
+        $rightNameColumn = $this->addFormElement(
+            $gridRowLeftColumn,
+            type: 'Fieldset',
+            id: 'rightNameColumn',
+            properties: [
+                'gridColumnClassAutoConfiguration' => [
+                    'viewPorts' => [
+                        'xxl' => [
+                            'numbersOfColumnsToUse' => 9
+                        ],
+                        'xl' => [
+                            'numbersOfColumnsToUse' => 9
+                        ],
+                        'lg' => [
+                            'numbersOfColumnsToUse' => 9
+                        ],
+                        'md' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'sm' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'xs' => [
+                            'numbersOfColumnsToUse' => 12
+                        ]
+                    ]
+                ]
+            ]
+        );
+
 
         $requestTextTemplates = $this->requestTextTemplateRepository->findAll();
         $requestTextTemplatesOptions = [];
@@ -172,9 +241,23 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             id: 'rightColumn',
         );
 
+        $this->addFormElement(
+            $leftNameColumn,
+            type: 'Text',
+            id: 'salutaion',
+            label: 'salutation',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 50
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 50])
+            ]
+        );
 
         $this->addFormElement(
-            $leftColumn,
+            $rightNameColumn,
             type: 'Text',
             id: 'name',
             label: 'name',
