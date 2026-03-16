@@ -6,6 +6,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Event\CanResolveItemByIdentifierEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemEvent;
@@ -49,7 +50,7 @@ class InquiryController extends ActionController
         if (count($items) === 0) {
 
             $this->addFlashMessage(
-                'No items were added',
+                LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:noItemsAdded', 'inquiry'),
                 '',
                 ContextualFeedbackSeverity::INFO,
                 false);
