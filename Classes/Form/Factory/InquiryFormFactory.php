@@ -328,7 +328,7 @@ class InquiryFormFactory extends AbstractFormFactory
                 34240 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/EmailToReceiver/',
             ]
         ]);
-        $this->eventDispatcher->dispatch(new CreateEmailToReceiverFinisherEvent($emailToReceiver));
+        $this->eventDispatcher->dispatch(new CreateEmailToReceiverFinisherEvent($emailToReceiver, $configuration));
 
         $inquiryFinisher = $formDefinition->createFinisher('Inquiry');
         $inquiryFinisher->setOptions([
