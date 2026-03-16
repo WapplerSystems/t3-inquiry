@@ -55,7 +55,7 @@
 			</trans-unit>
 			<trans-unit id="inquiryForm.element.message.properties.label">
 				<source>Your message</source>
-				<target>Ihre Nachricht1</target>
+				<target>Ihre Nachricht</target>
 			</trans-unit>
 			<trans-unit id="element.inquiryForm.renderingOptions.submitButtonLabel">
 				<source>Send inquiry</source>
