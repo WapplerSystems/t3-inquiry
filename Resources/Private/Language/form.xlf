@@ -4,8 +4,11 @@
 		<header/>
 		<body>
 
-			<trans-unit id="element.name.properties.label">
-				<source>Name</source>
+			<trans-unit id="element.firstname.properties.label">
+				<source>First Name</source>
+			</trans-unit>
+			<trans-unit id="element.lastname.properties.label">
+				<source>Last Name</source>
 			</trans-unit>
 			<trans-unit id="element.salutaion.properties.label">
 				<source>Salutation</source>
@@ -24,6 +27,9 @@
 			</trans-unit>
 			<trans-unit id="element.street.properties.label">
 				<source>Street</source>
+			</trans-unit>
+			<trans-unit id="element.housenumber.properties.label">
+				<source>Nr.</source>
 			</trans-unit>
 			<trans-unit id="element.zipcode.properties.label">
 				<source>Zipcode</source>
