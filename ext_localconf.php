@@ -3,7 +3,7 @@
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 use WapplerSystems\Inquiry\Controller\InquiryController;
 
-array_push($GLOBALS['TYPO3_CONF_VARS']['FE']['cacheHash']['excludedParameters'], 'tx_inquiry[uid]', 'tx_inquiry[type]', 'tx_inquiry[hash]');
+array_push($GLOBALS['TYPO3_CONF_VARS']['FE']['cacheHash']['excludedParameters'], 'tx_inquiry[uid]', 'tx_inquiry[type]', 'tx_inquiry[hash]', 'tx_inquiry[items]');
 
 
 $boot = static function (): void {
@@ -63,6 +63,17 @@ $boot = static function (): void {
         ],
         [
             InquiryController::class => 'toggleItemStatus',
+        ],
+    );
+
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
+        'PreloadItems',
+        [
+            InquiryController::class => 'preloadItems',
+        ],
+        [
+            InquiryController::class => 'preloadItems',
         ],
     );
 

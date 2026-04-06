@@ -18,6 +18,7 @@ plugin.tx_inquiry {
     ajaxToggleItemTypeNum = 678934
     ajaxItemsListTypeNum = 678935
     ajaxRemoveItemTypeNum = 678936
+    preloadItemsTypeNum = 678937
 
 
     # cat=plugin.tx_inquiry/list/b; type=int; label=UID of the page containing the inquiry list

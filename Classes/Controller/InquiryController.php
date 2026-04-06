@@ -277,6 +277,46 @@ class InquiryController extends ActionController
         return $this->jsonResponse(json_encode($data));
     }
 
+//    https://sirch.ddev.site/?type=678937&tx_inquiry[items][1][uid]=522&tx_inquiry[items][1][type]=pages
+
+    public function preloadItemsAction(): ResponseInterface
+    {
+        $params = $this->request->getQueryParams()['tx_inquiry'] ?? [];
+        $itemsParam = $params['items'] ?? [];
+
+        /** @var FrontendUserAuthentication $frontendUserAuthentication */
+        $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
+        $userSession = $frontendUserAuthentication->getSession();
+
+        $items = [];
+        if (is_array($itemsParam)) {
+            foreach ($itemsParam as $entry) {
+                $uid = (int)($entry['uid'] ?? 0);
+                $type = $entry['type'] ?? '';
+                if ($uid <= 0 || $type === '') {
+                    continue;
+                }
+                $event = new CanResolveItemByIdentifierEvent($uid, $type, $this->request);
+                $this->eventDispatcher->dispatch($event);
+                if (!$event->isResult()) {
+                    continue;
+                }
+                $items[] = ['uid' => $uid, 'type' => $type, 'hash' => md5($uid . '_' . $type)];
+            }
+        }
+
+        $userSession->set('items', $items);
+        $frontendUserAuthentication->storeSessionData();
+
+        $listPageUid = (int)($this->settings['listPageUid'] ?? 0);
+        $redirectUri = $listPageUid > 0
+            ? $this->uriBuilder->reset()->setTargetPageUid($listPageUid)->buildFrontendUri()
+            : '/merkzettel/';
+
+        return $this->redirectToUri($redirectUri);
+    }
+
+
     public function addItemFormAction(): ResponseInterface
     {
 
