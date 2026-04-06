@@ -277,7 +277,7 @@ class InquiryController extends ActionController
         return $this->jsonResponse(json_encode($data));
     }
 
-//    https://sirch.ddev.site/?type=678937&tx_inquiry[items][1][uid]=522&tx_inquiry[items][1][type]=pages
+//    https://sirch.ddev.site/?type=678937&tx_inquiry[items][1][uid]=522&tx_inquiry[items][1][type]=pages&tx_inquiry[items][2][uid]=523&tx_inquiry[items][2][type]=pages
 
     public function preloadItemsAction(): ResponseInterface
     {
