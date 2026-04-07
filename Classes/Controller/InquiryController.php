@@ -269,15 +269,29 @@ class InquiryController extends ActionController
                 unset($item);
             }
         }
+        unset($item);
+
+        $indexedItems = array_values(array_map(
+            static fn($item) => ['uid' => $item['uid'], 'type' => $item['type']],
+            $items
+        ));
+
+        $site = $this->request->getAttribute('site');
+        $preloadUrl = rtrim((string)$site->getBase(), '/') . '/?' . http_build_query([
+            'type' => (int)($this->settings['preloadItemsTypeNum'] ?? 678937),
+            'tx_inquiry' => ['items' => $indexedItems],
+        ]);
 
         $data = [
-            'items' => $items
+            'items' => $items,
+            'preloadUrl' => $preloadUrl,
         ];
 
         return $this->jsonResponse(json_encode($data));
     }
 
 //    https://sirch.ddev.site/?type=678937&tx_inquiry[items][1][uid]=522&tx_inquiry[items][1][type]=pages&tx_inquiry[items][2][uid]=523&tx_inquiry[items][2][type]=pages
+//    https://sirch.ddev.site/?type=678937&tx_inquiry%5Bitems%5D%5B0%5D%5Buid%5D=523&tx_inquiry%5Bitems%5D%5B0%5D%5Btype%5D=pages&tx_inquiry%5Bitems%5D%5B1%5D%5Buid%5D=522&tx_inquiry%5Bitems%5D%5B1%5D%5Btype%5D=pages&tx_inquiry%5Bitems%5D%5B2%5D%5Buid%5D=524&tx_inquiry%5Bitems%5D%5B2%5D%5Btype%5D=pages
 
     public function preloadItemsAction(): ResponseInterface
     {
@@ -301,7 +315,10 @@ class InquiryController extends ActionController
                 if (!$event->isResult()) {
                     continue;
                 }
-                $items[] = ['uid' => $uid, 'type' => $type, 'hash' => md5($uid . '_' . $type)];
+                $hash = md5($uid . '_' . $type);
+                if (!in_array($hash, array_column($items, 'hash'), true)) {
+                    $items[] = ['uid' => $uid, 'type' => $type, 'hash' => $hash];
+                }
             }
         }
 
