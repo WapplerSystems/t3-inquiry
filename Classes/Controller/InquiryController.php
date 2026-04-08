@@ -272,28 +272,13 @@ class InquiryController extends ActionController
         }
         unset($item);
 
-        $indexedItems = array_values(array_map(
-            static fn($item) => ['uid' => $item['uid'], 'type' => $item['type']],
-            $items
-        ));
-
-        $site = $this->request->getAttribute('site');
-        $preloadUrl = rtrim((string)$site->getBase(), '/') . '/?' . http_build_query([
-            'type' => (int)($this->settings['preloadItemsTypeNum'] ?? 678937),
-            'tx_inquiry' => ['items' => $indexedItems],
-        ]);
-
         $data = [
             'items' => $items,
-            'preloadUrl' => $preloadUrl,
+            'preloadUrl' => $this->buildPreloadUrl($items),
         ];
 
         return $this->jsonResponse(json_encode($data));
     }
-
-//    https://sirch.ddev.site/?type=678937&tx_inquiry[items][1][uid]=522&tx_inquiry[items][1][type]=pages&tx_inquiry[items][2][uid]=523&tx_inquiry[items][2][type]=pages
-//    https://sirch.ddev.site/?type=678937&tx_inquiry%5Bitems%5D%5B0%5D%5Buid%5D=523&tx_inquiry%5Bitems%5D%5B0%5D%5Btype%5D=pages&tx_inquiry%5Bitems%5D%5B1%5D%5Buid%5D=522&tx_inquiry%5Bitems%5D%5B1%5D%5Btype%5D=pages&tx_inquiry%5Bitems%5D%5B2%5D%5Buid%5D=524&tx_inquiry%5Bitems%5D%5B2%5D%5Btype%5D=pages
-
     public function preloadItemsAction(): ResponseInterface
     {
         $params = $this->request->getQueryParams()['tx_inquiry'] ?? [];
@@ -343,15 +328,23 @@ class InquiryController extends ActionController
         $items = $userSession->get('items') ?? [];
 
         $resolvedItems = [];
-        foreach ($items as $item) {
+        $indexedItems = [];
+        foreach (array_values($items) as $i => $item) {
             $event = new ResolveItemEvent((int)$item['uid'], $item['type'], $this->request);
             $this->eventDispatcher->dispatch($event);
             if ($event->getResolvedObject() !== null) {
-                $resolvedItems[] = $event->getResolvedObject();
+                $resolvedItems[] = [
+                    'object' => $event->getResolvedObject(),
+                    'htmlPreview' => $event->getHtmlPreview(),
+                ];
+                $indexedItems[$i] = ['uid' => $item['uid'], 'type' => $item['type']];
             }
         }
 
-        $this->view->assign('items', $resolvedItems);
+        $this->view->assignMultiple([
+            'items' => $resolvedItems,
+            'preloadUrl' => $this->buildPreloadUrl(array_values($indexedItems)),
+        ]);
         $html = $this->view->render();
 
         $mpdf = new Mpdf();
@@ -362,6 +355,21 @@ class InquiryController extends ActionController
             ->withHeader('Content-Type', 'application/pdf')
             ->withHeader('Content-Disposition', 'attachment; filename="inquiry-list.pdf"')
             ->withBody($this->streamFactory->createStream($pdfContent));
+    }
+
+
+    private function buildPreloadUrl(array $items): string
+    {
+        $indexedItems = array_values(array_map(
+            static fn($item) => ['uid' => $item['uid'], 'type' => $item['type']],
+            $items
+        ));
+
+        $site = $this->request->getAttribute('site');
+        return rtrim((string)$site->getBase(), '/') . '/?' . http_build_query([
+            'type' => (int)($this->settings['preloadItemsTypeNum'] ?? 678937),
+            'tx_inquiry' => ['items' => $indexedItems],
+        ]);
     }
 
 
