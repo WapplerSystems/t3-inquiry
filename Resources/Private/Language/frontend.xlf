@@ -18,6 +18,9 @@
 			<trans-unit id="noItemsAdded">
 				<source>The inquiry list is empty. No Products were selected, please go to product pages and add products to the inquiry list</source>
 			</trans-unit>
+			<trans-unit id="pdfLinkToList">
+				<source>Link to this list</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
