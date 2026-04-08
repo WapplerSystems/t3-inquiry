@@ -19,6 +19,7 @@ plugin.tx_inquiry {
     ajaxItemsListTypeNum = 678935
     ajaxRemoveItemTypeNum = 678936
     preloadItemsTypeNum = 678937
+    generatePdfTypeNum = 678938
 
 
     # cat=plugin.tx_inquiry/list/b; type=int; label=UID of the page containing the inquiry list

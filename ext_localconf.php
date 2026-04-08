@@ -77,6 +77,17 @@ $boot = static function (): void {
         ],
     );
 
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
+        'GeneratePdf',
+        [
+            InquiryController::class => 'generatePdf',
+        ],
+        [
+            InquiryController::class => 'generatePdf',
+        ],
+    );
+
 };
 
 $boot();

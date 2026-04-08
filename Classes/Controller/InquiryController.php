@@ -2,6 +2,7 @@
 
 namespace WapplerSystems\Inquiry\Controller;
 
+use Mpdf\Mpdf;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
@@ -331,6 +332,36 @@ class InquiryController extends ActionController
             : '/merkzettel/';
 
         return $this->redirectToUri($redirectUri);
+    }
+
+
+    public function generatePdfAction(): ResponseInterface
+    {
+        /** @var FrontendUserAuthentication $frontendUserAuthentication */
+        $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
+        $userSession = $frontendUserAuthentication->getSession();
+        $items = $userSession->get('items') ?? [];
+
+        $resolvedItems = [];
+        foreach ($items as $item) {
+            $event = new ResolveItemEvent((int)$item['uid'], $item['type'], $this->request);
+            $this->eventDispatcher->dispatch($event);
+            if ($event->getResolvedObject() !== null) {
+                $resolvedItems[] = $event->getResolvedObject();
+            }
+        }
+
+        $this->view->assign('items', $resolvedItems);
+        $html = $this->view->render();
+
+        $mpdf = new Mpdf();
+        $mpdf->WriteHTML($html);
+        $pdfContent = $mpdf->Output('', 'S');
+
+        return $this->responseFactory->createResponse()
+            ->withHeader('Content-Type', 'application/pdf')
+            ->withHeader('Content-Disposition', 'attachment; filename="inquiry-list.pdf"')
+            ->withBody($this->streamFactory->createStream($pdfContent));
     }
 
 

@@ -162,6 +162,29 @@ preloadItemsPage {
   10.vendorName = wapplersystems
 }
 
+generatePdfPage = PAGE
+generatePdfPage {
+  typeNum = {$plugin.tx_inquiry.settings.generatePdfTypeNum}
+
+  config {
+    disableAllHeaderCode = 1
+    xhtml_cleaning = none
+    admPanel = 0
+    debug = 0
+    disablePrefixComment = 1
+    metaCharset = utf-8
+    additionalHeaders.10.header = Content-Type:application/pdf
+    disableBodyTag = 1
+    no_cache = 1
+  }
+
+  10 = USER
+  10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+  10.extensionName = Inquiry
+  10.pluginName = GeneratePdf
+  10.vendorName = wapplersystems
+}
+
 quickInquiryPage = PAGE
 quickInquiryPage {
   typeNum = 989863
