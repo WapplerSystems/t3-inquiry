@@ -327,16 +327,16 @@ class InquiryController extends ActionController
         $userSession = $frontendUserAuthentication->getSession();
         $items = $userSession->get('items') ?? [];
 
+        $pdfFields = $this->request->getQueryParams()['pdf_fields'] ?? [];
+
         $resolvedItems = [];
         $indexedItems = [];
         foreach (array_values($items) as $i => $item) {
             $event = new ResolveItemEvent((int)$item['uid'], $item['type'], $this->request);
+            $event->setPdfFields($pdfFields[$item['hash']] ?? []);
             $this->eventDispatcher->dispatch($event);
             if ($event->getResolvedObject() !== null) {
-                $resolvedItems[] = [
-                    'object' => $event->getResolvedObject(),
-                    'htmlPreview' => $event->getHtmlPreviewPdf() ?? $event->getHtmlPreview(),
-                ];
+                $resolvedItems[] = $event->getHtmlPreviewPdf() ?? $event->getHtmlPreview();
                 $indexedItems[$i] = ['uid' => $item['uid'], 'type' => $item['type']];
             }
         }

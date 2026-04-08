@@ -5,24 +5,16 @@
 <style>
     body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
     h1 { font-size: 18px; margin-bottom: 20px; }
-    .item { border-bottom: 1px solid #ddd; padding: 10px 0; }
-    .item:last-child { border-bottom: none; }
-    .item-title { font-weight: bold; font-size: 13px; }
-    .preload-url { margin-top: 20px; font-size: 10px; color: #666; word-break: break-all; }
+    .preload-url { margin-top: 20px; font-size: 10px; color: #666; }
 </style>
 </head>
 <body>
 <h1>Merkzettel</h1>
+
 <f:for each="{items}" as="item">
-    <div class="item">
-        <f:if condition="{item.htmlPreview}">
-            <div class="inquiry-item-preview">
-                <f:format.raw>{item.htmlPreview}</f:format.raw>
-            </div>
-        </f:if>
-        <div class="item-title">{item.object.title}</div>
-    </div>
+    <f:format.raw>{item}</f:format.raw>
 </f:for>
+
 <div class="preload-url">
     <a href="{preloadUrl}"><f:translate key="LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:pdfLinkToList" /></a>
 </div>

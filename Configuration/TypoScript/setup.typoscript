@@ -25,6 +25,7 @@ plugin.tx_inquiry {
     ajaxToggleItemTypeNum = {$plugin.tx_inquiry.settings.ajaxToggleItemTypeNum}
     ajaxItemsListTypeNum = {$plugin.tx_inquiry.settings.ajaxItemsListTypeNum}
     ajaxRemoveItemTypeNum = {$plugin.tx_inquiry.settings.ajaxRemoveItemTypeNum}
+    generatePdfTypeNum = {$plugin.tx_inquiry.settings.generatePdfTypeNum}
 
     quickInquiryFormPageType = {$plugin.tx_inquiry.settings.quickInquiryFormPageType}
 

@@ -28,6 +28,10 @@
 				<source>Link to this list</source>
 				<target>Link zu dieser Liste</target>
 			</trans-unit>
+			<trans-unit id="generatePdf">
+				<source>Download PDF</source>
+				<target>PDF herunterladen</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

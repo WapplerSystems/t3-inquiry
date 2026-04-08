@@ -208,6 +208,27 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+
+  document.querySelectorAll('.inquiry-generate-pdf').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+
+      let url = this.href;
+      const pdfParams = [];
+
+      document.querySelectorAll('[data-inquiry-pdf-key][data-inquiry-pdf-hash]').forEach(function (input) {
+        const hash = input.getAttribute('data-inquiry-pdf-hash');
+        const key = input.getAttribute('data-inquiry-pdf-key');
+        pdfParams.push('pdf_fields[' + hash + '][' + key + ']=' + encodeURIComponent(input.value));
+      });
+
+      if (pdfParams.length > 0) {
+        url += '&' + pdfParams.join('&');
+      }
+
+      window.location.href = url;
+    });
+  });
 });
 
 document.addEventListener('DOMContentLoaded', function () {

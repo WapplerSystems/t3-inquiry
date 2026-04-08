@@ -21,6 +21,9 @@
 			<trans-unit id="pdfLinkToList">
 				<source>Link to this list</source>
 			</trans-unit>
+			<trans-unit id="generatePdf">
+				<source>Download PDF</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
