@@ -316,6 +316,12 @@ class InquiryController extends ActionController
             ? $this->uriBuilder->reset()->setTargetPageUid($listPageUid)->buildFrontendUri()
             : '/merkzettel/';
 
+        $prefill = $this->request->getQueryParams()['prefill'] ?? [];
+        if (!empty($prefill)) {
+            $separator = str_contains($redirectUri, '?') ? '&' : '?';
+            $redirectUri .= $separator . http_build_query(['prefill' => $prefill]);
+        }
+
         return $this->redirectToUri($redirectUri);
     }
 
@@ -343,7 +349,7 @@ class InquiryController extends ActionController
 
         $this->view->assignMultiple([
             'items' => $resolvedItems,
-            'preloadUrl' => $this->buildPreloadUrl(array_values($indexedItems)),
+            'preloadUrl' => $this->buildPreloadUrl(array_values($indexedItems), $pdfFields),
         ]);
         $html = $this->view->render();
 
@@ -358,18 +364,24 @@ class InquiryController extends ActionController
     }
 
 
-    private function buildPreloadUrl(array $items): string
+    private function buildPreloadUrl(array $items, array $pdfFields = []): string
     {
         $indexedItems = array_values(array_map(
             static fn($item) => ['uid' => $item['uid'], 'type' => $item['type']],
             $items
         ));
 
-        $site = $this->request->getAttribute('site');
-        return rtrim((string)$site->getBase(), '/') . '/?' . http_build_query([
+        $params = [
             'type' => (int)($this->settings['preloadItemsTypeNum'] ?? 678937),
             'tx_inquiry' => ['items' => $indexedItems],
-        ]);
+        ];
+
+        if (!empty($pdfFields)) {
+            $params['prefill'] = $pdfFields;
+        }
+
+        $site = $this->request->getAttribute('site');
+        return rtrim((string)$site->getBase(), '/') . '/?' . http_build_query($params);
     }
 
 

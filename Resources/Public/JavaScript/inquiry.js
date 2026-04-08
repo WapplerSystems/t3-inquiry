@@ -198,6 +198,19 @@ document.querySelectorAll('.inquiry-item-delete').forEach(btn => {
 })
 
 document.addEventListener('DOMContentLoaded', function () {
+  const params = new URLSearchParams(window.location.search);
+  params.forEach(function (value, key) {
+    const match = key.match(/^prefill\[([^\]]+)\]\[([^\]]+)\]$/);
+    if (match) {
+      const hash = match[1];
+      const fieldKey = match[2];
+      const input = document.querySelector('[data-inquiry-pdf-hash="' + hash + '"][data-inquiry-pdf-key="' + fieldKey + '"]');
+      if (input) {
+        input.value = value;
+      }
+    }
+  });
+
   addClickListenerToInquiryLinks();
   const form = document.getElementById('inquiryForm');
   if (form) {
