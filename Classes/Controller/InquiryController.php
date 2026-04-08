@@ -335,7 +335,7 @@ class InquiryController extends ActionController
             if ($event->getResolvedObject() !== null) {
                 $resolvedItems[] = [
                     'object' => $event->getResolvedObject(),
-                    'htmlPreview' => $event->getHtmlPreview(),
+                    'htmlPreview' => $event->getHtmlPreviewPdf() ?? $event->getHtmlPreview(),
                 ];
                 $indexedItems[$i] = ['uid' => $item['uid'], 'type' => $item['type']];
             }

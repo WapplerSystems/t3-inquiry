@@ -15,6 +15,7 @@ class ResolveItemEvent
     private ?FileReference $resolvedImage = null;
     private mixed $resolvedObject = null;
     private ?string $htmlPreview = null;
+    private ?string $htmlPreviewPdf = null;
     private ServerRequestInterface $request;
 
     public function __construct(int $uid, string $type, ServerRequestInterface $request)
@@ -82,6 +83,16 @@ class ResolveItemEvent
     public function setHtmlPreview(string $htmlPreview): void
     {
         $this->htmlPreview = $htmlPreview;
+    }
+
+    public function getHtmlPreviewPdf(): ?string
+    {
+        return $this->htmlPreviewPdf;
+    }
+
+    public function setHtmlPreviewPdf(string $htmlPreviewPdf): void
+    {
+        $this->htmlPreviewPdf = $htmlPreviewPdf;
     }
 
     public function getRequest(): ServerRequestInterface
