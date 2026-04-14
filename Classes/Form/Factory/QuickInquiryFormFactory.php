@@ -81,7 +81,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             $page,
             type: 'ItemName',
             id: 'itemName',
-            label: LocalizationUtility::translate('LLL:EXT:testgmbh_inquiry/Resources/Private/Language/form.xlf:quickInquiryForm.item-name'),
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:quickInquiryForm.item-name'),
             defaultValue: $configuration['resolvedItem']->getTitle(),
             properties: [
                 'fluidAdditionalAttributes' => [
@@ -96,7 +96,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             type: 'Textarea',
             id: 'Custom',
 //            label: 'Do you have any special requests?',
-            label: LocalizationUtility::translate('LLL:EXT:testgmbh_inquiry/Resources/Private/Language/form.xlf:quickInquiryForm.special-request'),
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:quickInquiryForm.special-request'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 1500
