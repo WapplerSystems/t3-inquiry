@@ -9,25 +9,30 @@
 		"offer",
 		"quote"
 	],
-	"homepage": "https://wappler.systems",
+	"homepage": "https://github.com/WapplerSystems/t3-inquiry",
 	"authors": [
 		{
 			"name": "Sven Wappler",
+			"email": "typo3@wappler.systems",
+			"role": "Developer",
+			"homepage": "https://wappler.systems"
+		},
+		{
+			"name": "Ilja Melnicenko",
+			"email": "typo3@wappler.systems",
 			"role": "Developer",
 			"homepage": "https://wappler.systems"
 		}
 	],
-	"license": [
-		"GPL-2.0+"
-	],
+	"license": "GPL-2.0-or-later",
+	"support": {
+		"issues": "https://github.com/WapplerSystems/t3-inquiry/issues",
+		"source": "https://github.com/WapplerSystems/t3-inquiry"
+	},
 	"require": {
 		"typo3/cms-core": "^13.0",
 		"typo3/cms-frontend": "^13.0",
 		"typo3/cms-form": "^13.0"
-	},
-	"suggest": {
-	},
-	"require-dev": {
 	},
 	"autoload": {
 		"psr-4": {
