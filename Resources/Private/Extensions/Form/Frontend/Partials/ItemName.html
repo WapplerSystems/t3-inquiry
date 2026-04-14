@@ -1,0 +1,28 @@
+
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+      xmlns:formvh="http://typo3.org/ns/TYPO3/CMS/Form/ViewHelpers"
+      xmlns:inq="http://typo3.org/ns/WapplerSystems/Inquiry/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<formvh:renderRenderable renderable="{element}">
+
+    <formvh:renderRenderable renderable="{element}">
+        <f:form.hidden
+            property="{element.identifier}"
+            value="{element.request.attributes.routing.pageId}"
+            id="{element.uniqueIdentifier}"
+            additionalAttributes="{formvh:translateElementProperty(element: element, property: 'fluidAdditionalAttributes')}"
+        />
+    </formvh:renderRenderable>
+
+    <div class="mb-3">
+        <div class="form-label">
+            <f:translate key="LLL:EXT:inquiry/Resources/Private/Language/form.xlf:quickInquiryForm.title" arguments="{0: '{inq:form.itemName(item: \'{element.properties.item}\')}'}" />
+        </div>
+        <div class="form-product-name">
+            <inq:form.itemName item="{element.properties.item}" />
+        </div>
+    </div>
+
+</formvh:renderRenderable>
+</html>

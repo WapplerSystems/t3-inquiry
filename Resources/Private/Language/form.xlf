@@ -4,8 +4,14 @@
 		<header/>
 		<body>
 
-			<trans-unit id="element.name.properties.label">
-				<source>Name</source>
+			<trans-unit id="element.firstname.properties.label">
+				<source>First Name</source>
+			</trans-unit>
+			<trans-unit id="element.lastname.properties.label">
+				<source>Last Name</source>
+			</trans-unit>
+			<trans-unit id="element.salutaion.properties.label">
+				<source>Salutation</source>
 			</trans-unit>
 			<trans-unit id="element.email.properties.label">
 				<source>Email</source>
@@ -19,6 +25,18 @@
 			<trans-unit id="element.country.properties.label">
 				<source>Country</source>
 			</trans-unit>
+			<trans-unit id="element.street.properties.label">
+				<source>Street</source>
+			</trans-unit>
+			<trans-unit id="element.housenumber.properties.label">
+				<source>Nr.</source>
+			</trans-unit>
+			<trans-unit id="element.zipcode.properties.label">
+				<source>Zipcode</source>
+			</trans-unit>
+			<trans-unit id="element.city.properties.label">
+				<source>City</source>
+			</trans-unit>
 			<trans-unit id="element.requestType.properties.label">
 				<source>Type of request</source>
 			</trans-unit>
@@ -26,14 +44,17 @@
 				<source>Type of request</source>
 			</trans-unit>
 
-			<trans-unit id="inquiryFormPage.element.requestType.properties.label">
+			<trans-unit id="inquiryForm.element.requestType.properties.label">
 				<source>Your type of request</source>
 			</trans-unit>
-			<trans-unit id="inquiryFormPage.element.message.properties.label">
+			<trans-unit id="inquiryForm.element.message.properties.label">
 				<source>Your message</source>
 			</trans-unit>
-			<trans-unit id="element.inquiryFormPage.renderingOptions.submitButtonLabel">
+			<trans-unit id="element.inquiryForm.renderingOptions.submitButtonLabel">
 				<source>Send inquiry</source>
+			</trans-unit>
+			<trans-unit id="inquiryForm.element.requestType.properties.prependOptionLabel">
+				<source>Please select</source>
 			</trans-unit>
 
 			<trans-unit id="confirmation.title">
@@ -42,8 +63,16 @@
 			<trans-unit id="confirmation.message">
 				<source>Thank you for your inquiry. We will get back to you as soon as possible.</source>
 			</trans-unit>
-			<trans-unit id="inquiryFormPage.element.requestType.properties.prependOptionLabel">
-				<source>Please select</source>
+
+
+			<trans-unit id="element.quickInquiryForm.renderingOptions.submitButtonLabel">
+				<source>Send inquiry</source>
+			</trans-unit>
+			<trans-unit id="quickInquiryForm.title">
+				<source>We would be happy to provide you with a quote and advise you on individual configuration.</source>
+			</trans-unit>
+			<trans-unit id="quickInquiryForm.special-request">
+				<source>Do you have any special requests?</source>
 			</trans-unit>
 
 		</body>

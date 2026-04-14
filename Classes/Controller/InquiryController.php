@@ -6,8 +6,10 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Event\CanResolveItemByIdentifierEvent;
+use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 
 class InquiryController extends ActionController
 {
@@ -34,7 +36,7 @@ class InquiryController extends ActionController
 
         $items = $userSession->get('items') ?? [];
 
-        $arguments = $this->request->getArguments()['inquiryFormPage'] ?? [];
+        $arguments = $this->request->getArguments()['inquiryForm'] ?? [];
         foreach ($items as $key => $item) {
             if (($arguments['itemDelete_' . $item['hash']] ?? 0) === '1') {
                 unset($items[$key]);
@@ -48,7 +50,7 @@ class InquiryController extends ActionController
         if (count($items) === 0) {
 
             $this->addFlashMessage(
-                'No items were added',
+                LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:noItemsAdded', 'inquiry'),
                 '',
                 ContextualFeedbackSeverity::INFO,
                 false);
@@ -69,9 +71,33 @@ class InquiryController extends ActionController
     public function quickFormAction(): ResponseInterface
     {
 
-        // TODO: implement quick form
+        if (($this->settings['subject'] ?? '') === '') {
+            return $this->htmlResponse('<div class="alert alert-warning">The inquiry form subject setting is required.</div>');
+        }
+        if (count($this->settings['recipients'] ?? []) === 0) {
+            return $this->htmlResponse('<div class="alert alert-warning">Please set recipients.</div>');
+        }
+
+        $uid = (int)($this->request->getQueryParams()['item-uid'] ?? null);
+        $type = $this->request->getQueryParams()['item-type'] ?? null;
+
+
+        $event = new ResolveItemEvent($uid, $type, $this->request);
+        $this->eventDispatcher->dispatch($event);
+
+        if ($event->getResolvedObject() === null) {
+            return $this->htmlResponse('<div class="alert alert-warning">Item could not be resolved.</div>');
+        }
+
+        $this->settings['resolvedItem'] = $event->getResolvedObject();
+        $this->settings['itemData'] = [
+            'uid' => $uid,
+            'type' => $type,
+        ];
+
         $this->view->assignMultiple([
-            'item' => null
+            'item' => $event->getResolvedObject(),
+            'settings' => $this->settings,
         ]);
 
         return $this->htmlResponse();

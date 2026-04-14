@@ -14,6 +14,16 @@
 				<source>Remove</source>
 				<target>Entfernen</target>
 			</trans-unit>
+
+			<trans-unit id="directInquiry">
+				<source>Direct Inquiry</source>
+				<target>Direkt-Anfrage stellen</target>
+			</trans-unit>
+
+			<trans-unit id="noItemsAdded">
+				<source>The inquiry list is empty. No Products were selected, please go to product pages and add products to the inquiry list</source>
+				<target>Die Anfrageliste ist leer. Es wurden keine Produkte ausgewählt. Bitte besuchen Sie die Produktseiten und fügen Sie Produkte zur Anfrageliste hinzu.</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

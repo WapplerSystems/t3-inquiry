@@ -26,6 +26,8 @@ plugin.tx_inquiry {
     ajaxItemsListTypeNum = {$plugin.tx_inquiry.settings.ajaxItemsListTypeNum}
     ajaxRemoveItemTypeNum = {$plugin.tx_inquiry.settings.ajaxRemoveItemTypeNum}
 
+    quickInquiryFormPageType = {$plugin.tx_inquiry.settings.quickInquiryFormPageType}
+
     emptyList = {$plugin.tx_inquiry.settings.emptyList}
 
   }
@@ -134,4 +136,31 @@ removeItemInquiryPage {
   10.extensionName = Inquiry
   10.pluginName = RemoveItem
   10.vendorName = wapplersystems
+}
+
+quickInquiryPage = PAGE
+quickInquiryPage {
+  typeNum = 989863
+
+  config {
+    disableAllHeaderCode = 1
+    xhtml_cleaning = none
+    admPanel = 0
+    debug = 0
+    disablePrefixComment = 1
+    metaCharset = utf-8
+    additionalHeaders.10.header = Content-Type:application/json;charset=UTF-8
+    disableBodyTag = 1
+    no_cache = 1
+  }
+
+  10 = CONTENT
+  10 {
+    table = tt_content
+    select {
+      pidInList = {$plugin.tx_inquiry.settings.quickFormPageUid}
+      where = colPos=0
+      orderBy = sorting
+    }
+  }
 }

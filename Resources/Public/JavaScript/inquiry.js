@@ -199,10 +199,10 @@ document.querySelectorAll('.inquiry-item-delete').forEach(btn => {
 
 document.addEventListener('DOMContentLoaded', function () {
   addClickListenerToInquiryLinks();
-  const form = document.getElementById('inquiryFormPage');
+  const form = document.getElementById('inquiryForm');
   if (form) {
     form.addEventListener('submit', function (e) {
-      const completedField = document.getElementById('inquiryFormPage-completed');
+      const completedField = document.getElementById('inquiryForm-completed');
       if (completedField) {
         completedField.value = '1';
       }
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-  const completedField = document.getElementById('inquiryFormPage-completed');
+  const completedField = document.getElementById('inquiryForm-completed');
   if (completedField) {
     completedField.value = '';
   }

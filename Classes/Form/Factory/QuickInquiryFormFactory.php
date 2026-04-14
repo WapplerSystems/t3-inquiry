@@ -26,6 +26,9 @@ use TYPO3\CMS\Form\Domain\Renderer\FluidFormRenderer;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Domain\Model\RequestTextTemplate;
 use WapplerSystems\Inquiry\Domain\Repository\RequestTextTemplateRepository;
+use WapplerSystems\Inquiry\Event\BuildInquiryQuickFormContactEvent;
+use WapplerSystems\Inquiry\Event\CreateConfirmationFinisherEvent;
+use WapplerSystems\Inquiry\Event\CreateEmailToReceiverFinisherEvent;
 
 class QuickInquiryFormFactory extends AbstractFormFactory
 {
@@ -60,9 +63,15 @@ class QuickInquiryFormFactory extends AbstractFormFactory
         $configurationService = GeneralUtility::makeInstance(ConfigurationService::class);
         $prototypeConfiguration = $configurationService->getPrototypeConfiguration('standard');
 
-        $formDefinition = GeneralUtility::makeInstance(FormDefinition::class, 'inquiryFormPage', $prototypeConfiguration);
+        $formDefinition = GeneralUtility::makeInstance(FormDefinition::class, 'quickInquiryForm', $prototypeConfiguration);
         $formDefinition->setRendererClassName(FluidFormRenderer::class);
         $formDefinition->setRenderingOption('controllerAction', 'form');
+        $formDefinition->setRenderingOption('additionalParams', [
+            'item-uid' => $configuration['itemData']['uid'],
+            'item-type' => $configuration['itemData']['type'],
+        ]);
+        $formDefinition->setRenderingOption('pageType', $configuration['quickInquiryFormPageType']);
+
         $resolver = GeneralUtility::makeInstance(ValidatorResolver::class);
 
         /** @var Page $page */
@@ -70,10 +79,15 @@ class QuickInquiryFormFactory extends AbstractFormFactory
 
         $this->addFormElement(
             $page,
-            type: 'Hidden',
-            id: 'completed',
-            validators: [
-                $resolver->createValidator(NotEmptyValidator::class)
+            type: 'ItemName',
+            id: 'itemName',
+            label: LocalizationUtility::translate('LLL:EXT:testgmbh_inquiry/Resources/Private/Language/form.xlf:quickInquiryForm.item-name'),
+            defaultValue: $configuration['resolvedItem']->getTitle(),
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 1500
+                ],
+                'item' => $configuration['resolvedItem']
             ]
         );
 
@@ -81,7 +95,8 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             $page,
             type: 'Textarea',
             id: 'Custom',
-            label: 'Do you have any special requests?',
+//            label: 'Do you have any special requests?',
+            label: LocalizationUtility::translate('LLL:EXT:testgmbh_inquiry/Resources/Private/Language/form.xlf:quickInquiryForm.special-request'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 1500
@@ -132,10 +147,170 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             ]
         );
 
+        /** @var GridRow $gridRowLeftColumn */
+        $gridRowLeftColumn = $this->addFormElement(
+            $leftColumn,
+            type: 'GridRow',
+            id: 'gridRowLeftColumn',
+        );
+
+        /** @var Section $leftNameColumn */
+        $leftNameColumn = $this->addFormElement(
+            $gridRowLeftColumn,
+            type: 'Fieldset',
+            id: 'leftNameColumn',
+            properties: [
+                'gridColumnClassAutoConfiguration' => [
+                    'viewPorts' => [
+                        'xxl' => [
+                            'numbersOfColumnsToUse' => 3
+                        ],
+                        'xl' => [
+                            'numbersOfColumnsToUse' => 3
+                        ],
+                        'lg' => [
+                            'numbersOfColumnsToUse' => 3
+                        ],
+                        'md' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'sm' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'xs' => [
+                            'numbersOfColumnsToUse' => 12
+                        ]
+                    ]
+                ]
+            ]
+        );
+
+        /** @var Section $rightNameColumn */
+        $rightNameColumn = $this->addFormElement(
+            $gridRowLeftColumn,
+            type: 'Fieldset',
+            id: 'rightNameColumn',
+            properties: [
+                'gridColumnClassAutoConfiguration' => [
+                    'viewPorts' => [
+                        'xxl' => [
+                            'numbersOfColumnsToUse' => 9
+                        ],
+                        'xl' => [
+                            'numbersOfColumnsToUse' => 9
+                        ],
+                        'lg' => [
+                            'numbersOfColumnsToUse' => 9
+                        ],
+                        'md' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'sm' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'xs' => [
+                            'numbersOfColumnsToUse' => 12
+                        ]
+                    ]
+                ]
+            ]
+        );
+
+        /** @var Section $rightColumn */
+        $rightColumn = $this->addFormElement(
+            $gridRow,
+            type: 'Fieldset',
+            id: 'rightColumn',
+        );
+
+        $this->addFormElement(
+            $rightColumn,
+            type: 'Text',
+            id: 'company',
+            label: 'company',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 300
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(NotEmptyValidator::class),
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+            ]
+        );
+
+        /** @var GridRow $gridRowRightColumn */
+        $gridRowRightColumn = $this->addFormElement(
+            $rightColumn,
+            type: 'GridRow',
+            id: 'gridRowRightColumn',
+        );
+
+        /** @var Section $leftAddressColumn */
+        $leftAddressColumn = $this->addFormElement(
+            $gridRowRightColumn,
+            type: 'Fieldset',
+            id: 'leftAddressColumn',
+            properties: [
+                'gridColumnClassAutoConfiguration' => [
+                    'viewPorts' => [
+                        'xxl' => [
+                            'numbersOfColumnsToUse' => 9
+                        ],
+                        'xl' => [
+                            'numbersOfColumnsToUse' => 9
+                        ],
+                        'lg' => [
+                            'numbersOfColumnsToUse' => 9
+                        ],
+                        'md' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'sm' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'xs' => [
+                            'numbersOfColumnsToUse' => 12
+                        ]
+                    ]
+                ]
+            ]
+        );
+
+        /** @var Section $rightAddressColumn */
+        $rightAddressColumn = $this->addFormElement(
+            $gridRowRightColumn,
+            type: 'Fieldset',
+            id: 'rightAddressColumn',
+            properties: [
+                'gridColumnClassAutoConfiguration' => [
+                    'viewPorts' => [
+                        'xxl' => [
+                            'numbersOfColumnsToUse' => 3
+                        ],
+                        'xl' => [
+                            'numbersOfColumnsToUse' => 3
+                        ],
+                        'lg' => [
+                            'numbersOfColumnsToUse' => 3
+                        ],
+                        'md' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'sm' => [
+                            'numbersOfColumnsToUse' => 12
+                        ],
+                        'xs' => [
+                            'numbersOfColumnsToUse' => 12
+                        ]
+                    ]
+                ]
+            ]
+        );
+
 
         $requestTextTemplates = $this->requestTextTemplateRepository->findAll();
         $requestTextTemplatesOptions = [];
-        //DebugUtility::debug($requestTextTemplates);
         /** @var RequestTextTemplate $requestTextTemplate */
         foreach ($requestTextTemplates as $requestTextTemplate) {
             /*
@@ -145,26 +320,48 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             ];*/
             $requestTextTemplatesOptions[$requestTextTemplate->getUid()] = $requestTextTemplate->getTitle();
         }
-        //DebugUtility::debug($requestTextTemplatesOptions);
 
         $items = [];
         if ($userSession->get('items')) {
             $items = $userSession->get('items');
         }
 
-        /** @var Section $rightColumn */
-        $rightColumn = $this->addFormElement(
-            $gridRow,
-            type: 'Fieldset',
-            id: 'rightColumn',
+        $this->addFormElement(
+            $leftNameColumn,
+            type: 'Text',
+            id: 'salutaion',
+            label: 'salutation',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 50
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 50])
+            ]
         );
 
+        $this->addFormElement(
+            $rightNameColumn,
+            type: 'Text',
+            id: 'firstname',
+            label: 'firstname',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 300
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(NotEmptyValidator::class),
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+            ]
+        );
 
         $this->addFormElement(
             $leftColumn,
             type: 'Text',
-            id: 'name',
-            label: 'name',
+            id: 'lastname',
+            label: 'lastname',
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 300
@@ -206,24 +403,9 @@ class QuickInquiryFormFactory extends AbstractFormFactory
                 $resolver->createValidator(StringLengthValidator::class, ['maximum' => 20])
             ]
         );
-        $this->addFormElement(
-            $leftColumn,
-            type: 'Text',
-            id: 'company',
-            label: 'company',
-            properties: [
-                'fluidAdditionalAttributes' => [
-                    'maxlength' => 300
-                ]
-            ],
-            validators: [
-                $resolver->createValidator(NotEmptyValidator::class),
-                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
-            ]
-        );
 
         $this->addFormElement(
-            $rightColumn,
+            $leftAddressColumn,
             type: 'Text',
             id: 'street',
             label: 'Street',
@@ -237,6 +419,23 @@ class QuickInquiryFormFactory extends AbstractFormFactory
                 $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
             ]
         );
+
+        $this->addFormElement(
+            $rightAddressColumn,
+            type: 'Text',
+            id: 'housenumber',
+            label: 'housenumber',
+            properties: [
+                'fluidAdditionalAttributes' => [
+                    'maxlength' => 300
+                ]
+            ],
+            validators: [
+                $resolver->createValidator(NotEmptyValidator::class),
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 30])
+            ]
+        );
+
         /** @var GridRow $gridRow */
         $gridRow2 = $this->addFormElement(
             $rightColumn,
@@ -349,20 +548,35 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             ]
         );
 
+        $this->eventDispatcher->dispatch(new BuildInquiryQuickFormContactEvent($formDefinition, $gridRow, $request));
+
+        $recipients = [];
+        foreach ($configuration['recipients'] ?? [] as $recipient) {
+            $recipients[$recipient['container']['address']] = $recipient['container']['name'];
+        }
+        $replyToRecipients = [
+            '{email}' => '{name}'
+        ];
+
+        $mailSettings = $GLOBALS['TYPO3_CONF_VARS']['MAIL'];
+
         $emailToReceiver = $formDefinition->createFinisher('EmailToReceiver');
         $emailToReceiver->setOptions([
-            'subject' => 'New inquiry',
-            'recipients' => [
-                'wappler@wappler.systems' => 'WDWDWDWDDD'
-            ],
-            'senderName' => 'Mail from inquiry form',
-            'senderAddress' => 'dwddwdw@ededed.de',
-            'replyToAddress' => '{email}',
-            'replyToName' => '{name}',
+            'subject' => $configuration['subject'] ?? 'Mail from inquiry form',
+            'recipients' => $recipients,
+            'senderName' => $mailSettings['defaultMailFromName'],
+            'senderAddress' => $mailSettings['defaultMailFromAddress'],
+            'replyToRecipients' => $replyToRecipients,
             'templateName' => 'MailToReceiver',
             'templateRootPaths' => [
                 34240 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/EmailToReceiver/',
             ]
+        ]);
+        $this->eventDispatcher->dispatch(new CreateEmailToReceiverFinisherEvent($emailToReceiver, $configuration));
+
+        $inquiryFinisher = $formDefinition->createFinisher('Inquiry');
+        $inquiryFinisher->setOptions([
+            'emptyList' => ($configuration['emptyList']  ?? '1') === '1',
         ]);
 
 
@@ -374,6 +588,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
                 10 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/Confirmation/',
             ]
         ]);
+        $this->eventDispatcher->dispatch(new CreateConfirmationFinisherEvent($confirmationFinisher));
 
 
         $this->triggerFormBuildingFinished($formDefinition);
