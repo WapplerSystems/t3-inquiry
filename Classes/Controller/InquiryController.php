@@ -9,6 +9,7 @@ use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
+use WapplerSystems\Inquiry\Domain\Repository\ListSnapshotRepository;
 use WapplerSystems\Inquiry\Event\CanResolveItemByIdentifierEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 
@@ -16,8 +17,10 @@ class InquiryController extends ActionController
 {
 
 
-    public function __construct(EventDispatcherInterface $eventDispatcher)
-    {
+    public function __construct(
+        EventDispatcherInterface $eventDispatcher,
+        private readonly ListSnapshotRepository $listSnapshotRepository,
+    ) {
     }
 
 
@@ -274,37 +277,70 @@ class InquiryController extends ActionController
 
         $data = [
             'items' => $items,
-            'preloadUrl' => $this->buildPreloadUrl($items),
         ];
 
         return $this->jsonResponse(json_encode($data));
     }
+
+    public function saveListSnapshotAction(): ResponseInterface
+    {
+        $rawBody = $this->request->getBody()->getContents();
+        $body = json_decode($rawBody, true) ?? [];
+        $items = $body['items'] ?? [];
+        $prefill = $body['prefill'] ?? [];
+
+        $identifier = md5(json_encode(['items' => array_values($items), 'prefill' => $prefill]));
+        $this->listSnapshotRepository->save($identifier, array_values($items), $prefill);
+
+        return $this->jsonResponse(json_encode(['identifier' => $identifier]));
+    }
+
+    public function getPrefillAction(): ResponseInterface
+    {
+        $identifier = $this->request->getQueryParams()['tx_inquiry']['identifier'] ?? '';
+        if ($identifier === '') {
+            return $this->jsonResponse(json_encode(['prefill' => []]))->withStatus(400);
+        }
+
+        $snapshot = $this->listSnapshotRepository->findByIdentifier($identifier);
+        if ($snapshot === null) {
+            return $this->jsonResponse(json_encode(['prefill' => []]))->withStatus(404);
+        }
+
+        return $this->jsonResponse(json_encode(['prefill' => $snapshot['prefill']]));
+    }
+
     public function preloadItemsAction(): ResponseInterface
     {
-        $params = $this->request->getQueryParams()['tx_inquiry'] ?? [];
-        $itemsParam = $params['items'] ?? [];
+        $identifier = $this->request->getQueryParams()['tx_inquiry']['identifier'] ?? '';
+        if ($identifier === '') {
+            return $this->redirectToUri($this->getFallbackListUri());
+        }
+
+        $snapshot = $this->listSnapshotRepository->findByIdentifier($identifier);
+        if ($snapshot === null) {
+            return $this->redirectToUri($this->getFallbackListUri());
+        }
 
         /** @var FrontendUserAuthentication $frontendUserAuthentication */
         $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
         $userSession = $frontendUserAuthentication->getSession();
 
         $items = [];
-        if (is_array($itemsParam)) {
-            foreach ($itemsParam as $entry) {
-                $uid = (int)($entry['uid'] ?? 0);
-                $type = $entry['type'] ?? '';
-                if ($uid <= 0 || $type === '') {
-                    continue;
-                }
-                $event = new CanResolveItemByIdentifierEvent($uid, $type, $this->request);
-                $this->eventDispatcher->dispatch($event);
-                if (!$event->isResult()) {
-                    continue;
-                }
-                $hash = md5($uid . '_' . $type);
-                if (!in_array($hash, array_column($items, 'hash'), true)) {
-                    $items[] = ['uid' => $uid, 'type' => $type, 'hash' => $hash];
-                }
+        foreach ($snapshot['items'] as $entry) {
+            $uid = (int)($entry['uid'] ?? 0);
+            $type = $entry['type'] ?? '';
+            if ($uid <= 0 || $type === '') {
+                continue;
+            }
+            $event = new CanResolveItemByIdentifierEvent($uid, $type, $this->request);
+            $this->eventDispatcher->dispatch($event);
+            if (!$event->isResult()) {
+                continue;
+            }
+            $hash = md5($uid . '_' . $type);
+            if (!in_array($hash, array_column($items, 'hash'), true)) {
+                $items[] = ['uid' => $uid, 'type' => $type, 'hash' => $hash];
             }
         }
 
@@ -312,15 +348,12 @@ class InquiryController extends ActionController
         $frontendUserAuthentication->storeSessionData();
 
         $listPageUid = (int)($this->settings['listPageUid'] ?? 0);
-        $redirectUri = $listPageUid > 0
+        $baseUri = $listPageUid > 0
             ? $this->uriBuilder->reset()->setTargetPageUid($listPageUid)->buildFrontendUri()
             : '/merkzettel/';
 
-        $prefill = $this->request->getQueryParams()['prefill'] ?? [];
-        if (!empty($prefill)) {
-            $separator = str_contains($redirectUri, '?') ? '&' : '?';
-            $redirectUri .= $separator . http_build_query(['prefill' => $prefill]);
-        }
+        $separator = str_contains($baseUri, '?') ? '&' : '?';
+        $redirectUri = $baseUri . $separator . http_build_query(['tx_inquiry' => ['identifier' => $identifier]]);
 
         return $this->redirectToUri($redirectUri);
     }
@@ -328,28 +361,34 @@ class InquiryController extends ActionController
 
     public function generatePdfAction(): ResponseInterface
     {
-        /** @var FrontendUserAuthentication $frontendUserAuthentication */
-        $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
-        $userSession = $frontendUserAuthentication->getSession();
-        $items = $userSession->get('items') ?? [];
+        $identifier = $this->request->getQueryParams()['tx_inquiry']['identifier'] ?? '';
+        if ($identifier === '') {
+            return $this->responseFactory->createResponse(400)
+                ->withBody($this->streamFactory->createStream('Missing identifier'));
+        }
 
-        $pdfFields = $this->request->getQueryParams()['pdf_fields'] ?? [];
+        $snapshot = $this->listSnapshotRepository->findByIdentifier($identifier);
+        if ($snapshot === null) {
+            return $this->responseFactory->createResponse(404)
+                ->withBody($this->streamFactory->createStream('Snapshot not found'));
+        }
+
+        $items = $snapshot['items'];
+        $pdfFields = $snapshot['prefill'];
 
         $resolvedItems = [];
-        $indexedItems = [];
-        foreach (array_values($items) as $i => $item) {
+        foreach (array_values($items) as $item) {
             $event = new ResolveItemEvent((int)$item['uid'], $item['type'], $this->request);
             $event->setPdfFields($pdfFields[$item['hash']] ?? []);
             $this->eventDispatcher->dispatch($event);
             if ($event->getResolvedObject() !== null) {
                 $resolvedItems[] = $event->getHtmlPreviewPdf() ?? $event->getHtmlPreview();
-                $indexedItems[$i] = ['uid' => $item['uid'], 'type' => $item['type']];
             }
         }
 
         $this->view->assignMultiple([
-            'items' => $resolvedItems,
-            'preloadUrl' => $this->buildPreloadUrl(array_values($indexedItems), $pdfFields),
+            'items'      => $resolvedItems,
+            'preloadUrl' => $this->buildPreloadUrl($identifier),
         ]);
         $html = $this->view->render();
 
@@ -364,24 +403,22 @@ class InquiryController extends ActionController
     }
 
 
-    private function buildPreloadUrl(array $items, array $pdfFields = []): string
+    private function buildPreloadUrl(string $identifier): string
     {
-        $indexedItems = array_values(array_map(
-            static fn($item) => ['uid' => $item['uid'], 'type' => $item['type']],
-            $items
-        ));
-
         $params = [
-            'type' => (int)($this->settings['preloadItemsTypeNum'] ?? 678937),
-            'tx_inquiry' => ['items' => $indexedItems],
+            'type'       => (int)($this->settings['preloadItemsTypeNum'] ?? 678937),
+            'tx_inquiry' => ['identifier' => $identifier],
         ];
-
-        if (!empty($pdfFields)) {
-            $params['prefill'] = $pdfFields;
-        }
-
         $site = $this->request->getAttribute('site');
         return rtrim((string)$site->getBase(), '/') . '/?' . http_build_query($params);
+    }
+
+    private function getFallbackListUri(): string
+    {
+        $listPageUid = (int)($this->settings['listPageUid'] ?? 0);
+        return $listPageUid > 0
+            ? $this->uriBuilder->reset()->setTargetPageUid($listPageUid)->buildFrontendUri()
+            : '/merkzettel/';
     }
 
 

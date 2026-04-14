@@ -26,6 +26,8 @@ plugin.tx_inquiry {
     ajaxItemsListTypeNum = {$plugin.tx_inquiry.settings.ajaxItemsListTypeNum}
     ajaxRemoveItemTypeNum = {$plugin.tx_inquiry.settings.ajaxRemoveItemTypeNum}
     generatePdfTypeNum = {$plugin.tx_inquiry.settings.generatePdfTypeNum}
+    saveListSnapshotTypeNum = {$plugin.tx_inquiry.settings.saveListSnapshotTypeNum}
+    getPrefillTypeNum = {$plugin.tx_inquiry.settings.getPrefillTypeNum}
 
     quickInquiryFormPageType = {$plugin.tx_inquiry.settings.quickInquiryFormPageType}
 
@@ -60,6 +62,20 @@ page.headerData {
   76892.typolink.returnLast = url
   76892.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.ajaxRemoveItemTypeNum}
   76892.wrap = <meta name="inquiry-remove-item" content="|">
+
+  76893 = TEXT
+  76893.typolink.parameter.data = TSFE:id
+  76893.typolink.forceAbsoluteUrl = 1
+  76893.typolink.returnLast = url
+  76893.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.saveListSnapshotTypeNum}
+  76893.wrap = <meta name="inquiry-save-snapshot" content="|">
+
+  76894 = TEXT
+  76894.typolink.parameter.data = TSFE:id
+  76894.typolink.forceAbsoluteUrl = 1
+  76894.typolink.returnLast = url
+  76894.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.getPrefillTypeNum}
+  76894.wrap = <meta name="inquiry-get-prefill" content="|">
 }
 
 
@@ -183,6 +199,52 @@ generatePdfPage {
   10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
   10.extensionName = Inquiry
   10.pluginName = GeneratePdf
+  10.vendorName = wapplersystems
+}
+
+saveListSnapshotPage = PAGE
+saveListSnapshotPage {
+  typeNum = {$plugin.tx_inquiry.settings.saveListSnapshotTypeNum}
+
+  config {
+    disableAllHeaderCode = 1
+    xhtml_cleaning = none
+    admPanel = 0
+    debug = 0
+    disablePrefixComment = 1
+    metaCharset = utf-8
+    additionalHeaders.10.header = Content-Type:application/json;charset=UTF-8
+    disableBodyTag = 1
+    no_cache = 1
+  }
+
+  10 = USER
+  10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+  10.extensionName = Inquiry
+  10.pluginName = SaveListSnapshot
+  10.vendorName = wapplersystems
+}
+
+getPrefillPage = PAGE
+getPrefillPage {
+  typeNum = {$plugin.tx_inquiry.settings.getPrefillTypeNum}
+
+  config {
+    disableAllHeaderCode = 1
+    xhtml_cleaning = none
+    admPanel = 0
+    debug = 0
+    disablePrefixComment = 1
+    metaCharset = utf-8
+    additionalHeaders.10.header = Content-Type:application/json;charset=UTF-8
+    disableBodyTag = 1
+    no_cache = 1
+  }
+
+  10 = USER
+  10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+  10.extensionName = Inquiry
+  10.pluginName = GetPrefill
   10.vendorName = wapplersystems
 }
 
