@@ -1,0 +1,17 @@
+settings:
+  plugin.tx_inquiry.settings.listPageUid:
+    label: 'UID of the page containing the inquiry list'
+    type: int
+    default: 0
+  plugin.tx_inquiry.settings.quickFormPageUid:
+    label: 'Quickform page UID'
+    type: int
+    default: 0
+  plugin.tx_inquiry.settings.quickInquiryFormPageType:
+    label: 'Page type of the Quickform'
+    type: int
+    default: 0
+  plugin.tx_inquiry.settings.emptyList:
+    label: 'Empty list after submission'
+    type: bool
+    default: true

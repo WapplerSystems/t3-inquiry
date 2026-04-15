@@ -4,6 +4,7 @@ namespace WapplerSystems\Inquiry\Controller;
 
 use Mpdf\Mpdf;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
@@ -392,7 +393,14 @@ class InquiryController extends ActionController
         ]);
         $html = $this->view->render();
 
-        $mpdf = new Mpdf();
+        $ttfPath = $this->getT3bootstrapTtfPath();
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $mpdf = new Mpdf([
+            'fontDir'  => array_merge($defaultConfig['fontDir'], [dirname($ttfPath)]),
+            'fontdata' => array_merge($defaultFontConfig['fontdata'], ['t3bootstrap' => ['R' => basename($ttfPath)]]),
+        ]);
+
         $mpdf->WriteHTML($html);
         $pdfContent = $mpdf->Output('', 'S');
 
@@ -402,6 +410,63 @@ class InquiryController extends ActionController
             ->withBody($this->streamFactory->createStream($pdfContent));
     }
 
+
+    private function getT3bootstrapTtfPath(): string
+    {
+        $ttfPath = sys_get_temp_dir() . '/t3bootstrap_icon.ttf';
+        if (!file_exists($ttfPath)) {
+            $woff = (string)file_get_contents(GeneralUtility::getFileAbsFileName('EXT:template/Resources/Public/Fonts/T3Bootstrap/t3bootstrap.woff'));
+            file_put_contents($ttfPath, $this->woffToTtf($woff));
+        }
+        return $ttfPath;
+    }
+
+    private function woffToTtf(string $woff): string
+    {
+        $header = unpack('Nsig/Nflavor/Nlength/nnumTables', substr($woff, 0, 14));
+        $numTables = $header['numTables'];
+        $flavor = $header['flavor'];
+
+        $tables = [];
+        $pos = 44;
+        for ($i = 0; $i < $numTables; $i++) {
+            $entry = unpack('a4tag/Noffset/NcompLength/NorigLength/NorigChecksum', substr($woff, $pos, 20));
+            $tables[] = $entry;
+            $pos += 20;
+        }
+        usort($tables, static fn($a, $b) => strcmp($a['tag'], $b['tag']));
+
+        $entrySelector = (int)floor(log($numTables, 2));
+        $searchRange = (int)(pow(2, $entrySelector) * 16);
+        $rangeShift = $numTables * 16 - $searchRange;
+
+        $ttf = pack('Nnnnn', $flavor, $numTables, $searchRange, $entrySelector, $rangeShift);
+
+        $dataStart = 12 + $numTables * 16;
+        $currentOffset = $dataStart;
+        $offsets = [];
+        foreach ($tables as $table) {
+            $offsets[] = $currentOffset;
+            $currentOffset += $table['origLength'];
+            $currentOffset = ($currentOffset + 3) & ~3;
+        }
+
+        foreach ($tables as $i => $table) {
+            $ttf .= pack('a4NNN', $table['tag'], $table['origChecksum'], $offsets[$i], $table['origLength']);
+        }
+
+        foreach ($tables as $table) {
+            $data = substr($woff, $table['offset'], $table['compLength']);
+            if ($table['compLength'] < $table['origLength']) {
+                $data = (string)zlib_decode($data);
+            }
+            $ttf .= $data;
+            $pad = (4 - (strlen($data) % 4)) % 4;
+            $ttf .= str_repeat("\0", $pad);
+        }
+
+        return $ttf;
+    }
 
     private function buildPreloadUrl(string $identifier): string
     {
