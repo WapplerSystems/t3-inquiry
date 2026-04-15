@@ -351,7 +351,7 @@ class InquiryController extends ActionController
         $listPageUid = (int)($this->settings['listPageUid'] ?? 0);
         $baseUri = $listPageUid > 0
             ? $this->uriBuilder->reset()->setTargetPageUid($listPageUid)->buildFrontendUri()
-            : '/merkzettel/';
+            : '/';
 
         $separator = str_contains($baseUri, '?') ? '&' : '?';
         $redirectUri = $baseUri . $separator . http_build_query(['tx_inquiry' => ['identifier' => $identifier]]);
@@ -474,8 +474,8 @@ class InquiryController extends ActionController
             'type'       => (int)($this->settings['preloadItemsTypeNum'] ?? 678937),
             'tx_inquiry' => ['identifier' => $identifier],
         ];
-        $site = $this->request->getAttribute('site');
-        return rtrim((string)$site->getBase(), '/') . '/?' . http_build_query($params);
+        $language = $this->request->getAttribute('language');
+        return rtrim((string)$language->getBase(), '/') . '/?' . http_build_query($params);
     }
 
     private function getFallbackListUri(): string
@@ -483,7 +483,7 @@ class InquiryController extends ActionController
         $listPageUid = (int)($this->settings['listPageUid'] ?? 0);
         return $listPageUid > 0
             ? $this->uriBuilder->reset()->setTargetPageUid($listPageUid)->buildFrontendUri()
-            : '/merkzettel/';
+            : '/';
     }
 
 
