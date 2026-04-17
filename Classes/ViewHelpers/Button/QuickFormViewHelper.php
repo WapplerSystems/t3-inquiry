@@ -58,7 +58,7 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
             return $this->tag->render();
         }
 
-        $uri = $this->renderFrontendLinkWithCoreContext($request);
+        $uri = $this->renderFrontendLinkWithCoreContext($request, $event->getResolvedItemUid());
 
         $this->tag->addAttribute('data-inquiry-item-uid', $event->getResolvedItemUid());
         $this->tag->addAttribute('data-inquiry-item-type', $event->getResolvedItemType());
@@ -74,7 +74,7 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
     }
 
 
-    protected function renderFrontendLinkWithCoreContext(ServerRequestInterface $request): string
+    protected function renderFrontendLinkWithCoreContext(ServerRequestInterface $request, int $itemUid): string
     {
         $pageUid = isset($this->arguments['pageUid']) ? (int)$this->arguments['pageUid'] : 'current';
         $pageType = isset($this->arguments['pageType']) ? (int)$this->arguments['pageType'] : 0;
@@ -85,7 +85,7 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
 
         $additionalParams = [
             'item-type' => $this->arguments['itemType'],
-            'item-uid' => $this->arguments['pageUid'],
+            'item-uid' => $itemUid,
         ];
         $absolute = isset($this->arguments['absolute']) && (bool)$this->arguments['absolute'];
         $addQueryString = $this->arguments['addQueryString'] ?? false;

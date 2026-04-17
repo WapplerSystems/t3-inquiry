@@ -10,8 +10,11 @@
 			<trans-unit id="element.lastname.properties.label">
 				<source>Last Name</source>
 			</trans-unit>
-			<trans-unit id="element.salutaion.properties.label">
+			<trans-unit id="element.salutation.properties.label">
 				<source>Salutation</source>
+			</trans-unit>
+			<trans-unit id="element.name.properties.label">
+				<source>Name</source>
 			</trans-unit>
 			<trans-unit id="element.email.properties.label">
 				<source>Email</source>
@@ -41,7 +44,7 @@
 				<source>Type of request</source>
 			</trans-unit>
 			<trans-unit id="element.message.properties.label">
-				<source>Type of request</source>
+				<source>Message</source>
 			</trans-unit>
 
 			<trans-unit id="inquiryForm.element.requestType.properties.label">

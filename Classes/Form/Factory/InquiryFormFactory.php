@@ -17,7 +17,6 @@ use TYPO3\CMS\Form\Domain\Factory\AbstractFormFactory;
 use TYPO3\CMS\Form\Domain\Model\Exception\FinisherPresetNotFoundException;
 use TYPO3\CMS\Form\Domain\Model\FormDefinition;
 use TYPO3\CMS\Form\Domain\Model\FormElements\AbstractSection;
-use TYPO3\CMS\Form\Domain\Model\FormElements\GenericFormElement;
 use TYPO3\CMS\Form\Domain\Model\FormElements\GridRow;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Section;
@@ -34,6 +33,7 @@ use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 
 class InquiryFormFactory extends AbstractFormFactory
 {
+    use FormElementTrait;
 
 
     public function __construct(
@@ -126,11 +126,6 @@ class InquiryFormFactory extends AbstractFormFactory
         $requestTextTemplatesOptions = [];
         /** @var RequestTextTemplate $requestTextTemplate */
         foreach ($requestTextTemplates as $requestTextTemplate) {
-            /*
-            $requestTextTemplatesOptions[$requestTextTemplate->getUid()] = [
-                'template' => $requestTextTemplate->getBody(),
-                'label' => $requestTextTemplate->getTitle()
-            ];*/
             $requestTextTemplatesOptions[$requestTextTemplate->getUid()] = $requestTextTemplate->getTitle();
         }
 
@@ -231,7 +226,7 @@ class InquiryFormFactory extends AbstractFormFactory
             $fieldsetContact,
             type: 'Text',
             id: 'name',
-            label: 'name',
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:element.name.properties.label'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 300
@@ -247,7 +242,7 @@ class InquiryFormFactory extends AbstractFormFactory
             $fieldsetContact,
             type: 'Email',
             id: 'email',
-            label: 'email',
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:element.email.properties.label'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 300
@@ -263,7 +258,7 @@ class InquiryFormFactory extends AbstractFormFactory
             $fieldsetContact,
             type: 'Text',
             id: 'phonenumber',
-            label: 'phonenumber',
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:element.phonenumber.properties.label'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 20
@@ -277,7 +272,7 @@ class InquiryFormFactory extends AbstractFormFactory
             $fieldsetContact,
             type: 'Text',
             id: 'company',
-            label: 'company',
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:element.company.properties.label'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 300
@@ -292,7 +287,7 @@ class InquiryFormFactory extends AbstractFormFactory
             $fieldsetContact,
             type: 'Text',
             id: 'country',
-            label: 'country',
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:element.country.properties.label'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 300
@@ -350,98 +345,6 @@ class InquiryFormFactory extends AbstractFormFactory
         $this->triggerFormBuildingFinished($formDefinition);
 
         return $formDefinition;
-    }
-
-    private function createDropdown(string $identifier, string $label, bool $required = false): GenericFormElement
-    {
-        $dropdown = $this->createFormElement('Select', $identifier, $label);
-        $dropdown->setProperties([
-            'options' => [
-                ['value' => 'option1', 'label' => 'Option 1'],
-                ['value' => 'option2', 'label' => 'Option 2'],
-                ['value' => 'option3', 'label' => 'Option 3'],
-            ],
-            'required' => $required,
-        ]);
-        return $dropdown;
-    }
-
-    private function createTextField(string $identifier, string $label, bool $required = false): GenericFormElement
-    {
-        $textField = $this->createFormElement('Text', $identifier, $label);
-        $textField->setProperties([
-            'required' => $required,
-        ]);
-        return $textField;
-    }
-
-    private function createEmailField(string $identifier, string $label, bool $required = false): GenericFormElement
-    {
-        $emailField = $this->createFormElement('Email', $identifier, $label);
-        $emailField->setProperties([
-            'required' => $required,
-        ]);
-        return $emailField;
-    }
-
-    private function createPage(string $identifier, string $label): Page
-    {
-        $page = new Page($identifier);
-        $page->setLabel($label);
-        return $page;
-    }
-
-    private function createGridRow(string $identifier): GridRow
-    {
-        return new GridRow($identifier, 'GridRow');
-    }
-
-    private function createFormElement(string $identifier, string $type, string $label): GenericFormElement
-    {
-        $formElement = new GenericFormElement($identifier, $type);
-        $formElement->setLabel($label);
-        return $formElement;
-    }
-
-    private function createGridColumn(string $identifier, int $width): GridColumn
-    {
-        return new GridColumn($identifier, $width);
-
-    }
-
-    private function addFormElement(
-        AbstractSection $section,
-        string          $type,
-        string          $id,
-        ?string         $label = null,
-        mixed           $defaultValue = null,
-        ?array          $properties = null,
-        ?array          $renderingOptions = null,
-        ?array          $validators = null
-    ): AbstractRenderable
-    {
-        /** @var AbstractRenderable $element */
-        $element = $section->createElement($id, $type);
-
-        if (isset($label)) $element->setLabel($label);
-        if (isset($defaultValue)) $element->setDefaultValue($defaultValue);
-        if (isset($properties)) {
-            foreach ($properties as $key => $value) {
-                $element->setProperty($key, $value);
-            }
-        }
-        if (isset($renderingOptions)) {
-            foreach ($renderingOptions as $key => $value) {
-                $element->setRenderingOption($key, $value);
-            }
-        }
-        if (isset($validators)) {
-            foreach ($validators as $validator) {
-                $element->addValidator($validator);
-            }
-        }
-
-        return $element;
     }
 
 }

@@ -171,7 +171,7 @@ class InquiryController extends ActionController
     }
 
 
-    public function removeAllItems() : ResponseInterface
+    public function removeAllItemsAction(): ResponseInterface
     {
 
         /** @var FrontendUserAuthentication $frontendUserAuthentication */
@@ -240,11 +240,11 @@ class InquiryController extends ActionController
             $items = [];
         }
 
-        foreach ($items as &$item) {
+        foreach ($items as $key => $item) {
             $event = new CanResolveItemByIdentifierEvent($item['uid'], $item['type'], $this->request);
             $this->eventDispatcher->dispatch($event);
             if (!$event->isResult()) {
-                unset($item);
+                unset($items[$key]);
             }
         }
 
@@ -267,14 +267,13 @@ class InquiryController extends ActionController
             $items = [];
         }
 
-        foreach ($items as &$item) {
+        foreach ($items as $key => $item) {
             $event = new CanResolveItemByIdentifierEvent($item['uid'], $item['type'], $this->request);
             $this->eventDispatcher->dispatch($event);
             if (!$event->isResult()) {
-                unset($item);
+                unset($items[$key]);
             }
         }
-        unset($item);
 
         $data = [
             'items' => $items,

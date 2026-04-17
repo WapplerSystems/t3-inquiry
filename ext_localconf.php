@@ -57,6 +57,17 @@ $boot = static function (): void {
 
     ExtensionUtility::configurePlugin(
         'Inquiry',
+        'RemoveAllItems',
+        [
+            InquiryController::class => 'removeAllItems',
+        ],
+        [
+            InquiryController::class => 'removeAllItems',
+        ],
+    );
+
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
         'ToggleItem',
         [
             InquiryController::class => 'toggleItemStatus',
