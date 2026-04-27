@@ -12,6 +12,7 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Domain\Repository\ListSnapshotRepository;
 use WapplerSystems\Inquiry\Event\CanResolveItemByIdentifierEvent;
+use WapplerSystems\Inquiry\Event\ConfigurePdfEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 
 class InquiryController extends ActionController
@@ -398,10 +399,22 @@ class InquiryController extends ActionController
         $ttfPath = $this->getT3bootstrapTtfPath();
         $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
         $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
-        $mpdf = new Mpdf([
-            'fontDir'  => array_merge($defaultConfig['fontDir'], [dirname($ttfPath)]),
-            'fontdata' => array_merge($defaultFontConfig['fontdata'], ['t3bootstrap' => ['R' => basename($ttfPath)]]),
-        ]);
+
+        $pdfEvent = new ConfigurePdfEvent();
+        $this->eventDispatcher->dispatch($pdfEvent);
+
+        $fontDirs = array_merge($defaultConfig['fontDir'], [dirname($ttfPath)], $pdfEvent->getFontDirs());
+        $fontData = array_merge($defaultFontConfig['fontdata'], ['t3bootstrap' => ['R' => basename($ttfPath)]], $pdfEvent->getFontData());
+
+        $mpdfConfig = [
+            'fontDir'  => $fontDirs,
+            'fontdata' => $fontData,
+        ];
+        if ($pdfEvent->getDefaultFont() !== '') {
+            $mpdfConfig['default_font'] = $pdfEvent->getDefaultFont();
+        }
+
+        $mpdf = new Mpdf($mpdfConfig);
         $mpdf->shrink_tables_to_fit = 0;
 
         $mpdf->WriteHTML($html);
