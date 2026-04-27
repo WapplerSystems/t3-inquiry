@@ -29,6 +29,7 @@ use WapplerSystems\Inquiry\Event\BuildInquiryFormContactEvent;
 use WapplerSystems\Inquiry\Event\BuildInquiryFormItemEvent;
 use WapplerSystems\Inquiry\Event\CreateConfirmationFinisherEvent;
 use WapplerSystems\Inquiry\Event\CreateEmailToReceiverFinisherEvent;
+use WapplerSystems\Inquiry\Event\CreateEmailToSenderFinisherEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 
 class InquiryFormFactory extends AbstractFormFactory
@@ -323,6 +324,24 @@ class InquiryFormFactory extends AbstractFormFactory
             ]
         ]);
         $this->eventDispatcher->dispatch(new CreateEmailToReceiverFinisherEvent($emailToReceiver, $configuration));
+
+        $emailToSender = $formDefinition->createFinisher('EmailToSender');
+        $emailToSender->setOptions([
+            'subject' => $configuration['subject'] ?? 'Mail from inquiry form',
+            'recipients' => [
+                '{email}' => '{firstname} {lastname}',
+            ],
+            'senderName' => $mailSettings['defaultMailFromName'],
+            'senderAddress' => $mailSettings['defaultMailFromAddress'],
+            'replyToRecipients' => [
+                $mailSettings['defaultMailFromAddress'] => $mailSettings['defaultMailFromName'],
+            ],
+            'templateName' => 'MailToSender',
+            'templateRootPaths' => [
+                34240 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/EmailToSender/',
+            ],
+        ]);
+        $this->eventDispatcher->dispatch(new CreateEmailToSenderFinisherEvent($emailToSender, $configuration));
 
         $inquiryFinisher = $formDefinition->createFinisher('Inquiry');
         $inquiryFinisher->setOptions([
