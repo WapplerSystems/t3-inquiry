@@ -127,11 +127,10 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
             $cObj->setRequest($request);
             $linkFactory = GeneralUtility::makeInstance(LinkFactory::class);
             $linkResult = $linkFactory->create((string)$this->renderChildren(), $typolinkConfiguration, $cObj);
-
+            return $linkResult->getUrl();
         } catch (UnableToLinkException) {
+            return '';
         }
-
-        return $linkResult->getUrl();
     }
 
 }

@@ -485,13 +485,4 @@ class InquiryController extends ActionController
             : '/';
     }
 
-
-    public function addItemFormAction(): ResponseInterface
-    {
-
-
-        return $this->htmlResponse();
-    }
-
-
 }

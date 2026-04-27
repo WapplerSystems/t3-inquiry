@@ -145,7 +145,7 @@ if (itemsListMeta) {
 
 function updateInquiryLinks() {
   inquiryListItems.forEach(item => {
-    const inquiryLinks = document.querySelectorAll('a[data-inquiry-item-uid][data-inquiry-item-type], button[data-inquiry-item-uid][data-inquiry-item-type]');
+    const inquiryLinks = document.querySelectorAll('.toggle-inquiry-item-status-button[data-inquiry-item-uid][data-inquiry-item-type]');
     inquiryLinks.forEach(link => {
       const uid = link.getAttribute('data-inquiry-item-uid');
       const type = link.getAttribute('data-inquiry-item-type');
