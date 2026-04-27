@@ -307,7 +307,9 @@ class InquiryController extends ActionController
             return $this->jsonResponse(json_encode(['prefill' => []]))->withStatus(404);
         }
 
-        return $this->jsonResponse(json_encode(['prefill' => $snapshot['prefill']]));
+        $prefill = $snapshot['prefill'];
+        unset($prefill['_contact']);
+        return $this->jsonResponse(json_encode(['prefill' => $prefill]));
     }
 
     public function preloadItemsAction(): ResponseInterface
@@ -389,6 +391,7 @@ class InquiryController extends ActionController
         $this->view->assignMultiple([
             'items'      => $resolvedItems,
             'preloadUrl' => $this->buildPreloadUrl($identifier),
+            'contact'    => $pdfFields['_contact'] ?? [],
         ]);
         $html = $this->view->render();
 
