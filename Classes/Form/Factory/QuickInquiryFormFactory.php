@@ -20,7 +20,6 @@ use TYPO3\CMS\Form\Domain\Model\FormElements\GridRow;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Page;
 use TYPO3\CMS\Form\Domain\Model\FormElements\Section;
 use TYPO3\CMS\Form\Domain\Renderer\FluidFormRenderer;
-use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Domain\Model\RequestTextTemplate;
 use WapplerSystems\Inquiry\Domain\Repository\RequestTextTemplateRepository;
 use WapplerSystems\Inquiry\Event\BuildInquiryQuickFormContactEvent;
@@ -50,12 +49,6 @@ class QuickInquiryFormFactory extends AbstractFormFactory
      */
     public function build(array $configuration, ?string $prototypeName = null, ?ServerRequestInterface $request = null): FormDefinition
     {
-
-        /** @var FrontendUserAuthentication $frontendUserAuthentication */
-        $frontendUserAuthentication = $request->getAttribute('frontend.user');
-        $userSession = $frontendUserAuthentication->getSession();
-
-
         /** @var ConfigurationService $configurationService */
         $configurationService = GeneralUtility::makeInstance(ConfigurationService::class);
         $prototypeConfiguration = $configurationService->getPrototypeConfiguration('standard');
@@ -101,7 +94,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             ],
             validators: [
                 $resolver->createValidator(NotEmptyValidator::class),
-                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+                $resolver->createValidator(StringLengthValidator::class, ['maximum' => 1500])
             ]
         );
 
@@ -388,7 +381,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             $leftAddressColumn,
             type: 'Text',
             id: 'street',
-            label: 'Street',
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:element.street.properties.label'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 300
@@ -486,7 +479,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             $leftColumn2,
             type: 'Text',
             id: 'zipcode',
-            label: 'Zipcode',
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:element.zipcode.properties.label'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 300
@@ -501,7 +494,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             $rightColumn2,
             type: 'Text',
             id: 'city',
-            label: 'City',
+            label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:element.city.properties.label'),
             properties: [
                 'fluidAdditionalAttributes' => [
                     'maxlength' => 300

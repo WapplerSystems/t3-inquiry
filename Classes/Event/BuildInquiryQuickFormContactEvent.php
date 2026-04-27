@@ -18,6 +18,7 @@ class BuildInquiryQuickFormContactEvent
     {
         $this->formDefinition = $formDefinition;
         $this->fieldsetContact = $fieldsetContact;
+        $this->request = $request;
     }
 
     public function getFormDefinition(): FormDefinition

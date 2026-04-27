@@ -56,9 +56,8 @@ class InquiryFormFactory extends AbstractFormFactory
     public function build(array $configuration, ?string $prototypeName = null, ?ServerRequestInterface $request = null): FormDefinition
     {
 
-        /** @var FrontendUserAuthentication $frontendUserAuthentication */
-        $frontendUserAuthentication = $request->getAttribute('frontend.user');
-        $userSession = $frontendUserAuthentication->getSession();
+        $frontendUserAuthentication = $request?->getAttribute('frontend.user');
+        $userSession = $frontendUserAuthentication?->getSession();
 
 
         /** @var ConfigurationService $configurationService */
@@ -130,7 +129,7 @@ class InquiryFormFactory extends AbstractFormFactory
         }
 
         $items = [];
-        if ($userSession->get('items')) {
+        if ($userSession?->get('items')) {
             $items = $userSession->get('items');
         }
 

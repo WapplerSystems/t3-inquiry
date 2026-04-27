@@ -17,6 +17,7 @@ class BuildInquiryFormEvent
     {
         $this->formDefinition = $formDefinition;
         $this->fieldsetItem = $fieldsetItem;
+        $this->request = $request;
     }
 
     public function getFieldsetItem(): Section

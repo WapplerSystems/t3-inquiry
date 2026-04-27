@@ -23,6 +23,7 @@ class InquiryController extends ActionController
         EventDispatcherInterface $eventDispatcher,
         private readonly ListSnapshotRepository $listSnapshotRepository,
     ) {
+        $this->eventDispatcher = $eventDispatcher;
     }
 
 
@@ -156,11 +157,7 @@ class InquiryController extends ActionController
         }
 
         // remove item
-        foreach ($storedItems as $item) {
-            if ($item['hash'] === $hash) {
-                unset($storedItems[array_search($item, $storedItems, true)]);
-            }
-        }
+        $storedItems = array_filter($storedItems, static fn($item) => $item['hash'] !== $hash);
         $userSession->set('items', $storedItems);
         $frontendUserAuthentication->storeSessionData();
 
@@ -213,11 +210,7 @@ class InquiryController extends ActionController
         $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
         $userSession = $frontendUserAuthentication->getSession();
         $storedItems = $userSession->get('items') ?? [];
-        foreach ($storedItems as $item) {
-            if ((int)$item['uid'] === $uid && $item['type'] === $type) {
-                unset($storedItems[array_search($item, $storedItems, true)]);
-            }
-        }
+        $storedItems = array_filter($storedItems, static fn($item) => !((int)$item['uid'] === $uid && $item['type'] === $type));
         $userSession->set('items', $storedItems);
         $frontendUserAuthentication->storeSessionData();
 
