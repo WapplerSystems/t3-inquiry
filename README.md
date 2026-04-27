@@ -12,6 +12,7 @@ Die TYPO3-Extension `inquiry` ist eine universelle und hochflexible Lösung, um 
     - Produkte können ohne Neuladen der Seite per **Ajax** hinzugefügt oder entfernt werden.
     - Dynamische Aktualisierung der Badge-Counter (z. B. im Header).
 - **Flexibles Formularwesen**: Nutzt das TYPO3 Form-Framework. Formulare können einfach per Event-Listener erweitert oder angepasst werden.
+- **Zwei-Mail-Versand**: Beim Absenden der Anfrageliste erhalten sowohl die konfigurierten Empfänger (`EmailToReceiver`) als auch der Anfragende selbst eine Bestätigungsmail (`EmailToSender`). Beide Mails sind über eigene Events anpassbar.
 - **PDF-Export**: Die Anfrageliste kann inklusive ausgefüllter Felder als PDF heruntergeladen werden.
 - **Preload-Link**: Jedes PDF enthält einen eindeutigen Link, mit dem die Liste auf der Website wiederhergestellt und die Felder vorausgefüllt werden können.
 - **Einfache Integration**: ViewHelper für Buttons ("In die Anfrageliste") und Links zur Liste werden mitgeliefert.
@@ -114,8 +115,18 @@ Nutzen Sie die folgenden Events für individuelle Anpassungen:
 - `BuildInquiryFormItemEvent`: Ergänzt item-spezifische Felder pro Artikel.
 - `ResolveItemEvent`: Löst eine UID in ein Objekt auf; setzt `htmlPreview` (Web) und `htmlPreviewPdf` (PDF).
 - `CanResolveItemByIdentifierEvent`: Prüft, ob der Adapter für einen gegebenen Typ zuständig ist.
-- `CreateEmailToReceiverFinisherEvent`: Ermöglicht die Anpassung der E-Mail-Vorlage und des Betreffs.
+- `CreateEmailToReceiverFinisherEvent`: Ermöglicht die Anpassung der Empfänger-Mail (Vorlage, Betreff, Reply-To etc.).
+- `CreateEmailToSenderFinisherEvent`: Ermöglicht die Anpassung der Bestätigungs-Mail an den Anfragenden.
 - ... und viele weitere.
+
+## 📧 E-Mail-Versand
+
+Beim Absenden der Anfrageliste werden zwei Mails verschickt:
+
+1. **An die konfigurierten Empfänger** (`EmailToReceiver`): enthält die Kontaktdaten des Anfragenden und die Liste der angefragten Artikel.
+2. **An den Anfragenden** (`EmailToSender`): Bestätigungsmail mit derselben Zusammenfassung; das Reply-To ist auf die Standard-Absender-Adresse des Systems gesetzt, damit Antworten an die Empfänger gehen.
+
+Beide Mails verwenden das TYPO3 Form-Framework `EmailFinisher`. Adapter können über die jeweiligen `Create*FinisherEvent`-Events Vorlagen, Layouts, Betreff oder Empfänger überschreiben.
 
 ---
 
