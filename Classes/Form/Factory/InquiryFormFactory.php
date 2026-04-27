@@ -329,7 +329,7 @@ class InquiryFormFactory extends AbstractFormFactory
         $emailToSender->setOptions([
             'subject' => $configuration['subject'] ?? 'Mail from inquiry form',
             'recipients' => [
-                '{email}' => '{firstname} {lastname}',
+                '{email}' => '{name}',
             ],
             'senderName' => $mailSettings['defaultMailFromName'],
             'senderAddress' => $mailSettings['defaultMailFromAddress'],
