@@ -402,6 +402,7 @@ class InquiryController extends ActionController
             'fontDir'  => array_merge($defaultConfig['fontDir'], [dirname($ttfPath)]),
             'fontdata' => array_merge($defaultFontConfig['fontdata'], ['t3bootstrap' => ['R' => basename($ttfPath)]]),
         ]);
+        $mpdf->shrink_tables_to_fit = 0;
 
         $mpdf->WriteHTML($html);
         $pdfContent = $mpdf->Output('', 'S');
