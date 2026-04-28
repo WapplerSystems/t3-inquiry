@@ -14,6 +14,7 @@ Die TYPO3-Extension `inquiry` ist eine universelle und hochflexible Lösung, um 
 - **Flexibles Formularwesen**: Nutzt das TYPO3 Form-Framework. Formulare können einfach per Event-Listener erweitert oder angepasst werden.
 - **Zwei-Mail-Versand**: Beim Absenden der Anfrageliste erhalten sowohl die konfigurierten Empfänger (`EmailToReceiver`) als auch der Anfragende selbst eine Bestätigungsmail (`EmailToSender`). Beide Mails sind über eigene Events anpassbar.
 - **FlyIn-Liste**: Optionaler Bootstrap-Offcanvas, der die aktuelle Anfrageliste (Bild + Titel + Entfernen-Button) als ausfahrbares Panel anzeigt. Per Custom-Event (`inquiry:item-removed`) synchronisiert sich die FlyIn live mit der Anfrageliste-Seite und umgekehrt.
+- **Mehrfenster-/Tab-Synchronisation**: Anfrageliste, FlyIn und Toggle-Buttons halten sich automatisch in mehreren geöffneten Tabs und Fenstern desselben Browsers synchron — über `BroadcastChannel` für Echtzeit-Sync und `visibilitychange` als Fallback beim Tab-Fokuswechsel.
 - **PDF-Export**: Die Anfrageliste kann inklusive ausgefüllter Felder als PDF heruntergeladen werden.
 - **Preload-Link**: Jedes PDF enthält einen eindeutigen Link, mit dem die Liste auf der Website wiederhergestellt und die Felder vorausgefüllt werden können.
 - **Einfache Integration**: ViewHelper für Buttons ("In die Anfrageliste") und Links zur Liste werden mitgeliefert.
@@ -61,7 +62,7 @@ vendor/bin/typo3 database:updateschema
 |---------|--------|-------|
 | 678934 | `toggleItemStatus` | Artikel hinzufügen / entfernen |
 | 678935 | `getItems` | Aktuelle Liste zurückgeben (`{items}`) |
-| 678936 | `removeItem` | Artikel entfernen |
+| 678936 | `removeItem` | Artikel entfernen, gibt aktualisierte Items-Liste zurück |
 | 678937 | `preloadItems` | Snapshot aus DB laden, Session befüllen, Weiterleitung mit Identifier |
 | 678938 | `generatePdf` | Snapshot aus DB laden, PDF rendern und ausliefern |
 | 678939 | `saveListSnapshot` | POST-Endpunkt – Items + Prefill speichern, gibt `{identifier}` zurück |
@@ -159,6 +160,16 @@ Beide Komponenten lauschen darauf und entfernen das passende DOM-Element optimis
 Adapter überschreiben üblicherweise:
 - `Templates/Inquiry/FlyInItems.html` für reichere Item-Darstellung (z. B. Spec-Lines).
 - `resolveItem()`-Listener: `$event->setResolvedImage(...)` setzen, damit Vorschaubilder erscheinen.
+
+## 🔄 Mehrfenster-/Tab-Synchronisation
+
+Der Zustand der Anfrageliste bleibt zwischen mehreren geöffneten Tabs und Fenstern desselben Browsers automatisch konsistent. Drei Schichten greifen ineinander:
+
+1. **Lokale Custom-Events** (`inquiry:item-removed`, `inquiry:items-changed`) — DOM-Reaktionen innerhalb desselben Tabs.
+2. **`BroadcastChannel('tx_inquiry:sync')`** — Echtzeit-Sync zwischen Tabs/Fenstern desselben Browsers. Nach erfolgreichem `toggleItemStatus`/`removeItem` sendet der auslösende Tab `{ type: 'items-changed', items }`. Empfänger gleichen Badge, Toggle-Buttons, FlyIn-Inhalt und – auf der Anfrageliste-Seite – die Item-Fieldsets selbst ab.
+3. **`visibilitychange`** — Wenn ein Tab den Fokus zurückgewinnt, lädt der Browser die Items-Liste serverseitig neu und stößt den gleichen Reconcile-Pfad an. Fallback für Konstellationen, in denen der andere Tab nicht aktiv lauschen konnte (z. B. nach einem zwischenzeitlich geschlossenen Fenster).
+
+Auf der Anfrageliste-Seite kommt zusätzlich `swapInquiryForm()` zum Einsatz: bei Abweichungen wird die aktuelle Seite via `fetch` geladen, das `<form id="inquiryForm">` ersetzt und zuvor erfasste Eingabewerte (Kontaktdaten, Per-Item-Nachrichten) anhand des `name`-Attributs wiederhergestellt. Framework-interne Felder (`__trustedProperties` etc.) kommen frisch aus der Antwort, sodass nachfolgende Submits weiterhin valide bleiben.
 
 ---
 
