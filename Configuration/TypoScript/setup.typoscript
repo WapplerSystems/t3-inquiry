@@ -28,6 +28,7 @@ plugin.tx_inquiry {
     generatePdfTypeNum = {$plugin.tx_inquiry.settings.generatePdfTypeNum}
     saveListSnapshotTypeNum = {$plugin.tx_inquiry.settings.saveListSnapshotTypeNum}
     getPrefillTypeNum = {$plugin.tx_inquiry.settings.getPrefillTypeNum}
+    flyInItemsTypeNum = {$plugin.tx_inquiry.settings.flyInItemsTypeNum}
 
     quickInquiryFormPageType = {$plugin.tx_inquiry.settings.quickInquiryFormPageType}
 
@@ -39,6 +40,7 @@ plugin.tx_inquiry {
 }
 
 page.includeJSFooter.inquiry = EXT:inquiry/Resources/Public/JavaScript/inquiry.js
+page.includeJSFooter.inquiry-flyin = EXT:inquiry/Resources/Public/JavaScript/inquiry-flyin.js
 page.includeCSS.inquiry = EXT:inquiry/Resources/Public/CSS/inquiry.css
 
 page.headerData {
@@ -76,6 +78,13 @@ page.headerData {
   76894.typolink.returnLast = url
   76894.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.getPrefillTypeNum}
   76894.wrap = <meta name="inquiry-get-prefill" content="|">
+
+  76895 = TEXT
+  76895.typolink.parameter.data = TSFE:id
+  76895.typolink.forceAbsoluteUrl = 1
+  76895.typolink.returnLast = url
+  76895.typolink.additionalParams = &type={$plugin.tx_inquiry.settings.flyInItemsTypeNum}
+  76895.wrap = <meta name="inquiry-flyin-items" content="|">
 }
 
 
@@ -245,6 +254,29 @@ getPrefillPage {
   10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
   10.extensionName = Inquiry
   10.pluginName = GetPrefill
+  10.vendorName = wapplersystems
+}
+
+flyInItemsPage = PAGE
+flyInItemsPage {
+  typeNum = {$plugin.tx_inquiry.settings.flyInItemsTypeNum}
+
+  config {
+    disableAllHeaderCode = 1
+    xhtml_cleaning = none
+    admPanel = 0
+    debug = 0
+    disablePrefixComment = 1
+    metaCharset = utf-8
+    additionalHeaders.10.header = Content-Type:text/html;charset=UTF-8
+    disableBodyTag = 1
+    no_cache = 1
+  }
+
+  10 = USER
+  10.userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+  10.extensionName = Inquiry
+  10.pluginName = FlyInItems
   10.vendorName = wapplersystems
 }
 

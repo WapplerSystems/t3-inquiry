@@ -1,0 +1,29 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:if condition="{items}">
+    <f:then>
+        <ul class="inquiry-flyin-items list-unstyled" data-inquiry-flyin-empty="false">
+            <f:for each="{items}" as="item">
+                <li class="inquiry-flyin-item d-flex align-items-center" data-inquiry-flyin-item-hash="{item.hash}">
+                    <f:if condition="{item.image}">
+                        <div class="inquiry-flyin-item-image me-2">
+                            <f:image image="{item.image}" maxWidth="80" alt="{item.name}" />
+                        </div>
+                    </f:if>
+                    <div class="inquiry-flyin-item-title flex-grow-1">{item.name}</div>
+                    <button type="button" class="inquiry-flyin-item-remove btn btn-sm btn-outline-secondary"
+                            data-inquiry-item-uid="{item.uid}"
+                            data-inquiry-item-type="{item.type}"
+                            aria-label="{f:translate(key: 'LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:flyIn.remove', default: 'Remove')}">
+                        &times;
+                    </button>
+                </li>
+            </f:for>
+        </ul>
+    </f:then>
+    <f:else>
+        <div class="inquiry-flyin-empty" data-inquiry-flyin-empty="true">
+            <f:translate key="LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:flyIn.empty" default="Your inquiry list is empty." />
+        </div>
+    </f:else>
+</f:if>
+</html>

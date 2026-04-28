@@ -24,6 +24,24 @@
 			<trans-unit id="generatePdf">
 				<source>Download PDF</source>
 			</trans-unit>
+			<trans-unit id="flyIn.title">
+				<source>Inquiry list</source>
+			</trans-unit>
+			<trans-unit id="flyIn.empty">
+				<source>Your inquiry list is empty.</source>
+			</trans-unit>
+			<trans-unit id="flyIn.cta">
+				<source>Go to inquiry list</source>
+			</trans-unit>
+			<trans-unit id="flyIn.openLabel">
+				<source>Open inquiry list</source>
+			</trans-unit>
+			<trans-unit id="flyIn.close">
+				<source>Close</source>
+			</trans-unit>
+			<trans-unit id="flyIn.remove">
+				<source>Remove</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

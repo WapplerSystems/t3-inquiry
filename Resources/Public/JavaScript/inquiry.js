@@ -35,10 +35,11 @@ function addClickListenerToInquiryLinks() {
 
       const uid = this.getAttribute('data-inquiry-item-uid');
       const type = this.getAttribute('data-inquiry-item-type');
-      toggleItemUrl.searchParams.append('tx_inquiry[uid]', uid);
-      toggleItemUrl.searchParams.append('tx_inquiry[type]', type);
+      const requestUrl = new URL(toggleItemUrl.toString());
+      requestUrl.searchParams.set('tx_inquiry[uid]', uid);
+      requestUrl.searchParams.set('tx_inquiry[type]', type);
 
-        fetch(toggleItemUrl, {
+        fetch(requestUrl, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -119,13 +120,10 @@ if (itemsListMeta) {
       inquiryListItems = Object.values(data.items);
 
       let count = inquiryListItems.length;
-      if (count == 0) {
-        return;
-      }
 
       /* inquiry links/buttons */
       document.querySelectorAll('.to-inquiry-list').forEach(link => {
-        let countSpan = link.querySelector('.inquiry-count');
+        let countSpan = link.querySelector('.inquiry-item-counter');
         if (!countSpan) {
           countSpan = document.createElement('span');
           countSpan.className = 'inquiry-item-counter';
@@ -175,11 +173,11 @@ document.querySelectorAll('.inquiry-item-delete').forEach(btn => {
     e.preventDefault();
 
     let fieldSetId = this.getAttribute('data-target');
-    let newRemoveItemUrl = removeItemUrl;
     const uid = this.getAttribute('data-inquiry-item-uid');
     const type = this.getAttribute('data-inquiry-item-type');
-    newRemoveItemUrl.searchParams.append('tx_inquiry[uid]', uid);
-    newRemoveItemUrl.searchParams.append('tx_inquiry[type]', type);
+    const newRemoveItemUrl = new URL(removeItemUrl.toString());
+    newRemoveItemUrl.searchParams.set('tx_inquiry[uid]', uid);
+    newRemoveItemUrl.searchParams.set('tx_inquiry[type]', type);
 
     fetch(newRemoveItemUrl, {
       headers: {
@@ -198,6 +196,9 @@ document.querySelectorAll('.inquiry-item-delete').forEach(btn => {
           if (fieldSet) {
             fieldSet.remove();
           }
+          document.dispatchEvent(new CustomEvent('inquiry:item-removed', {
+            detail: { uid: uid, type: type }
+          }));
         }
 
 
@@ -208,6 +209,19 @@ document.querySelectorAll('.inquiry-item-delete').forEach(btn => {
 
   });
 })
+
+document.addEventListener('inquiry:item-removed', function (e) {
+  const detail = e.detail || {};
+  if (!detail.uid || !detail.type) return;
+  const btn = document.querySelector('.inquiry-item-delete[data-inquiry-item-uid="' + detail.uid + '"][data-inquiry-item-type="' + detail.type + '"]');
+  if (!btn) return;
+  const fieldsetId = btn.getAttribute('data-target');
+  if (!fieldsetId) return;
+  const fieldset = document.getElementById(fieldsetId);
+  if (fieldset) {
+    fieldset.remove();
+  }
+});
 
 document.addEventListener('DOMContentLoaded', function () {
   // Prefill form fields from DB snapshot when an identifier is present in the URL

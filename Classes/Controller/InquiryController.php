@@ -276,6 +276,38 @@ class InquiryController extends ActionController
         return $this->jsonResponse(json_encode($data));
     }
 
+    public function flyInItemsAction(): ResponseInterface
+    {
+        /** @var FrontendUserAuthentication $frontendUserAuthentication */
+        $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
+        $userSession = $frontendUserAuthentication->getSession();
+        $items = $userSession->get('items') ?? [];
+
+        $resolvedItems = [];
+        foreach ($items as $item) {
+            $event = new ResolveItemEvent((int)$item['uid'], $item['type'], $this->request);
+            $this->eventDispatcher->dispatch($event);
+            if ($event->getResolvedObject() === null) {
+                continue;
+            }
+            $resolvedItems[] = [
+                'uid' => (int)$item['uid'],
+                'type' => $item['type'],
+                'hash' => $item['hash'] ?? md5($item['uid'] . '_' . $item['type']),
+                'name' => $event->getResolvedName() ?? '',
+                'image' => $event->getResolvedImage(),
+                'object' => $event->getResolvedObject(),
+            ];
+        }
+
+        $this->view->assignMultiple([
+            'items' => $resolvedItems,
+            'listPageUid' => (int)($this->settings['listPageUid'] ?? 0),
+        ]);
+
+        return $this->htmlResponse();
+    }
+
     public function saveListSnapshotAction(): ResponseInterface
     {
         $rawBody = $this->request->getBody()->getContents();

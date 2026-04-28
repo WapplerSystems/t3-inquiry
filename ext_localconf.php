@@ -121,6 +121,17 @@ $boot = static function (): void {
         ],
     );
 
+    ExtensionUtility::configurePlugin(
+        'Inquiry',
+        'FlyInItems',
+        [
+            InquiryController::class => 'flyInItems',
+        ],
+        [
+            InquiryController::class => 'flyInItems',
+        ],
+    );
+
 };
 
 $boot();

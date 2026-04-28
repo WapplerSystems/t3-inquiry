@@ -13,6 +13,7 @@ Die TYPO3-Extension `inquiry` ist eine universelle und hochflexible Lösung, um 
     - Dynamische Aktualisierung der Badge-Counter (z. B. im Header).
 - **Flexibles Formularwesen**: Nutzt das TYPO3 Form-Framework. Formulare können einfach per Event-Listener erweitert oder angepasst werden.
 - **Zwei-Mail-Versand**: Beim Absenden der Anfrageliste erhalten sowohl die konfigurierten Empfänger (`EmailToReceiver`) als auch der Anfragende selbst eine Bestätigungsmail (`EmailToSender`). Beide Mails sind über eigene Events anpassbar.
+- **FlyIn-Liste**: Optionaler Bootstrap-Offcanvas, der die aktuelle Anfrageliste (Bild + Titel + Entfernen-Button) als ausfahrbares Panel anzeigt. Per Custom-Event (`inquiry:item-removed`) synchronisiert sich die FlyIn live mit der Anfrageliste-Seite und umgekehrt.
 - **PDF-Export**: Die Anfrageliste kann inklusive ausgefüllter Felder als PDF heruntergeladen werden.
 - **Preload-Link**: Jedes PDF enthält einen eindeutigen Link, mit dem die Liste auf der Website wiederhergestellt und die Felder vorausgefüllt werden können.
 - **Einfache Integration**: ViewHelper für Buttons ("In die Anfrageliste") und Links zur Liste werden mitgeliefert.
@@ -45,10 +46,12 @@ vendor/bin/typo3 database:updateschema
 
 1.  **TypoScript einbinden**: Fügen Sie das statische TypoScript der Extension zu Ihrem Template hinzu.
 2.  **Adapter erstellen**: Implementieren Sie Event-Listener für `ResolveItemEvent`, um Ihre Objekte (z. B. Produkte) der Extension bekannt zu machen.
-3.  **ViewHelper nutzen**: Integrieren Sie die Buttons in Ihre Fluid-Templates:
+3.  **ViewHelper nutzen**: Integrieren Sie die Buttons und die FlyIn in Ihre Fluid-Templates:
     ```html
     {namespace i=WapplerSystems\Inquiry\ViewHelpers}
-    <i:button.toggleItem uid="{product.uid}" />
+    <i:button.toggleItem item="{product}" />
+    <i:button.flyIn />            <!-- Trigger im Header -->
+    <i:flyIn.panel />              <!-- Offcanvas einmal pro Seite (z. B. vor </body>) -->
     ```
 4.  **Plugins einbinden**: Für PDF-Export und Preload werden zusätzliche Plugins/typeNums benötigt (siehe unten).
 
@@ -63,10 +66,12 @@ vendor/bin/typo3 database:updateschema
 | 678938 | `generatePdf` | Snapshot aus DB laden, PDF rendern und ausliefern |
 | 678939 | `saveListSnapshot` | POST-Endpunkt – Items + Prefill speichern, gibt `{identifier}` zurück |
 | 678940 | `getPrefill` | GET – Prefill-Daten für einen Identifier zurückgeben |
+| 678941 | `flyInItems` | HTML-Fragment der aktuellen Anfrageliste für die FlyIn |
 
-Die URLs für typeNum 678939 und 678940 werden automatisch als Meta-Tags in alle Seiten eingefügt:
+Die URLs für typeNum 678939, 678940 und 678941 werden automatisch als Meta-Tags in alle Seiten eingefügt:
 - `<meta name="inquiry-save-snapshot" ...>` → URL für typeNum 678939
 - `<meta name="inquiry-get-prefill" ...>` → URL für typeNum 678940
+- `<meta name="inquiry-flyin-items" ...>` → URL für typeNum 678941
 
 ## 📄 PDF-Export
 
@@ -127,6 +132,33 @@ Beim Absenden der Anfrageliste werden zwei Mails verschickt:
 2. **An den Anfragenden** (`EmailToSender`): Bestätigungsmail mit derselben Zusammenfassung; das Reply-To ist auf die Standard-Absender-Adresse des Systems gesetzt, damit Antworten an die Empfänger gehen.
 
 Beide Mails verwenden das TYPO3 Form-Framework `EmailFinisher`. Adapter können über die jeweiligen `Create*FinisherEvent`-Events Vorlagen, Layouts, Betreff oder Empfänger überschreiben.
+
+## 🛒 FlyIn (Offcanvas-Liste)
+
+Die FlyIn ist ein optionaler Bootstrap-Offcanvas, mit dem Nutzer ihre aktuelle Anfrageliste jederzeit aus dem Header heraus einsehen können – inklusive Vorschaubild, Titel und Entfernen-Button pro Artikel sowie eines CTA-Links zur vollständigen Anfrageliste-Seite (`plugin.tx_inquiry.settings.listPageUid`).
+
+### Ablauf
+
+1. `<i:button.flyIn />` im Header öffnet das Offcanvas (Bootstrap `data-bs-toggle="offcanvas"`).
+2. Beim Öffnen lädt `inquiry-flyin.js` per `fetch` ein HTML-Fragment vom `flyInItemsAction` (typeNum 678941) und ersetzt den Inhalt der Offcanvas-Body.
+3. Die Standard-Vorlage `Templates/Inquiry/FlyInItems.html` rendert Bild + Titel + Entfernen-Button (Adapter können eine eigene Variante hinterlegen, um z. B. Spec-Lines anzuzeigen).
+4. Bei leerer Liste wird ein Empty-State angezeigt und der CTA ausgeblendet.
+
+### Cross-Component-Sync
+
+Beide Entfern-Pfade (Button in der FlyIn, Delete-Button in der Anfrageliste-Seite) feuern nach erfolgreichem Remove-Request ein Custom-Event:
+```javascript
+document.dispatchEvent(new CustomEvent('inquiry:item-removed', {
+    detail: { uid, type }
+}));
+```
+Beide Komponenten lauschen darauf und entfernen das passende DOM-Element optimistisch (clientseitig), ohne erneuten Server-Roundtrip. Lediglich beim Wechsel auf den Empty-State wird der Inhalt der FlyIn frisch geladen.
+
+### Adapter-Integration
+
+Adapter überschreiben üblicherweise:
+- `Templates/Inquiry/FlyInItems.html` für reichere Item-Darstellung (z. B. Spec-Lines).
+- `resolveItem()`-Listener: `$event->setResolvedImage(...)` setzen, damit Vorschaubilder erscheinen.
 
 ---
 

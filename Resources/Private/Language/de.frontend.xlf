@@ -32,6 +32,30 @@
 				<source>Download PDF</source>
 				<target>PDF herunterladen</target>
 			</trans-unit>
+			<trans-unit id="flyIn.title">
+				<source>Inquiry list</source>
+				<target>Anfrageliste</target>
+			</trans-unit>
+			<trans-unit id="flyIn.empty">
+				<source>Your inquiry list is empty.</source>
+				<target>Ihre Anfrageliste ist leer.</target>
+			</trans-unit>
+			<trans-unit id="flyIn.cta">
+				<source>Go to inquiry list</source>
+				<target>Zur Anfrageliste</target>
+			</trans-unit>
+			<trans-unit id="flyIn.openLabel">
+				<source>Open inquiry list</source>
+				<target>Anfrageliste öffnen</target>
+			</trans-unit>
+			<trans-unit id="flyIn.close">
+				<source>Close</source>
+				<target>Schließen</target>
+			</trans-unit>
+			<trans-unit id="flyIn.remove">
+				<source>Remove</source>
+				<target>Entfernen</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
