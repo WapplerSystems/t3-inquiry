@@ -49,7 +49,15 @@
                 url.searchParams.append('tx_inquiry[type]', type);
                 fetch(url, { headers: { 'Accept': 'application/json' } })
                     .then(r => r.ok ? r.json() : Promise.reject(new Error('Remove failed')))
-                    .then(() => {
+                    .then(data => {
+                        if (data && Array.isArray(data.items)) {
+                            if (typeof window.setInquiryListItems === 'function') {
+                                window.setInquiryListItems(data.items);
+                            }
+                            if (typeof window.broadcastInquiryItems === 'function') {
+                                window.broadcastInquiryItems(data.items);
+                            }
+                        }
                         document.dispatchEvent(new CustomEvent('inquiry:item-removed', {
                             detail: { uid: uid, type: type }
                         }));
@@ -66,32 +74,24 @@
         });
     }
 
-    function syncToggleButtons(uid, type) {
-        document.querySelectorAll('.toggle-inquiry-item-status-button[data-inquiry-item-uid="' + uid + '"][data-inquiry-item-type="' + type + '"]').forEach(btn => {
-            btn.classList.remove('added');
-            const labelSpan = btn.querySelector('.inquiry-button-label');
-            const addLabel = btn.getAttribute('data-add-label');
-            if (labelSpan && addLabel) {
-                labelSpan.textContent = addLabel;
-            }
-        });
-    }
-
     flyIn.addEventListener('show.bs.offcanvas', refreshBody);
+
+    document.addEventListener('inquiry:items-changed', function () {
+        if (flyIn.classList.contains('show')) {
+            refreshBody();
+        }
+    });
 
     document.addEventListener('inquiry:item-removed', function (e) {
         const detail = e.detail || {};
         decrementBadges();
-        if (detail.uid && detail.type) {
-            syncToggleButtons(detail.uid, detail.type);
-        }
 
         if (!body || !detail.uid || !detail.type) {
             refreshBody();
             return;
         }
 
-        const btn = body.querySelector('.inquiry-flyin-item-remove[data-inquiry-item-uid="' + detail.uid + '"][data-inquiry-item-type="' + detail.type + '"]');
+        const btn = body.querySelector('.inquiry-flyin-item-remove[data-inquiry-item-uid="' + CSS.escape(detail.uid) + '"][data-inquiry-item-type="' + CSS.escape(detail.type) + '"]');
         const li = btn ? btn.closest('.inquiry-flyin-item') : null;
         if (li) {
             li.remove();

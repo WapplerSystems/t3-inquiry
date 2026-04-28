@@ -157,7 +157,7 @@ class InquiryController extends ActionController
         }
 
         // remove item
-        $storedItems = array_filter($storedItems, static fn($item) => $item['hash'] !== $hash);
+        $storedItems = array_values(array_filter($storedItems, static fn($item) => $item['hash'] !== $hash));
         $userSession->set('items', $storedItems);
         $frontendUserAuthentication->storeSessionData();
 
@@ -210,12 +210,13 @@ class InquiryController extends ActionController
         $frontendUserAuthentication = $this->request->getAttribute('frontend.user');
         $userSession = $frontendUserAuthentication->getSession();
         $storedItems = $userSession->get('items') ?? [];
-        $storedItems = array_filter($storedItems, static fn($item) => !((int)$item['uid'] === $uid && $item['type'] === $type));
+        $storedItems = array_values(array_filter($storedItems, static fn($item) => !((int)$item['uid'] === $uid && $item['type'] === $type)));
         $userSession->set('items', $storedItems);
         $frontendUserAuthentication->storeSessionData();
 
         $data = [
             'removed' => true,
+            'items' => $storedItems,
         ];
 
         return $this->jsonResponse(json_encode($data));
