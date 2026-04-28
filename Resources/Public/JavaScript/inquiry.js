@@ -153,6 +153,7 @@ if (itemsListMeta) {
 
 
       updateInquiryLinks();
+      broadcastInquiryItems(inquiryListItems);
 
     })
     .catch(error => {
