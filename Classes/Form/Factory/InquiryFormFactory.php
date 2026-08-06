@@ -39,7 +39,7 @@ class InquiryFormFactory extends AbstractFormFactory
 
     public function __construct(
         readonly private RequestTextTemplateRepository $requestTextTemplateRepository,
-        private EventDispatcherInterface               $eventDispatcher,
+        private EventDispatcherInterface               $inquiryEventDispatcher,
     )
     {
 
@@ -140,7 +140,7 @@ class InquiryFormFactory extends AbstractFormFactory
 
             $hash = $item['hash'];
             $event = new ResolveItemEvent($item['uid'], $item['type'], $request);
-            $this->eventDispatcher->dispatch($event);
+            $this->inquiryEventDispatcher->dispatch($event);
 
             if ($event->getResolvedObject() === null) {
                 continue;
@@ -208,7 +208,7 @@ class InquiryFormFactory extends AbstractFormFactory
                 defaultValue: $item['type']
             );
 
-            $this->eventDispatcher->dispatch(new BuildInquiryFormItemEvent($formDefinition, $fieldsetItem, $hash, $request));
+            $this->inquiryEventDispatcher->dispatch(new BuildInquiryFormItemEvent($formDefinition, $fieldsetItem, $hash, $request));
 
             $i++;
         }
@@ -299,7 +299,7 @@ class InquiryFormFactory extends AbstractFormFactory
             ]
         );
 
-        $this->eventDispatcher->dispatch(new BuildInquiryFormContactEvent($formDefinition, $fieldsetContact, $request));
+        $this->inquiryEventDispatcher->dispatch(new BuildInquiryFormContactEvent($formDefinition, $fieldsetContact, $request));
 
         $recipients = [];
         foreach ($configuration['recipients'] ?? [] as $recipient) {
@@ -323,7 +323,7 @@ class InquiryFormFactory extends AbstractFormFactory
                 34240 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/EmailToReceiver/',
             ]
         ]);
-        $this->eventDispatcher->dispatch(new CreateEmailToReceiverFinisherEvent($emailToReceiver, $configuration));
+        $this->inquiryEventDispatcher->dispatch(new CreateEmailToReceiverFinisherEvent($emailToReceiver, $configuration));
 
         $emailToSender = $formDefinition->createFinisher('EmailToSender');
         $emailToSender->setOptions([
@@ -341,7 +341,7 @@ class InquiryFormFactory extends AbstractFormFactory
                 34240 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/EmailToSender/',
             ],
         ]);
-        $this->eventDispatcher->dispatch(new CreateEmailToSenderFinisherEvent($emailToSender, $configuration));
+        $this->inquiryEventDispatcher->dispatch(new CreateEmailToSenderFinisherEvent($emailToSender, $configuration));
 
         $inquiryFinisher = $formDefinition->createFinisher('Inquiry');
         $inquiryFinisher->setOptions([
@@ -357,7 +357,7 @@ class InquiryFormFactory extends AbstractFormFactory
                 10 => 'EXT:inquiry/Resources/Private/Extensions/Form/Frontend/Templates/Finisher/Confirmation/',
             ]
         ]);
-        $this->eventDispatcher->dispatch(new CreateConfirmationFinisherEvent($confirmationFinisher));
+        $this->inquiryEventDispatcher->dispatch(new CreateConfirmationFinisherEvent($confirmationFinisher));
 
 
         $this->triggerFormBuildingFinished($formDefinition);
