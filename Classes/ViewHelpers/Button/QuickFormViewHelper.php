@@ -36,7 +36,7 @@ class QuickFormViewHelper extends AbstractTagBasedViewHelper
         parent::__construct();
     }
 
-    public function initializeArguments()
+    public function initializeArguments(): void
     {
         parent::initializeArguments();
         $this->registerArgument('item', 'mixed', 'The item which should be added to the list', true);
