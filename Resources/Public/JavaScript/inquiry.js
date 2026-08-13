@@ -1,13 +1,16 @@
 let toggleItemMeta = document.querySelector('meta[name="inquiry-toggle-item"]');
 let toggleItemUrl = null;
 if (toggleItemMeta) {
-  toggleItemUrl = new URL(toggleItemMeta.getAttribute('content'));
+  // The meta content is root-relative when the site base is host-relative
+  // ("base: /"). new URL() without a base argument throws on relative URLs,
+  // which would abort this whole script before any handler is bound.
+  toggleItemUrl = new URL(toggleItemMeta.getAttribute('content'), window.location.href);
 }
 
 let removeItemMeta = document.querySelector('meta[name="inquiry-remove-item"]');
 let removeItemUrl = null;
 if (removeItemMeta) {
-  removeItemUrl = new URL(removeItemMeta.getAttribute('content'));
+  removeItemUrl = new URL(removeItemMeta.getAttribute('content'), window.location.href);
 }
 
 let saveSnapshotMeta = document.querySelector('meta[name="inquiry-save-snapshot"]');

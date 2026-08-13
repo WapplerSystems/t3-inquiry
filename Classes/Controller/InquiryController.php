@@ -4,6 +4,7 @@ namespace WapplerSystems\Inquiry\Controller;
 
 use Mpdf\Mpdf;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
@@ -420,7 +421,7 @@ class InquiryController extends ActionController
             'preloadUrl' => $this->buildPreloadUrl($identifier),
             'contact'    => $pdfFields['_contact'] ?? [],
         ]);
-        $html = $this->view->render();
+        $html = $this->resolveImageSourcesForMpdf($this->view->render());
 
         $ttfPath = $this->getT3bootstrapTtfPath();
         $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
@@ -452,6 +453,61 @@ class InquiryController extends ActionController
             ->withBody($this->streamFactory->createStream($pdfContent));
     }
 
+    /**
+     * Rewrites root-relative image sources to absolute filesystem paths so mPDF
+     * can read them.
+     *
+     * mPDF's basepath is empty unless explicitly set, so a leading "/" is never
+     * mapped onto the document root, and hosts with allow_url_fopen=0 cannot
+     * fetch the image over HTTP either. Either way the image silently degrades
+     * to mPDF's "broken image" placeholder. Absolute filesystem paths work in
+     * every case.
+     *
+     * Only <img src> is touched: <a href> must keep pointing at real URLs so the
+     * links inside the generated PDF remain usable.
+     */
+    private function resolveImageSourcesForMpdf(string $html): string
+    {
+        $publicPath = rtrim(Environment::getPublicPath(), '/');
+        $siteUrl = $this->request->getAttribute('normalizedParams')?->getSiteUrl();
+        $siteUrl = is_string($siteUrl) ? rtrim($siteUrl, '/') : '';
+
+        return preg_replace_callback(
+            '#(<img\b[^>]*?\bsrc=")([^"]*)(")#i',
+            static function (array $m) use ($publicPath, $siteUrl): string {
+                $src = $m[2];
+
+                // Leave data: URIs, protocol-relative and foreign absolute URLs alone.
+                if ($src === ''
+                    || str_starts_with($src, 'data:')
+                    || str_starts_with($src, '//')
+                    || str_starts_with($src, $publicPath)
+                ) {
+                    return $m[0];
+                }
+
+                // Absolute URL of this very site -> treat as site-relative.
+                if ($siteUrl !== '' && str_starts_with($src, $siteUrl . '/')) {
+                    $src = substr($src, strlen($siteUrl));
+                } elseif (preg_match('#^[a-z][a-z0-9+.\-]*:#i', $src) === 1) {
+                    // Any other scheme (http, https, ftp, ...) stays untouched.
+                    return $m[0];
+                }
+
+                // Drop the cache-busting query string / fragment. f:uri.resource
+                // appends "?<mtime>", and mPDF uses the presence of a query
+                // string to decide a source is remote — it would then prepend its
+                // basepath to our filesystem path and try to fetch it over HTTP.
+                $path = preg_replace('#[?\#].*$#', '', $src) ?? $src;
+
+                // Root-relative ("/fileadmin/...") and public-dir-relative
+                // ("_assets/...", which is what f:uri.resource emits) both
+                // resolve against the public path.
+                return $m[1] . $publicPath . '/' . ltrim($path, '/') . $m[3];
+            },
+            $html
+        ) ?? $html;
+    }
 
     private function getT3bootstrapTtfPath(): string
     {

@@ -44,7 +44,9 @@
                 e.preventDefault();
                 const uid = this.getAttribute('data-inquiry-item-uid');
                 const type = this.getAttribute('data-inquiry-item-type');
-                const url = new URL(removeUrl);
+                // Second argument is required: removeUrl is root-relative when
+                // the site base is host-relative, and new URL() would throw.
+                const url = new URL(removeUrl, window.location.href);
                 url.searchParams.append('tx_inquiry[uid]', uid);
                 url.searchParams.append('tx_inquiry[type]', type);
                 fetch(url, { headers: { 'Accept': 'application/json' } })
