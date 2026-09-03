@@ -10,7 +10,7 @@
 			</trans-unit>
 			<trans-unit id="element.lastname.properties.label">
 				<source>Last Name</source>
-				<target>Nachnahme</target>
+				<target>Nachname</target>
 			</trans-unit>
 			<trans-unit id="element.salutation.properties.label">
 				<source>Salutation</source>
