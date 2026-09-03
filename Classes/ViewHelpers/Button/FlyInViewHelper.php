@@ -17,6 +17,13 @@ use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
  * The button uses the standard `to-inquiry-list` class so the existing
  * inquiry.js badge mechanism updates the count automatically after every
  * add/remove. Pair with `<i:flyIn.panel />` once per page to mount the offcanvas.
+ *
+ * Child content is rendered before the counter, so a site can give the button
+ * an icon and a label of its own:
+ *
+ *   <i:button.flyIn class="my-button">
+ *       <i class="my-icon"></i><span>Inquiry list</span>
+ *   </i:button.flyIn>
  */
 class FlyInViewHelper extends AbstractTagBasedViewHelper
 {
@@ -39,7 +46,8 @@ class FlyInViewHelper extends AbstractTagBasedViewHelper
             trim(($this->tag->getAttribute('class') ?? '') . ' to-inquiry-list inquiry-flyin-trigger')
         );
 
-        $this->tag->setContent('<span class="inquiry-item-counter">' . $count . '</span>');
+        $content = (string)$this->renderChildren();
+        $this->tag->setContent($content . '<span class="inquiry-item-counter">' . $count . '</span>');
         $this->tag->forceClosingTag(true);
         return $this->tag->render();
     }
