@@ -303,6 +303,59 @@ document.addEventListener('DOMContentLoaded', function () {
   bindInquiryGeneratePdfHandlers();
 });
 
+// The PDF is built from the same fields as the mail, but it bypasses the form
+// framework's validation, so it has to check the required ones itself. Which
+// fields are required is read from the rendered marker instead of a hardcoded
+// list, so this stays free of project specific knowledge.
+function collectMissingRequiredPdfFields() {
+  const missing = [];
+  document.querySelectorAll('[data-inquiry-pdf-key][data-inquiry-pdf-hash]').forEach(function (input) {
+    const group = input.closest('.form-group');
+    if (!group || !group.querySelector(':scope > .control-label .required')) return;
+    if (input.value.trim() === '') {
+      missing.push(input);
+    }
+  });
+  return missing;
+}
+
+// Only ever clears what this handler marked, so error state rendered by the
+// server after a failed submit survives.
+function clearOwnPdfFieldErrors() {
+  document.querySelectorAll('[data-inquiry-pdf-key][data-inquiry-pdf-hash]').forEach(function (input) {
+    if (!input._inquiryPdfError) return;
+    input._inquiryPdfError = false;
+    input.classList.remove('error');
+    const group = input.closest('.form-group');
+    if (group) group.classList.remove('has-error');
+  });
+}
+
+function markPdfFieldError(input) {
+  input._inquiryPdfError = true;
+  input.classList.add('error');
+  const group = input.closest('.form-group');
+  if (group) group.classList.add('has-error');
+}
+
+// Optional: the message text comes from a data attribute so the wording can be
+// translated downstream without this file carrying any copy.
+function setPdfRequiredMessage(link, text) {
+  const parent = link.parentElement;
+  let box = parent ? parent.querySelector('.inquiry-pdf-required-message') : null;
+  if (!text) {
+    if (box) box.remove();
+    return;
+  }
+  if (!box) {
+    box = document.createElement('div');
+    box.className = 'inquiry-pdf-required-message';
+    box.setAttribute('role', 'alert');
+    link.insertAdjacentElement('afterend', box);
+  }
+  box.textContent = text;
+}
+
 function bindInquiryGeneratePdfHandlers() {
   document.querySelectorAll('.inquiry-generate-pdf').forEach(function (link) {
     if (link._inquiryPdfBound) return;
@@ -314,6 +367,16 @@ function bindInquiryGeneratePdfHandlers() {
         console.error('[tx_inquiry] inquiry-save-snapshot meta tag missing');
         return;
       }
+
+      clearOwnPdfFieldErrors();
+      const missing = collectMissingRequiredPdfFields();
+      if (missing.length > 0) {
+        missing.forEach(markPdfFieldError);
+        setPdfRequiredMessage(this, this.getAttribute('data-inquiry-required-message'));
+        missing[0].focus();
+        return;
+      }
+      setPdfRequiredMessage(this, '');
 
       const pdfFields = {};
       document.querySelectorAll('[data-inquiry-pdf-key][data-inquiry-pdf-hash]').forEach(function (input) {
