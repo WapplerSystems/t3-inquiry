@@ -2,4 +2,10 @@
 
 .inquiry-fieldset-header {
     display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.inquiry-fieldset-header .inquiry-item-delete {
+    flex-shrink: 0;
 }
