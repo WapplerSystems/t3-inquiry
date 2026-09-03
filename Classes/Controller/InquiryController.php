@@ -12,6 +12,7 @@ use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Domain\Repository\ListSnapshotRepository;
+use WapplerSystems\Inquiry\Service\ListSnapshotService;
 use WapplerSystems\Inquiry\Event\CanResolveItemByIdentifierEvent;
 use WapplerSystems\Inquiry\Event\ConfigurePdfEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemEvent;
@@ -23,6 +24,7 @@ class InquiryController extends ActionController
     public function __construct(
         EventDispatcherInterface $eventDispatcher,
         private readonly ListSnapshotRepository $listSnapshotRepository,
+        private readonly ListSnapshotService $listSnapshotService,
     ) {
         $this->eventDispatcher = $eventDispatcher;
     }
@@ -317,8 +319,7 @@ class InquiryController extends ActionController
         $items = $body['items'] ?? [];
         $prefill = $body['prefill'] ?? [];
 
-        $identifier = md5(json_encode(['items' => array_values($items), 'prefill' => $prefill]));
-        $this->listSnapshotRepository->save($identifier, array_values($items), $prefill);
+        $identifier = $this->listSnapshotService->store($items, $prefill);
 
         return $this->jsonResponse(json_encode(['identifier' => $identifier]));
     }
@@ -418,7 +419,11 @@ class InquiryController extends ActionController
 
         $this->view->assignMultiple([
             'items'      => $resolvedItems,
-            'preloadUrl' => $this->buildPreloadUrl($identifier),
+            'preloadUrl' => $this->listSnapshotService->buildPreloadUrl(
+                $identifier,
+                $this->request,
+                isset($this->settings['preloadItemsTypeNum']) ? (int)$this->settings['preloadItemsTypeNum'] : null,
+            ),
             'contact'    => $pdfFields['_contact'] ?? [],
         ]);
         $html = $this->resolveImageSourcesForMpdf($this->view->render());
@@ -564,16 +569,6 @@ class InquiryController extends ActionController
         }
 
         return $ttf;
-    }
-
-    private function buildPreloadUrl(string $identifier): string
-    {
-        $params = [
-            'type'       => (int)($this->settings['preloadItemsTypeNum'] ?? 678937),
-            'tx_inquiry' => ['identifier' => $identifier],
-        ];
-        $language = $this->request->getAttribute('language');
-        return rtrim((string)$language->getBase(), '/') . '/?' . http_build_query($params);
     }
 
     private function getFallbackListUri(): string
