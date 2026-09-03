@@ -15,18 +15,33 @@
     const body = flyIn.querySelector('[data-inquiry-flyin-body]');
     const footer = flyIn.querySelector('[data-inquiry-flyin-footer]');
 
+    let contentFresh = false;
+    let inFlight = null;
+
     function refreshBody() {
         if (!body) return Promise.resolve();
-        return fetch(itemsUrl, { headers: { 'Accept': 'text/html' } })
+        if (inFlight) return inFlight;
+        inFlight = fetch(itemsUrl, { headers: { 'Accept': 'text/html' } })
             .then(r => r.ok ? r.text() : Promise.reject(new Error('Failed to load FlyIn items')))
             .then(html => {
                 body.innerHTML = html;
+                contentFresh = true;
                 updateFooterVisibility();
                 bindRemoveButtons();
             })
             .catch(err => {
                 console.error('[tx_inquiry] FlyIn fetch failed:', err);
+            })
+            .finally(() => {
+                inFlight = null;
             });
+        return inFlight;
+    }
+
+    // Only fetch when the body does not already match the current items, so a
+    // panel that was warmed up beforehand opens without waiting for a request.
+    function ensureBody() {
+        return contentFresh ? Promise.resolve() : refreshBody();
     }
 
     function updateFooterVisibility() {
@@ -76,9 +91,18 @@
         });
     }
 
-    flyIn.addEventListener('show.bs.offcanvas', refreshBody);
+    flyIn.addEventListener('show.bs.offcanvas', ensureBody);
+
+    // Warm the panel up as soon as the visitor shows intent to open it. The
+    // request then overlaps the offcanvas animation instead of following it.
+    flyIn.ownerDocument.querySelectorAll('.inquiry-flyin-trigger').forEach(trigger => {
+        ['pointerenter', 'focus', 'touchstart'].forEach(type => {
+            trigger.addEventListener(type, ensureBody, { once: true, passive: true });
+        });
+    });
 
     document.addEventListener('inquiry:items-changed', function () {
+        contentFresh = false;
         if (flyIn.classList.contains('show')) {
             refreshBody();
         }
@@ -97,6 +121,8 @@
         const li = btn ? btn.closest('.inquiry-flyin-item') : null;
         if (li) {
             li.remove();
+        } else {
+            contentFresh = false;
         }
         if (body.querySelectorAll('.inquiry-flyin-item').length === 0) {
             refreshBody();
