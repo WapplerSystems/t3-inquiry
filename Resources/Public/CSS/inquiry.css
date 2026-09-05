@@ -9,3 +9,10 @@
 .inquiry-fieldset-header .inquiry-item-delete {
     flex-shrink: 0;
 }
+
+/* The item counter on a FlyIn trigger stays empty while the list is empty --
+   a badge reading "0" is noise, and the badge is also empty before inquiry.js
+   has filled it in. Sites style the badge themselves; this only hides it. */
+.inquiry-item-counter:empty {
+    display: none;
+}

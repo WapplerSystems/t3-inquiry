@@ -46,7 +46,9 @@ if (inquirySyncChannel) {
 
 /**
  * Writes the item count into the badge of every inquiry trigger, creating the
- * span when the markup did not bring one.
+ * span when the markup did not bring one. A count of zero leaves the badge
+ * EMPTY rather than writing "0", so that the `.inquiry-item-counter:empty`
+ * rule can hide it -- a badge announcing zero items is noise.
  *
  * Every path that changes the item count goes through here; keeping a single
  * copy is what stops the badge and the list from drifting apart.
@@ -59,7 +61,7 @@ function setInquiryCounters(count) {
       countSpan.className = 'inquiry-item-counter';
       link.appendChild(countSpan);
     }
-    countSpan.textContent = count;
+    countSpan.textContent = count > 0 ? String(count) : '';
   });
 }
 
