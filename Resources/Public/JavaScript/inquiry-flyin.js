@@ -84,13 +84,6 @@
         });
     }
 
-    function decrementBadges() {
-        document.querySelectorAll('.to-inquiry-list .inquiry-item-counter').forEach(span => {
-            const current = parseInt(span.textContent, 10) || 0;
-            span.textContent = Math.max(0, current - 1);
-        });
-    }
-
     flyIn.addEventListener('show.bs.offcanvas', ensureBody);
 
     // Warm the panel up as soon as the visitor shows intent to open it. The
@@ -110,7 +103,6 @@
 
     document.addEventListener('inquiry:item-removed', function (e) {
         const detail = e.detail || {};
-        decrementBadges();
 
         if (!body || !detail.uid || !detail.type) {
             refreshBody();

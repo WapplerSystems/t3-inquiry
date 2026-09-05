@@ -44,6 +44,29 @@ if (inquirySyncChannel) {
 }
 
 
+/**
+ * Writes the item count into the badge of every inquiry trigger, creating the
+ * span when the markup did not bring one.
+ *
+ * Every path that changes the item count goes through here; keeping a single
+ * copy is what stops the badge and the list from drifting apart.
+ */
+function setInquiryCounters(count) {
+  document.querySelectorAll('.to-inquiry-list').forEach(link => {
+    let countSpan = link.querySelector('.inquiry-item-counter');
+    if (!countSpan) {
+      countSpan = document.createElement('span');
+      countSpan.className = 'inquiry-item-counter';
+      link.appendChild(countSpan);
+    }
+    countSpan.textContent = count;
+  });
+}
+
+// The FlyIn script lives in its own file and needs the same rule.
+window.setInquiryCounters = setInquiryCounters;
+
+
 function addClickListenerToInquiryLinks() {
   if (!toggleItemUrl) {
     return;
@@ -98,17 +121,7 @@ function addClickListenerToInquiryLinks() {
 
             link.blur();
 
-            let count = data.items.length;
-
-            document.querySelectorAll('.to-inquiry-list').forEach(link => {
-              let countSpan = link.querySelector('.inquiry-item-counter');
-              if (!countSpan) {
-                countSpan = document.createElement('span');
-                countSpan.className = 'inquiry-item-counter';
-                link.appendChild(countSpan);
-              }
-              countSpan.textContent = count;
-            });
+            setInquiryCounters(data.items.length);
 
           })
           .catch(error => {
@@ -141,18 +154,7 @@ if (itemsListMeta) {
     .then(data => {
       inquiryListItems = Object.values(data.items);
 
-      let count = inquiryListItems.length;
-
-      /* inquiry links/buttons */
-      document.querySelectorAll('.to-inquiry-list').forEach(link => {
-        let countSpan = link.querySelector('.inquiry-item-counter');
-        if (!countSpan) {
-          countSpan = document.createElement('span');
-          countSpan.className = 'inquiry-item-counter';
-          link.appendChild(countSpan);
-        }
-        countSpan.textContent = count;
-      });
+      setInquiryCounters(inquiryListItems.length);
 
 
       updateInquiryLinks();
@@ -166,6 +168,7 @@ if (itemsListMeta) {
 
 window.setInquiryListItems = function (items) {
   inquiryListItems = Array.isArray(items) ? items : [];
+  setInquiryCounters(inquiryListItems.length);
   updateInquiryLinks();
 };
 
@@ -233,6 +236,7 @@ function bindInquiryItemDeleteHandlers() {
             }
             if (Array.isArray(data.items)) {
               inquiryListItems = data.items;
+              setInquiryCounters(inquiryListItems.length);
               broadcastInquiryItems(inquiryListItems);
             }
             document.dispatchEvent(new CustomEvent('inquiry:item-removed', {
@@ -514,16 +518,7 @@ function reconcileInquiryItems(serverItems) {
 
   inquiryListItems = serverItems;
 
-  const count = inquiryListItems.length;
-  document.querySelectorAll('.to-inquiry-list').forEach(link => {
-    let countSpan = link.querySelector('.inquiry-item-counter');
-    if (!countSpan) {
-      countSpan = document.createElement('span');
-      countSpan.className = 'inquiry-item-counter';
-      link.appendChild(countSpan);
-    }
-    countSpan.textContent = count;
-  });
+  setInquiryCounters(inquiryListItems.length);
 
   updateInquiryLinks();
 
