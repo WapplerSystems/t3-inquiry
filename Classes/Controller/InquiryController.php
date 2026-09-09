@@ -19,6 +19,8 @@ use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 
 class InquiryController extends ActionController
 {
+    protected const DEFAULT_PDF_FILE_NAME = 'inquiry-list.pdf';
+
 
 
     public function __construct(
@@ -432,7 +434,7 @@ class InquiryController extends ActionController
         $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
         $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
 
-        $pdfEvent = new ConfigurePdfEvent();
+        $pdfEvent = new ConfigurePdfEvent($this->resolveClientTime());
         $this->eventDispatcher->dispatch($pdfEvent);
 
         $fontDirs = array_merge($defaultConfig['fontDir'], [dirname($ttfPath)], $pdfEvent->getFontDirs());
@@ -454,8 +456,55 @@ class InquiryController extends ActionController
 
         return $this->responseFactory->createResponse()
             ->withHeader('Content-Type', 'application/pdf')
-            ->withHeader('Content-Disposition', 'attachment; filename="inquiry-list.pdf"')
+            ->withHeader(
+                'Content-Disposition',
+                'attachment; filename="' . $this->sanitizeFileName($pdfEvent->getFileName()) . '"'
+            )
             ->withBody($this->streamFactory->createStream($pdfContent));
+    }
+
+    /**
+     * Current time in the downloading visitor's own time zone.
+     *
+     * The client sends its UTC offset in minutes (what
+     * -Date::getTimezoneOffset() yields) so that a timestamp put into the file
+     * name reads as the visitor's local time rather than the server's. Without
+     * the parameter -- a direct call, a crawler, a client that does not send it
+     * -- the server time zone is used.
+     */
+    protected function resolveClientTime(): \DateTimeImmutable
+    {
+        $now = new \DateTimeImmutable();
+        $offset = $this->request->getQueryParams()['tx_inquiry']['tzoffset'] ?? null;
+        if (!is_scalar($offset) || !preg_match('/^[+-]?\d{1,4}$/', (string)$offset)) {
+            return $now;
+        }
+
+        $minutes = (int)$offset;
+        // Real zones span UTC-12:00 to UTC+14:00.
+        if ($minutes < -720 || $minutes > 840) {
+            return $now;
+        }
+
+        return $now->setTimezone(new \DateTimeZone(sprintf(
+            '%s%02d:%02d',
+            $minutes < 0 ? '-' : '+',
+            intdiv(abs($minutes), 60),
+            abs($minutes) % 60
+        )));
+    }
+
+    /**
+     * Keeps a listener-supplied file name safe to put into a header.
+     */
+    protected function sanitizeFileName(string $fileName): string
+    {
+        $fileName = ltrim((string)preg_replace('/[^A-Za-z0-9._-]+/', '-', $fileName), '.-');
+        if ($fileName === '') {
+            return self::DEFAULT_PDF_FILE_NAME;
+        }
+
+        return str_ends_with(strtolower($fileName), '.pdf') ? $fileName : $fileName . '.pdf';
     }
 
     /**

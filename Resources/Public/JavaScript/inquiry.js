@@ -411,7 +411,11 @@ function bindInquiryGeneratePdfHandlers() {
           return response.json();
         })
         .then(data => {
-          window.location.href = pdfUrl + '&tx_inquiry[identifier]=' + encodeURIComponent(data.identifier);
+          // The server names the file after this offset, so the timestamp in it
+          // reads as the visitor's local time instead of the server's.
+          const tzOffset = -new Date().getTimezoneOffset();
+          window.location.href = pdfUrl + '&tx_inquiry[identifier]=' + encodeURIComponent(data.identifier)
+            + '&tx_inquiry[tzoffset]=' + encodeURIComponent(tzOffset);
         })
         .catch(error => {
           console.error('[tx_inquiry] Error saving snapshot:', error);
