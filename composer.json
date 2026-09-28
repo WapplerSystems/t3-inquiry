@@ -44,5 +44,20 @@
 		"typo3/cms": {
 			"extension-key": "inquiry"
 		}
+	},
+	"require-dev": {
+		"typo3/testing-framework": "^8.0",
+		"phpunit/phpunit": "^11.0"
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"WapplerSystems\\Inquiry\\Tests\\": "Tests/"
+		}
+	},
+	"config": {
+		"allow-plugins": {
+			"typo3/class-alias-loader": true,
+			"typo3/cms-composer-installers": true
+		}
 	}
 }

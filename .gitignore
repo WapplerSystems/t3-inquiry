@@ -1,0 +1,9 @@
+.idea
+.Build/*
+.php_cs
+.php_cs.cache
+.phpunit.cache
+composer.lock
+Documentation-GENERATED-temp
+public/
+vendor/
