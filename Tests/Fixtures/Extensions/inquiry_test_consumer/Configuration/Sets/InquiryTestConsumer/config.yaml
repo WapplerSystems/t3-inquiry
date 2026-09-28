@@ -1,0 +1,5 @@
+name: wapplersystems/inquiry-test-consumer
+label: Inquiry Test Consumer
+dependencies:
+  - wapplersystems/inquiry
+  - typo3/fluid-styled-content

@@ -1,0 +1,45 @@
+{
+	"name": "wapplersystems/inquiry-e2e-instance",
+	"description": "Throwaway TYPO3 instance the browser tests drive. Not part of any release.",
+	"license": "GPL-2.0-or-later",
+	"type": "project",
+	"repositories": [
+		{
+			"type": "path",
+			"url": "../..",
+			"options": {
+				"symlink": true
+			}
+		},
+		{
+			"type": "path",
+			"url": "../../Tests/Fixtures/Extensions/inquiry_test_consumer",
+			"options": {
+				"symlink": true
+			}
+		}
+	],
+	"require": {
+		"typo3/cms-backend": "^13.4",
+		"typo3/cms-core": "^13.4",
+		"typo3/cms-fluid-styled-content": "^13.4",
+		"typo3/cms-form": "^13.4",
+		"typo3/cms-frontend": "^13.4",
+		"typo3/cms-install": "^13.4",
+		"wapplersystems/inquiry": "@dev",
+		"wapplersystems/inquiry-test-consumer": "@dev"
+	},
+	"config": {
+		"allow-plugins": {
+			"typo3/class-alias-loader": true,
+			"typo3/cms-composer-installers": true
+		}
+	},
+	"extra": {
+		"typo3/cms": {
+			"web-dir": "public"
+		}
+	},
+	"minimum-stability": "dev",
+	"prefer-stable": true
+}
