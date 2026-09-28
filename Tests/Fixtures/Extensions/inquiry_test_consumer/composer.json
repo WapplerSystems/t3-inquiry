@@ -1,0 +1,19 @@
+{
+	"name": "wapplersystems/inquiry-test-consumer",
+	"type": "typo3-cms-extension",
+	"description": "Minimal inquiry consumer for the test suite",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"wapplersystems/inquiry": "*"
+	},
+	"autoload": {
+		"psr-4": {
+			"WapplerSystems\\InquiryTestConsumer\\": "Classes"
+		}
+	},
+	"extra": {
+		"typo3/cms": {
+			"extension-key": "inquiry_test_consumer"
+		}
+	}
+}
