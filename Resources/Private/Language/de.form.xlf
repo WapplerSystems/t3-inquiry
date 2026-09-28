@@ -48,6 +48,10 @@
 				<source>Zipcode</source>
 				<target>PLZ</target>
 			</trans-unit>
+			<trans-unit id="element.zip.properties.label">
+				<source>Zipcode</source>
+				<target>PLZ</target>
+			</trans-unit>
 			<trans-unit id="element.city.properties.label">
 				<source>City</source>
 				<target>Stadt</target>

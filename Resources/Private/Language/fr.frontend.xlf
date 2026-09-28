@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xliff version="1.0">
+	<file source-language="de" target-language="fr" datatype="plaintext" original="messages" date="2024-06-19T12:00:00Z">
+		<body>
+			<trans-unit id="addToList">
+				<source>Add to inquiry list</source>
+				<target>Ajouter à la liste de demandes</target>
+			</trans-unit>
+			<trans-unit id="removeFromList">
+				<source>Remove from inquiry list</source>
+				<target>Retirer de la liste de demandes</target>
+			</trans-unit>
+			<trans-unit id="removeItemButton">
+				<source>Remove</source>
+				<target>Retirer</target>
+			</trans-unit>
+
+			<trans-unit id="directInquiry">
+				<source>Direct Inquiry</source>
+				<target>Demande directe</target>
+			</trans-unit>
+
+			<trans-unit id="noItemsAdded">
+				<source>The inquiry list is empty. No Products were selected, please go to product pages and add products to the inquiry list</source>
+				<target>La liste de demandes est vide. Aucun produit n'a été sélectionné. Veuillez consulter les pages produits et ajouter des produits à la liste de demandes.</target>
+			</trans-unit>
+			<trans-unit id="pdfLinkToList">
+				<source>Link to this list</source>
+				<target>Lien vers cette liste</target>
+			</trans-unit>
+			<trans-unit id="generatePdf">
+				<source>Download PDF</source>
+				<target>Télécharger le PDF</target>
+			</trans-unit>
+			<trans-unit id="flyIn.title">
+				<source>Inquiry list</source>
+				<target>Liste de demandes</target>
+			</trans-unit>
+			<trans-unit id="flyIn.empty">
+				<source>Your inquiry list is empty.</source>
+				<target>Votre liste de demandes est vide.</target>
+			</trans-unit>
+			<trans-unit id="flyIn.cta">
+				<source>Go to inquiry list</source>
+				<target>Accéder à la liste de demandes</target>
+			</trans-unit>
+			<trans-unit id="flyIn.openLabel">
+				<source>Open inquiry list</source>
+				<target>Ouvrir la liste de demandes</target>
+			</trans-unit>
+			<trans-unit id="flyIn.close">
+				<source>Close</source>
+				<target>Fermer</target>
+			</trans-unit>
+			<trans-unit id="flyIn.remove">
+				<source>Remove</source>
+				<target>Retirer</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>
