@@ -24,6 +24,10 @@
 				<source>The inquiry list is empty. No Products were selected, please go to product pages and add products to the inquiry list</source>
 				<target>Lista zapytań jest pusta. Nie wybrano żadnych produktów. Prosimy przejść do stron produktów i dodać produkty do listy zapytań.</target>
 			</trans-unit>
+			<trans-unit id="pdfTitle">
+				<source>Inquiry list</source>
+				<target>Lista zapytań</target>
+			</trans-unit>
 			<trans-unit id="pdfLinkToList">
 				<source>Link to this list</source>
 				<target>Link do tej listy</target>
