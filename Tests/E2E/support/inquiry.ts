@@ -25,6 +25,8 @@ export function toggleButton(page: Page) {
 /**
  * The badge is deliberately empty at zero rather than showing "0", so read it
  * as "how many does the page claim to hold" and compare against a string.
+ * inquiry.js fills it after its own request, so always read it through
+ * expect.poll() -- a single read races that request and fails now and then.
  */
 export async function counterText(page: Page): Promise<string> {
     const counter = page.locator('.to-inquiry-list .inquiry-item-counter').first();

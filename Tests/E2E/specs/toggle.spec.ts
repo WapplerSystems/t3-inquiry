@@ -9,11 +9,11 @@ import { addFirstItem, counterText, openProduct, removeFirstItem, toggleButton }
 test.describe('toggle button', () => {
     test('adds an item and counts it', async ({ page }) => {
         await openProduct(page);
-        expect(await counterText(page)).toBe('');
+        await expect.poll(() => counterText(page)).toBe('');
 
         await addFirstItem(page);
 
-        expect(await counterText(page)).toBe('1');
+        await expect.poll(() => counterText(page)).toBe('1');
     });
 
     test('swaps its label between add and remove', async ({ page }) => {
@@ -37,12 +37,12 @@ test.describe('toggle button', () => {
     test('takes the item back out again', async ({ page }) => {
         await openProduct(page);
         await addFirstItem(page);
-        expect(await counterText(page)).toBe('1');
+        await expect.poll(() => counterText(page)).toBe('1');
 
         await removeFirstItem(page);
 
         // Zero is rendered as an empty badge on purpose, never as "0".
-        expect(await counterText(page)).toBe('');
+        await expect.poll(() => counterText(page)).toBe('');
     });
 
     test('remembers the item across a reload', async ({ page }) => {
@@ -52,7 +52,7 @@ test.describe('toggle button', () => {
         await page.reload({ waitUntil: 'domcontentloaded' });
 
         await expect(toggleButton(page).first()).toHaveClass(/\badded\b/);
-        expect(await counterText(page)).toBe('1');
+        await expect.poll(() => counterText(page)).toBe('1');
     });
 
     test('never renders the unresolved-item error', async ({ page }) => {

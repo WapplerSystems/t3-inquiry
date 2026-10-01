@@ -14,7 +14,7 @@ test.describe('synchronisation between tabs', () => {
         await openProduct(first);
         await openProduct(second);
 
-        expect(await counterText(second)).toBe('');
+        await expect.poll(() => counterText(second)).toBe('');
 
         await addFirstItem(first);
 
@@ -36,7 +36,7 @@ test.describe('synchronisation between tabs', () => {
         await later.goto(paths.product, { waitUntil: 'domcontentloaded' });
 
         await expect(toggleButton(later).first()).toHaveClass(/\badded\b/);
-        expect(await counterText(later)).toBe('1');
+        await expect.poll(() => counterText(later)).toBe('1');
     });
 
     test('removal travels between tabs as well', async ({ context }) => {
@@ -45,7 +45,7 @@ test.describe('synchronisation between tabs', () => {
         await openProduct(first);
         await addFirstItem(first);
         await openProduct(second);
-        expect(await counterText(second)).toBe('1');
+        await expect.poll(() => counterText(second)).toBe('1');
 
         await toggleButton(first).first().click();
         await expect(toggleButton(first).first()).not.toHaveClass(/\badded\b/);
