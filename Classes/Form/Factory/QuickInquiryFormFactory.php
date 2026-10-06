@@ -6,7 +6,6 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
-use TYPO3\CMS\Extbase\Validation\Validator\EmailAddressValidator;
 use TYPO3\CMS\Extbase\Validation\Validator\NotEmptyValidator;
 use TYPO3\CMS\Extbase\Validation\Validator\StringLengthValidator;
 use TYPO3\CMS\Extbase\Validation\ValidatorResolver;
@@ -359,7 +358,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
             validators: [
                 $resolver->createValidator(NotEmptyValidator::class),
                 $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300]),
-                $resolver->createValidator(EmailAddressValidator::class)
+                // EmailAddress comes with the Email element prototype, adding it again doubles the error message
             ]
         );
         $this->addFormElement(
