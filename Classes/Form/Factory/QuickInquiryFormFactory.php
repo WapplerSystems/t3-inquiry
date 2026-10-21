@@ -32,7 +32,7 @@ class QuickInquiryFormFactory extends AbstractFormFactory
 
     public function __construct(
         readonly private RequestTextTemplateRepository $requestTextTemplateRepository,
-        private EventDispatcherInterface               $eventDispatcher,
+        protected ?EventDispatcherInterface            $eventDispatcher,
     )
     {
 
