@@ -1,0 +1,6 @@
+settings:
+  inquiryTestConsumer.listPageUid:
+    label: 'Page holding the inquiry form'
+    description: 'Written by Build/e2e/seed.php — the page template links the counter trigger to it.'
+    type: int
+    default: 2

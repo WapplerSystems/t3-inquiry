@@ -19,6 +19,23 @@
         pageType="{form.renderingOptions.pageType}"
         additionalAttributes="{form.renderingOptions.additionalAttributes}"
     >
+        <f:comment>
+            Fehler auf dem Formular selbst statt auf einem Feld: alles, was ein
+            Validator auf Formularebene ueber addError() meldet (Challenge,
+            MinimumFillTime, EntropySpam im wapplersystems/form-Fork). Kein
+            Feld-Partial zeigt diese an; ohne den Block wird so eine Einsendung
+            stumm abgewiesen. Dieses Template ueberschreibt Form.html fuer jedes
+            Formular der Instanz, deshalb muss der Block hier stehen.
+        </f:comment>
+        <f:form.validationResults for="{form.identifier}">
+            <f:if condition="{validationResults.errors}">
+                <div class="form-error-summary alert alert-danger" role="alert">
+                    <f:for each="{validationResults.errors}" as="error">
+                        <p class="form-error-summary-item">{error -> f:format.htmlspecialchars()}</p>
+                    </f:for>
+                </div>
+            </f:if>
+        </f:form.validationResults>
         <f:render partial="{form.currentPage.templateName}" arguments="{page: form.currentPage}"/>
         <div class="row">
             <div class="actions col-12{f:if(condition: '{form.renderingOptions.layout} == \'horizontal\'',then:' col-sm-10 ml-auto')}">

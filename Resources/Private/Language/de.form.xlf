@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file source-language="en" datatype="plaintext" original="messages" date="2014-06-02T11:47:10Z" product-name="inquiry">
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2014-06-02T11:47:10Z" product-name="inquiry">
 		<header/>
 		<body>
 
@@ -10,7 +10,7 @@
 			</trans-unit>
 			<trans-unit id="element.lastname.properties.label">
 				<source>Last Name</source>
-				<target>Nachnahme</target>
+				<target>Nachname</target>
 			</trans-unit>
 			<trans-unit id="element.salutation.properties.label">
 				<source>Salutation</source>
@@ -45,6 +45,10 @@
 				<target>Nr.</target>
 			</trans-unit>
 			<trans-unit id="element.zipcode.properties.label">
+				<source>Zipcode</source>
+				<target>PLZ</target>
+			</trans-unit>
+			<trans-unit id="element.zip.properties.label">
 				<source>Zipcode</source>
 				<target>PLZ</target>
 			</trans-unit>

@@ -1,13 +1,16 @@
 let toggleItemMeta = document.querySelector('meta[name="inquiry-toggle-item"]');
 let toggleItemUrl = null;
 if (toggleItemMeta) {
-  toggleItemUrl = new URL(toggleItemMeta.getAttribute('content'));
+  // The meta content is root-relative when the site base is host-relative
+  // ("base: /"). new URL() without a base argument throws on relative URLs,
+  // which would abort this whole script before any handler is bound.
+  toggleItemUrl = new URL(toggleItemMeta.getAttribute('content'), window.location.href);
 }
 
 let removeItemMeta = document.querySelector('meta[name="inquiry-remove-item"]');
 let removeItemUrl = null;
 if (removeItemMeta) {
-  removeItemUrl = new URL(removeItemMeta.getAttribute('content'));
+  removeItemUrl = new URL(removeItemMeta.getAttribute('content'), window.location.href);
 }
 
 let saveSnapshotMeta = document.querySelector('meta[name="inquiry-save-snapshot"]');
@@ -39,6 +42,31 @@ if (inquirySyncChannel) {
     reconcileInquiryItems(items);
   });
 }
+
+
+/**
+ * Writes the item count into the badge of every inquiry trigger, creating the
+ * span when the markup did not bring one. A count of zero leaves the badge
+ * EMPTY rather than writing "0", so that the `.inquiry-item-counter:empty`
+ * rule can hide it -- a badge announcing zero items is noise.
+ *
+ * Every path that changes the item count goes through here; keeping a single
+ * copy is what stops the badge and the list from drifting apart.
+ */
+function setInquiryCounters(count) {
+  document.querySelectorAll('.to-inquiry-list').forEach(link => {
+    let countSpan = link.querySelector('.inquiry-item-counter');
+    if (!countSpan) {
+      countSpan = document.createElement('span');
+      countSpan.className = 'inquiry-item-counter';
+      link.appendChild(countSpan);
+    }
+    countSpan.textContent = count > 0 ? String(count) : '';
+  });
+}
+
+// The FlyIn script lives in its own file and needs the same rule.
+window.setInquiryCounters = setInquiryCounters;
 
 
 function addClickListenerToInquiryLinks() {
@@ -95,17 +123,7 @@ function addClickListenerToInquiryLinks() {
 
             link.blur();
 
-            let count = data.items.length;
-
-            document.querySelectorAll('.to-inquiry-list').forEach(link => {
-              let countSpan = link.querySelector('.inquiry-item-counter');
-              if (!countSpan) {
-                countSpan = document.createElement('span');
-                countSpan.className = 'inquiry-item-counter';
-                link.appendChild(countSpan);
-              }
-              countSpan.textContent = count;
-            });
+            setInquiryCounters(data.items.length);
 
           })
           .catch(error => {
@@ -138,18 +156,7 @@ if (itemsListMeta) {
     .then(data => {
       inquiryListItems = Object.values(data.items);
 
-      let count = inquiryListItems.length;
-
-      /* inquiry links/buttons */
-      document.querySelectorAll('.to-inquiry-list').forEach(link => {
-        let countSpan = link.querySelector('.inquiry-item-counter');
-        if (!countSpan) {
-          countSpan = document.createElement('span');
-          countSpan.className = 'inquiry-item-counter';
-          link.appendChild(countSpan);
-        }
-        countSpan.textContent = count;
-      });
+      setInquiryCounters(inquiryListItems.length);
 
 
       updateInquiryLinks();
@@ -163,6 +170,7 @@ if (itemsListMeta) {
 
 window.setInquiryListItems = function (items) {
   inquiryListItems = Array.isArray(items) ? items : [];
+  setInquiryCounters(inquiryListItems.length);
   updateInquiryLinks();
 };
 
@@ -230,6 +238,7 @@ function bindInquiryItemDeleteHandlers() {
             }
             if (Array.isArray(data.items)) {
               inquiryListItems = data.items;
+              setInquiryCounters(inquiryListItems.length);
               broadcastInquiryItems(inquiryListItems);
             }
             document.dispatchEvent(new CustomEvent('inquiry:item-removed', {
@@ -300,6 +309,59 @@ document.addEventListener('DOMContentLoaded', function () {
   bindInquiryGeneratePdfHandlers();
 });
 
+// The PDF is built from the same fields as the mail, but it bypasses the form
+// framework's validation, so it has to check the required ones itself. Which
+// fields are required is read from the rendered marker instead of a hardcoded
+// list, so this stays free of project specific knowledge.
+function collectMissingRequiredPdfFields() {
+  const missing = [];
+  document.querySelectorAll('[data-inquiry-pdf-key][data-inquiry-pdf-hash]').forEach(function (input) {
+    const group = input.closest('.form-group');
+    if (!group || !group.querySelector(':scope > .control-label .required')) return;
+    if (input.value.trim() === '') {
+      missing.push(input);
+    }
+  });
+  return missing;
+}
+
+// Only ever clears what this handler marked, so error state rendered by the
+// server after a failed submit survives.
+function clearOwnPdfFieldErrors() {
+  document.querySelectorAll('[data-inquiry-pdf-key][data-inquiry-pdf-hash]').forEach(function (input) {
+    if (!input._inquiryPdfError) return;
+    input._inquiryPdfError = false;
+    input.classList.remove('error');
+    const group = input.closest('.form-group');
+    if (group) group.classList.remove('has-error');
+  });
+}
+
+function markPdfFieldError(input) {
+  input._inquiryPdfError = true;
+  input.classList.add('error');
+  const group = input.closest('.form-group');
+  if (group) group.classList.add('has-error');
+}
+
+// Optional: the message text comes from a data attribute so the wording can be
+// translated downstream without this file carrying any copy.
+function setPdfRequiredMessage(link, text) {
+  const parent = link.parentElement;
+  let box = parent ? parent.querySelector('.inquiry-pdf-required-message') : null;
+  if (!text) {
+    if (box) box.remove();
+    return;
+  }
+  if (!box) {
+    box = document.createElement('div');
+    box.className = 'inquiry-pdf-required-message';
+    box.setAttribute('role', 'alert');
+    link.insertAdjacentElement('afterend', box);
+  }
+  box.textContent = text;
+}
+
 function bindInquiryGeneratePdfHandlers() {
   document.querySelectorAll('.inquiry-generate-pdf').forEach(function (link) {
     if (link._inquiryPdfBound) return;
@@ -311,6 +373,16 @@ function bindInquiryGeneratePdfHandlers() {
         console.error('[tx_inquiry] inquiry-save-snapshot meta tag missing');
         return;
       }
+
+      clearOwnPdfFieldErrors();
+      const missing = collectMissingRequiredPdfFields();
+      if (missing.length > 0) {
+        missing.forEach(markPdfFieldError);
+        setPdfRequiredMessage(this, this.getAttribute('data-inquiry-required-message'));
+        missing[0].focus();
+        return;
+      }
+      setPdfRequiredMessage(this, '');
 
       const pdfFields = {};
       document.querySelectorAll('[data-inquiry-pdf-key][data-inquiry-pdf-hash]').forEach(function (input) {
@@ -339,7 +411,11 @@ function bindInquiryGeneratePdfHandlers() {
           return response.json();
         })
         .then(data => {
-          window.location.href = pdfUrl + '&tx_inquiry[identifier]=' + encodeURIComponent(data.identifier);
+          // The server names the file after this offset, so the timestamp in it
+          // reads as the visitor's local time instead of the server's.
+          const tzOffset = -new Date().getTimezoneOffset();
+          window.location.href = pdfUrl + '&tx_inquiry[identifier]=' + encodeURIComponent(data.identifier)
+            + '&tx_inquiry[tzoffset]=' + encodeURIComponent(tzOffset);
         })
         .catch(error => {
           console.error('[tx_inquiry] Error saving snapshot:', error);
@@ -448,16 +524,7 @@ function reconcileInquiryItems(serverItems) {
 
   inquiryListItems = serverItems;
 
-  const count = inquiryListItems.length;
-  document.querySelectorAll('.to-inquiry-list').forEach(link => {
-    let countSpan = link.querySelector('.inquiry-item-counter');
-    if (!countSpan) {
-      countSpan = document.createElement('span');
-      countSpan.className = 'inquiry-item-counter';
-      link.appendChild(countSpan);
-    }
-    countSpan.textContent = count;
-  });
+  setInquiryCounters(inquiryListItems.length);
 
   updateInquiryLinks();
 

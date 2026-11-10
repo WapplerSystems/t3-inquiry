@@ -1,0 +1,5 @@
+# The page holding the "Inquiry: Form" content element. The seeding script
+# writes the real uid into the site settings, which feed this constant.
+inquiryTestConsumer {
+  listPageUid = {$inquiryTestConsumer.listPageUid}
+}

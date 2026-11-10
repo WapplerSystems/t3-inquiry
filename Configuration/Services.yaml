@@ -7,6 +7,11 @@ services:
   WapplerSystems\Inquiry\:
     resource: '../Classes/*'
 
+  # Fetched with GeneralUtility::makeInstance() by downstream finishers, which
+  # only works for public services.
+  WapplerSystems\Inquiry\Service\ListSnapshotService:
+    public: true
+
   WapplerSystems\Inquiry\Form\Factory\InquiryFormFactory:
     public: true
 

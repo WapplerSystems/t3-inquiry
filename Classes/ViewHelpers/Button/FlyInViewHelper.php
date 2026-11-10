@@ -3,7 +3,6 @@
 namespace WapplerSystems\Inquiry\ViewHelpers\Button;
 
 
-use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
 
@@ -17,6 +16,13 @@ use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
  * The button uses the standard `to-inquiry-list` class so the existing
  * inquiry.js badge mechanism updates the count automatically after every
  * add/remove. Pair with `<i:flyIn.panel />` once per page to mount the offcanvas.
+ *
+ * Child content is rendered before the counter, so a site can give the button
+ * an icon and a label of its own:
+ *
+ *   <i:button.flyIn class="my-button">
+ *       <i class="my-icon"></i><span>Inquiry list</span>
+ *   </i:button.flyIn>
  */
 class FlyInViewHelper extends AbstractTagBasedViewHelper
 {
@@ -24,8 +30,6 @@ class FlyInViewHelper extends AbstractTagBasedViewHelper
 
     public function render(): string
     {
-        $request = $this->renderingContext->getAttribute(ServerRequestInterface::class);
-        $count = $this->getInitialItemCount($request);
         $label = LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/frontend.xlf:flyIn.openLabel', 'inquiry') ?? 'Open inquiry list';
 
         $this->tag->addAttribute('type', 'button');
@@ -39,16 +43,16 @@ class FlyInViewHelper extends AbstractTagBasedViewHelper
             trim(($this->tag->getAttribute('class') ?? '') . ' to-inquiry-list inquiry-flyin-trigger')
         );
 
-        $this->tag->setContent('<span class="inquiry-item-counter">' . $count . '</span>');
+        $content = (string)$this->renderChildren();
+
+        // The badge starts out EMPTY on purpose. Rendering the session's item
+        // count here would bake it into the page cache: this trigger sits on
+        // every page, so whoever warms the cache freezes their own number for
+        // every later visitor. inquiry.js fills the badge from the items
+        // endpoint on each page load, and `.inquiry-item-counter:empty` keeps
+        // it out of sight until it actually holds a number.
+        $this->tag->setContent($content . '<span class="inquiry-item-counter"></span>');
         $this->tag->forceClosingTag(true);
         return $this->tag->render();
-    }
-
-    private function getInitialItemCount(?ServerRequestInterface $request): int
-    {
-        $frontendUser = $request?->getAttribute('frontend.user');
-        $session = $frontendUser?->getSession();
-        $items = $session?->get('items') ?? [];
-        return is_array($items) ? count($items) : 0;
     }
 }

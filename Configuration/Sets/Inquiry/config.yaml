@@ -2,3 +2,4 @@ name: wapplersystems/inquiry
 label: inquiry
 dependencies:
   - typo3/fluid-styled-content
+  - typo3/form

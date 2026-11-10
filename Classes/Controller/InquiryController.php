@@ -4,6 +4,7 @@ namespace WapplerSystems\Inquiry\Controller;
 
 use Mpdf\Mpdf;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use TYPO3\CMS\Core\Core\Environment;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
@@ -11,17 +12,21 @@ use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
 use WapplerSystems\Inquiry\Domain\Repository\ListSnapshotRepository;
+use WapplerSystems\Inquiry\Service\ListSnapshotService;
 use WapplerSystems\Inquiry\Event\CanResolveItemByIdentifierEvent;
 use WapplerSystems\Inquiry\Event\ConfigurePdfEvent;
 use WapplerSystems\Inquiry\Event\ResolveItemEvent;
 
 class InquiryController extends ActionController
 {
+    protected const DEFAULT_PDF_FILE_NAME = 'inquiry-list.pdf';
+
 
 
     public function __construct(
         EventDispatcherInterface $eventDispatcher,
         private readonly ListSnapshotRepository $listSnapshotRepository,
+        private readonly ListSnapshotService $listSnapshotService,
     ) {
         $this->eventDispatcher = $eventDispatcher;
     }
@@ -316,8 +321,7 @@ class InquiryController extends ActionController
         $items = $body['items'] ?? [];
         $prefill = $body['prefill'] ?? [];
 
-        $identifier = md5(json_encode(['items' => array_values($items), 'prefill' => $prefill]));
-        $this->listSnapshotRepository->save($identifier, array_values($items), $prefill);
+        $identifier = $this->listSnapshotService->store($items, $prefill);
 
         return $this->jsonResponse(json_encode(['identifier' => $identifier]));
     }
@@ -417,16 +421,20 @@ class InquiryController extends ActionController
 
         $this->view->assignMultiple([
             'items'      => $resolvedItems,
-            'preloadUrl' => $this->buildPreloadUrl($identifier),
+            'preloadUrl' => $this->listSnapshotService->buildPreloadUrl(
+                $identifier,
+                $this->request,
+                isset($this->settings['preloadItemsTypeNum']) ? (int)$this->settings['preloadItemsTypeNum'] : null,
+            ),
             'contact'    => $pdfFields['_contact'] ?? [],
         ]);
-        $html = $this->view->render();
+        $html = $this->resolveImageSourcesForMpdf($this->view->render());
 
         $ttfPath = $this->getT3bootstrapTtfPath();
         $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
         $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
 
-        $pdfEvent = new ConfigurePdfEvent();
+        $pdfEvent = new ConfigurePdfEvent($this->resolveClientTime());
         $this->eventDispatcher->dispatch($pdfEvent);
 
         $fontDirs = array_merge($defaultConfig['fontDir'], [dirname($ttfPath)], $pdfEvent->getFontDirs());
@@ -448,10 +456,112 @@ class InquiryController extends ActionController
 
         return $this->responseFactory->createResponse()
             ->withHeader('Content-Type', 'application/pdf')
-            ->withHeader('Content-Disposition', 'attachment; filename="inquiry-list.pdf"')
+            ->withHeader(
+                'Content-Disposition',
+                'attachment; filename="' . $this->sanitizeFileName($pdfEvent->getFileName()) . '"'
+            )
             ->withBody($this->streamFactory->createStream($pdfContent));
     }
 
+    /**
+     * Current time in the downloading visitor's own time zone.
+     *
+     * The client sends its UTC offset in minutes (what
+     * -Date::getTimezoneOffset() yields) so that a timestamp put into the file
+     * name reads as the visitor's local time rather than the server's. Without
+     * the parameter -- a direct call, a crawler, a client that does not send it
+     * -- the server time zone is used.
+     */
+    protected function resolveClientTime(): \DateTimeImmutable
+    {
+        $now = new \DateTimeImmutable();
+        $offset = $this->request->getQueryParams()['tx_inquiry']['tzoffset'] ?? null;
+        if (!is_scalar($offset) || !preg_match('/^[+-]?\d{1,4}$/', (string)$offset)) {
+            return $now;
+        }
+
+        $minutes = (int)$offset;
+        // Real zones span UTC-12:00 to UTC+14:00.
+        if ($minutes < -720 || $minutes > 840) {
+            return $now;
+        }
+
+        return $now->setTimezone(new \DateTimeZone(sprintf(
+            '%s%02d:%02d',
+            $minutes < 0 ? '-' : '+',
+            intdiv(abs($minutes), 60),
+            abs($minutes) % 60
+        )));
+    }
+
+    /**
+     * Keeps a listener-supplied file name safe to put into a header.
+     */
+    protected function sanitizeFileName(string $fileName): string
+    {
+        $fileName = ltrim((string)preg_replace('/[^A-Za-z0-9._-]+/', '-', $fileName), '.-');
+        if ($fileName === '') {
+            return self::DEFAULT_PDF_FILE_NAME;
+        }
+
+        return str_ends_with(strtolower($fileName), '.pdf') ? $fileName : $fileName . '.pdf';
+    }
+
+    /**
+     * Rewrites root-relative image sources to absolute filesystem paths so mPDF
+     * can read them.
+     *
+     * mPDF's basepath is empty unless explicitly set, so a leading "/" is never
+     * mapped onto the document root, and hosts with allow_url_fopen=0 cannot
+     * fetch the image over HTTP either. Either way the image silently degrades
+     * to mPDF's "broken image" placeholder. Absolute filesystem paths work in
+     * every case.
+     *
+     * Only <img src> is touched: <a href> must keep pointing at real URLs so the
+     * links inside the generated PDF remain usable.
+     */
+    private function resolveImageSourcesForMpdf(string $html): string
+    {
+        $publicPath = rtrim(Environment::getPublicPath(), '/');
+        $siteUrl = $this->request->getAttribute('normalizedParams')?->getSiteUrl();
+        $siteUrl = is_string($siteUrl) ? rtrim($siteUrl, '/') : '';
+
+        return preg_replace_callback(
+            '#(<img\b[^>]*?\bsrc=")([^"]*)(")#i',
+            static function (array $m) use ($publicPath, $siteUrl): string {
+                $src = $m[2];
+
+                // Leave data: URIs, protocol-relative and foreign absolute URLs alone.
+                if ($src === ''
+                    || str_starts_with($src, 'data:')
+                    || str_starts_with($src, '//')
+                    || str_starts_with($src, $publicPath)
+                ) {
+                    return $m[0];
+                }
+
+                // Absolute URL of this very site -> treat as site-relative.
+                if ($siteUrl !== '' && str_starts_with($src, $siteUrl . '/')) {
+                    $src = substr($src, strlen($siteUrl));
+                } elseif (preg_match('#^[a-z][a-z0-9+.\-]*:#i', $src) === 1) {
+                    // Any other scheme (http, https, ftp, ...) stays untouched.
+                    return $m[0];
+                }
+
+                // Drop the cache-busting query string / fragment. f:uri.resource
+                // appends "?<mtime>", and mPDF uses the presence of a query
+                // string to decide a source is remote — it would then prepend its
+                // basepath to our filesystem path and try to fetch it over HTTP.
+                $path = preg_replace('#[?\#].*$#', '', $src) ?? $src;
+
+                // Root-relative ("/fileadmin/...") and public-dir-relative
+                // ("_assets/...", which is what f:uri.resource emits) both
+                // resolve against the public path.
+                return $m[1] . $publicPath . '/' . ltrim($path, '/') . $m[3];
+            },
+            $html
+        ) ?? $html;
+    }
 
     private function getT3bootstrapTtfPath(): string
     {
@@ -508,16 +618,6 @@ class InquiryController extends ActionController
         }
 
         return $ttf;
-    }
-
-    private function buildPreloadUrl(string $identifier): string
-    {
-        $params = [
-            'type'       => (int)($this->settings['preloadItemsTypeNum'] ?? 678937),
-            'tx_inquiry' => ['identifier' => $identifier],
-        ];
-        $language = $this->request->getAttribute('language');
-        return rtrim((string)$language->getBase(), '/') . '/?' . http_build_query($params);
     }
 
     private function getFallbackListUri(): string

@@ -1,0 +1,166 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - 'release/**'
+      - 'main'
+  pull_request:
+
+jobs:
+  unit-tests:
+    name: Unit Tests (PHP ${{ matrix.php }}, TYPO3 ${{ matrix.typo3 }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.2'
+            typo3: '^13.4'
+          - php: '8.3'
+            typo3: '^13.4'
+          - php: '8.4'
+            typo3: '^13.4'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          # gd and mbstring are required by mpdf, which powers the PDF export
+          extensions: intl, mbstring, gd, pdo_sqlite
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: |
+          composer require typo3/cms-core:${{ matrix.typo3 }} --no-update
+          composer install --no-progress --prefer-dist
+
+      - name: Run Unit Tests
+        run: vendor/bin/phpunit -c phpunit.xml
+
+  functional-tests:
+    name: Functional Tests (PHP ${{ matrix.php }}, TYPO3 ${{ matrix.typo3 }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.2'
+            typo3: '^13.4'
+          - php: '8.3'
+            typo3: '^13.4'
+          - php: '8.4'
+            typo3: '^13.4'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: intl, mbstring, gd, pdo_sqlite
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: |
+          composer require typo3/cms-core:${{ matrix.typo3 }} --no-update
+          composer install --no-progress --prefer-dist
+
+      - name: Run Functional Tests
+        env:
+          typo3DatabaseDriver: pdo_sqlite
+        run: vendor/bin/phpunit -c phpunit.functional.xml
+
+  browser-tests:
+    name: Browser Tests (PHP ${{ matrix.php }}, TYPO3 ${{ matrix.typo3 }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.3'
+            typo3: '^13.4'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: intl, mbstring, gd, pdo_sqlite, sqlite3
+          tools: composer:v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Builds a throwaway TYPO3 on sqlite, seeds the page tree and places the
+      # content element. Without it there is nothing to click: the extension
+      # ships no pages, and the toggle button needs a consumer to resolve items.
+      - name: Build the test instance
+        run: Build/e2e/setup.sh 8099
+
+      - name: Serve the test instance
+        run: |
+          php -S 127.0.0.1:8099 -t Build/e2e/public Build/e2e/router.php &
+          for i in $(seq 1 30); do
+            if curl -sf -o /dev/null http://127.0.0.1:8099/product; then
+              echo "instance is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "instance did not come up" >&2
+          exit 1
+
+      - name: Install Playwright
+        working-directory: Tests/E2E
+        run: |
+          npm install --no-fund --no-audit
+          npx playwright install --with-deps chromium
+
+      - name: Run Browser Tests
+        working-directory: Tests/E2E
+        env:
+          INQUIRY_BASE_URL: http://127.0.0.1:8099
+          INQUIRY_PRODUCT_PATH: /product
+          INQUIRY_LIST_PATH: /inquiry-list
+        run: npx playwright test
+
+      - name: Keep the report of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: Tests/E2E/playwright-report/
+          retention-days: 7
+
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, mbstring, gd
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --no-progress --prefer-dist
+
+      - name: PHP Lint
+        run: find Classes Tests -name '*.php' -print0 | xargs -0 -n1 php -l

@@ -15,18 +15,33 @@
     const body = flyIn.querySelector('[data-inquiry-flyin-body]');
     const footer = flyIn.querySelector('[data-inquiry-flyin-footer]');
 
+    let contentFresh = false;
+    let inFlight = null;
+
     function refreshBody() {
         if (!body) return Promise.resolve();
-        return fetch(itemsUrl, { headers: { 'Accept': 'text/html' } })
+        if (inFlight) return inFlight;
+        inFlight = fetch(itemsUrl, { headers: { 'Accept': 'text/html' } })
             .then(r => r.ok ? r.text() : Promise.reject(new Error('Failed to load FlyIn items')))
             .then(html => {
                 body.innerHTML = html;
+                contentFresh = true;
                 updateFooterVisibility();
                 bindRemoveButtons();
             })
             .catch(err => {
                 console.error('[tx_inquiry] FlyIn fetch failed:', err);
+            })
+            .finally(() => {
+                inFlight = null;
             });
+        return inFlight;
+    }
+
+    // Only fetch when the body does not already match the current items, so a
+    // panel that was warmed up beforehand opens without waiting for a request.
+    function ensureBody() {
+        return contentFresh ? Promise.resolve() : refreshBody();
     }
 
     function updateFooterVisibility() {
@@ -44,7 +59,9 @@
                 e.preventDefault();
                 const uid = this.getAttribute('data-inquiry-item-uid');
                 const type = this.getAttribute('data-inquiry-item-type');
-                const url = new URL(removeUrl);
+                // Second argument is required: removeUrl is root-relative when
+                // the site base is host-relative, and new URL() would throw.
+                const url = new URL(removeUrl, window.location.href);
                 url.searchParams.append('tx_inquiry[uid]', uid);
                 url.searchParams.append('tx_inquiry[type]', type);
                 fetch(url, { headers: { 'Accept': 'application/json' } })
@@ -67,16 +84,18 @@
         });
     }
 
-    function decrementBadges() {
-        document.querySelectorAll('.to-inquiry-list .inquiry-item-counter').forEach(span => {
-            const current = parseInt(span.textContent, 10) || 0;
-            span.textContent = Math.max(0, current - 1);
-        });
-    }
+    flyIn.addEventListener('show.bs.offcanvas', ensureBody);
 
-    flyIn.addEventListener('show.bs.offcanvas', refreshBody);
+    // Warm the panel up as soon as the visitor shows intent to open it. The
+    // request then overlaps the offcanvas animation instead of following it.
+    flyIn.ownerDocument.querySelectorAll('.inquiry-flyin-trigger').forEach(trigger => {
+        ['pointerenter', 'focus', 'touchstart'].forEach(type => {
+            trigger.addEventListener(type, ensureBody, { once: true, passive: true });
+        });
+    });
 
     document.addEventListener('inquiry:items-changed', function () {
+        contentFresh = false;
         if (flyIn.classList.contains('show')) {
             refreshBody();
         }
@@ -84,7 +103,6 @@
 
     document.addEventListener('inquiry:item-removed', function (e) {
         const detail = e.detail || {};
-        decrementBadges();
 
         if (!body || !detail.uid || !detail.type) {
             refreshBody();
@@ -95,6 +113,8 @@
         const li = btn ? btn.closest('.inquiry-flyin-item') : null;
         if (li) {
             li.remove();
+        } else {
+            contentFresh = false;
         }
         if (body.querySelectorAll('.inquiry-flyin-item').length === 0) {
             refreshBody();

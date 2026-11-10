@@ -1,0 +1,31 @@
+# The smallest page rendering that gives the browser tests something to click.
+# Deliberately plain: no CSS framework, no site design — every element the specs
+# look for is a documented hook of EXT:inquiry.
+
+page = PAGE
+page {
+  typeNum = 0
+
+  10 = FLUIDTEMPLATE
+  10 {
+    templateName = Page
+    templateRootPaths.10 = EXT:inquiry_test_consumer/Resources/Private/Templates/
+
+    settings {
+      listPageUid = {$inquiryTestConsumer.listPageUid}
+    }
+
+    # Rendered markup, not the per-column array the "page-content" processor
+    # hands over — the template drops it straight into the page.
+    variables {
+      content = CONTENT
+      content {
+        table = tt_content
+        select {
+          orderBy = sorting
+          where = colPos = 0
+        }
+      }
+    }
+  }
+}

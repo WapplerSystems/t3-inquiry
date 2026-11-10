@@ -37,6 +37,9 @@
 			<trans-unit id="element.zipcode.properties.label">
 				<source>Zipcode</source>
 			</trans-unit>
+			<trans-unit id="element.zip.properties.label">
+				<source>Zipcode</source>
+			</trans-unit>
 			<trans-unit id="element.city.properties.label">
 				<source>City</source>
 			</trans-unit>

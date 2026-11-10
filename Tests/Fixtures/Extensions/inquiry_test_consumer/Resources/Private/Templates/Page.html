@@ -1,0 +1,33 @@
+{namespace inquiry=WapplerSystems\Inquiry\ViewHelpers}
+<f:spaceless>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{data.title}</title>
+</head>
+<body>
+<h1>{data.title}</h1>
+
+<f:comment>
+    The trigger the item counter is written into. EXT:inquiry looks for
+    ".to-inquiry-list" and creates the ".inquiry-item-counter" span itself when
+    the markup does not bring one, so a bare link is enough here.
+</f:comment>
+<p>
+    <a class="to-inquiry-list" href="{f:uri.page(pageUid: settings.listPageUid)}">Inquiry list</a>
+</p>
+
+<f:comment>
+    The toggle button. It only renders something clickable while a consumer
+    claims the item — here the page itself, through PageItemListener.
+</f:comment>
+<div class="product">
+    <inquiry:button.toggleItem item="{data.uid}" class="btn" />
+</div>
+
+<main>
+    <f:format.raw>{content}</f:format.raw>
+</main>
+</body>
+</html>
+</f:spaceless>
