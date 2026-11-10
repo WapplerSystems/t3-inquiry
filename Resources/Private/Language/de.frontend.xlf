@@ -28,6 +28,10 @@
 				<source>Inquiry list</source>
 				<target>Merkzettel</target>
 			</trans-unit>
+			<trans-unit id="pdfDateFormat">
+				<source>j F Y</source>
+				<target>d.m.Y</target>
+			</trans-unit>
 			<trans-unit id="pdfLinkToList">
 				<source>Link to this list</source>
 				<target>Link zu dieser Liste</target>

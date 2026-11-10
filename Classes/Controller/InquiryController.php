@@ -427,6 +427,7 @@ class InquiryController extends ActionController
                 isset($this->settings['preloadItemsTypeNum']) ? (int)$this->settings['preloadItemsTypeNum'] : null,
             ),
             'contact'    => $pdfFields['_contact'] ?? [],
+            'date'       => $this->resolveClientTime(),
         ]);
         $html = $this->resolveImageSourcesForMpdf($this->view->render());
 

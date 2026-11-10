@@ -362,7 +362,19 @@ function setPdfRequiredMessage(link, text) {
   box.textContent = text;
 }
 
+// The PDF is built from the open form. Once the form is gone (the confirmation
+// after a successful submit replaces it, and the list is emptied), a download
+// would only produce an empty PDF, so the link goes away with the form. The
+// confirmation keeps the id on a plain <div>, hence the explicit form selector.
+function updateInquiryPdfLinkVisibility() {
+  const hasForm = document.querySelector('form#inquiryForm') !== null;
+  document.querySelectorAll('.inquiry-generate-pdf').forEach(function (link) {
+    link.hidden = !hasForm;
+  });
+}
+
 function bindInquiryGeneratePdfHandlers() {
+  updateInquiryPdfLinkVisibility();
   document.querySelectorAll('.inquiry-generate-pdf').forEach(function (link) {
     if (link._inquiryPdfBound) return;
     link._inquiryPdfBound = true;
@@ -371,6 +383,9 @@ function bindInquiryGeneratePdfHandlers() {
 
       if (!saveSnapshotUrl) {
         console.error('[tx_inquiry] inquiry-save-snapshot meta tag missing');
+        return;
+      }
+      if (inquiryListItems.length === 0) {
         return;
       }
 

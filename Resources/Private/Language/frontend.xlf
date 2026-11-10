@@ -21,6 +21,9 @@
 			<trans-unit id="pdfTitle">
 				<source>Inquiry list</source>
 			</trans-unit>
+			<trans-unit id="pdfDateFormat">
+				<source>j F Y</source>
+			</trans-unit>
 			<trans-unit id="pdfLinkToList">
 				<source>Link to this list</source>
 			</trans-unit>
