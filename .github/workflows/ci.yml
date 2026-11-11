@@ -88,7 +88,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '8.3'
+          - php: '8.5'
             typo3: '^14.0'
 
     steps:
