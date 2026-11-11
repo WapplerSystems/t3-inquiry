@@ -160,20 +160,25 @@ class InquiryFormFactory extends AbstractFormFactory
             );
 
 
-            $this->addFormElement(
-                $fieldsetItem,
-                //type: 'RequestTypeSelect',
-                type: 'SingleSelect',
-                id: 'requestType_' . $hash,
-                label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryForm.element.requestType.properties.label'),
-                properties: [
-                    'options' => $requestTextTemplatesOptions,
-                    'prependOptionLabel' => LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryForm.element.requestType.properties.prependOptionLabel')
-                ],
-                validators: [
-                    $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
-                ]
-            );
+            // Without request text templates there is nothing to choose from.
+            // EXT:form v14 also turns an empty "options" array into '', which the
+            // select ViewHelper rejects — the whole list page would fail to render.
+            if ($requestTextTemplatesOptions !== []) {
+                $this->addFormElement(
+                    $fieldsetItem,
+                    //type: 'RequestTypeSelect',
+                    type: 'SingleSelect',
+                    id: 'requestType_' . $hash,
+                    label: LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryForm.element.requestType.properties.label'),
+                    properties: [
+                        'options' => $requestTextTemplatesOptions,
+                        'prependOptionLabel' => LocalizationUtility::translate('LLL:EXT:inquiry/Resources/Private/Language/form.xlf:inquiryForm.element.requestType.properties.prependOptionLabel')
+                    ],
+                    validators: [
+                        $resolver->createValidator(StringLengthValidator::class, ['maximum' => 300])
+                    ]
+                );
+            }
 
             $this->addFormElement(
                 $fieldsetItem,
