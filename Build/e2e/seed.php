@@ -18,6 +18,7 @@ declare(strict_types=1);
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Core\SystemEnvironmentBuilder;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use Symfony\Component\Yaml\Yaml;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 (static function (): void {
@@ -94,6 +95,14 @@ function dropWelcomeTemplate(object $connection): void
 
     if ($removed > 0) {
         printf("removed %d sys_template record(s) that would override the site sets\n", $removed);
+    }
+
+    // Since v14 the welcome page is site-scoped TypoScript next to config.yaml
+    // instead of a sys_template record. It loads after the site sets and
+    // replaces their "page" object just the same.
+    foreach (glob(__DIR__ . '/config/sites/*/{setup,constants}.typoscript', GLOB_BRACE) ?: [] as $file) {
+        unlink($file);
+        printf("removed %s that would override the site sets\n", basename($file));
     }
 }
 
@@ -204,19 +213,16 @@ function writeSiteConfiguration(string $instanceRoot, int $listPageUid): void
     }
 
     $configFile = $directories[0] . '/config.yaml';
-    $config = file_get_contents($configFile) ?: '';
+    $config = Yaml::parseFile($configFile) ?? [];
 
-    if (!str_contains($config, 'wapplersystems/inquiry-test-consumer')) {
-        $config .= "\ndependencies:\n"
-            . "  - wapplersystems/inquiry\n"
-            . "  - wapplersystems/inquiry-test-consumer\n";
-    }
+    // Merged rather than appended: since v14 "typo3 setup" writes its own
+    // dependencies (fluid-styled-content), and a second top-level key makes
+    // TYPO3 skip the whole site as invalid YAML — every page then 404s.
+    $config['dependencies'] = array_values(array_unique(array_merge(
+        $config['dependencies'] ?? [],
+        ['wapplersystems/inquiry', 'wapplersystems/inquiry-test-consumer']
+    )));
+    $config['settings']['inquiryTestConsumer']['listPageUid'] = $listPageUid;
 
-    if (!str_contains($config, 'listPageUid')) {
-        $config .= "\nsettings:\n"
-            . "  inquiryTestConsumer:\n"
-            . "    listPageUid: " . $listPageUid . "\n";
-    }
-
-    file_put_contents($configFile, $config);
+    file_put_contents($configFile, Yaml::dump($config, 99, 2));
 }

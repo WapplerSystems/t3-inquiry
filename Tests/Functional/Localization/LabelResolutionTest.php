@@ -18,6 +18,12 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
  */
 final class LabelResolutionTest extends FunctionalTestCase
 {
+    // The inquiry form factory extends EXT:form's AbstractFormFactory, whose
+    // injected services only exist in the container while EXT:form is loaded.
+    protected array $coreExtensionsToLoad = [
+        'form',
+    ];
+
     protected array $testExtensionsToLoad = [
         'wapplersystems/inquiry',
     ];

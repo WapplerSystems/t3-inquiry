@@ -22,6 +22,12 @@ use WapplerSystems\Inquiry\Event\ResolveItemEvent;
  */
 final class ItemResolutionTest extends FunctionalTestCase
 {
+    // The inquiry form factory extends EXT:form's AbstractFormFactory, whose
+    // injected services only exist in the container while EXT:form is loaded.
+    protected array $coreExtensionsToLoad = [
+        'form',
+    ];
+
     protected array $testExtensionsToLoad = [
         'wapplersystems/inquiry',
         __DIR__ . '/../../Fixtures/Extensions/inquiry_test_consumer',
